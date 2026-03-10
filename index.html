@@ -481,6 +481,23 @@ body.light #splash{background:#F0F0F6}
 .pwa-banner-close{width:26px;height:26px;border-radius:50%;border:none;background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;transition:background .2s}
 .pwa-banner-close:hover{background:var(--border)}
 
+/* ── Backup Reminder Banner ── */
+#backup-banner{display:none;align-items:center;gap:10px;background:rgba(160,100,240,.08);border:1px solid rgba(160,100,240,.28);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:14px;animation:bannerSlide .4s cubic-bezier(.34,1.2,.64,1) both}
+#backup-banner.visible{display:flex}
+.backup-banner-icon{font-size:20px;flex-shrink:0;animation:wiggle 3s ease-in-out infinite}
+.backup-banner-text{flex:1}
+.backup-banner-title{font-size:13px;font-weight:600;color:#A060F0;line-height:1.3}
+.backup-banner-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.backup-banner-actions{display:flex;gap:6px;flex-shrink:0}
+.backup-now-mini{padding:6px 12px;border:none;border-radius:var(--radius-sm);background:rgba(160,100,240,.2);color:#A060F0;font-family:var(--font-head);font-size:11px;font-weight:800;cursor:pointer;transition:background .2s}
+.backup-now-mini:hover{background:rgba(160,100,240,.32)}
+.backup-dismiss{padding:6px 8px;border:none;border-radius:var(--radius-sm);background:transparent;color:var(--muted);font-size:13px;cursor:pointer}
+/* Backup status text in settings */
+.backup-status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.btn-backup{background:rgba(160,100,240,.14);color:#A060F0;border:1.5px solid rgba(160,100,240,.28)}
+.btn-backup:hover{background:rgba(160,100,240,.24)}
+.btn-backup.loading{opacity:.6;pointer-events:none}
+
 /* Reset confirm overlay */
 #reset-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.78);display:flex;align-items:flex-end;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .25s}
 #reset-overlay.show{opacity:1;pointer-events:auto}
@@ -539,6 +556,19 @@ body.light #splash{background:#F0F0F6}
       <div class="banner-sub">Tap karke check karo</div>
     </div>
     <span class="banner-arrow">›</span>
+  </div>
+
+  <!-- Backup Reminder Banner -->
+  <div id="backup-banner">
+    <span class="backup-banner-icon">💾</span>
+    <div class="backup-banner-text">
+      <div class="backup-banner-title">7 din se backup nahi hua!</div>
+      <div class="backup-banner-sub">Data safe karo — abhi backup lo</div>
+    </div>
+    <div class="backup-banner-actions">
+      <button class="backup-now-mini" onclick="backupNow()">Backup</button>
+      <button class="backup-dismiss" onclick="dismissBackupBanner()">✕</button>
+    </div>
   </div>
   <div class="summary-grid">
     <div class="summary-card income"><span class="sc-icon">💰</span><div class="sc-label">Income</div><div class="sc-amount green" id="sc-income">₹0</div><div class="sc-sub" id="sc-income-sub">0 transactions</div></div>
@@ -826,6 +856,19 @@ body.light #splash{background:#F0F0F6}
       <button class="settings-action-btn btn-export" onclick="exportCSV()">Export</button>
     </div>
 
+    <!-- AUTO BACKUP CARD -->
+    <div class="settings-card">
+      <div class="settings-card-icon" style="background:rgba(160,100,240,.12);color:#A060F0">💾</div>
+      <div class="settings-card-body">
+        <div class="settings-card-title">Auto Backup</div>
+        <div class="settings-card-sub" id="backupStatusText">
+          <span class="backup-status-dot" id="backupDot" style="background:var(--muted)"></span>
+          <span id="backupLastText">Kabhi backup nahi hua</span>
+        </div>
+      </div>
+      <button class="settings-action-btn btn-backup" id="backupNowBtn" onclick="backupNow()">Backup Now</button>
+    </div>
+
     <div class="settings-divider"></div>
 
     <!-- App Preferences -->
@@ -926,6 +969,8 @@ body.light #splash{background:#F0F0F6}
 function initStorage(){
   ['pb_transactions','pb_udhar','pb_budgets','pb_emis'].forEach(function(k){if(!localStorage.getItem(k))localStorage.setItem(k,'[]');});
   if(!localStorage.getItem('pb_settings'))localStorage.setItem('pb_settings',JSON.stringify({theme:'dark',currency:'INR'}));
+  /* backup timestamp – null means never backed up */
+  if(!localStorage.getItem('pb_last_backup'))localStorage.setItem('pb_last_backup','null');
 }
 function getData(k){try{return JSON.parse(localStorage.getItem(k))||[];}catch(e){return[];}}
 function saveData(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
@@ -1493,8 +1538,9 @@ window.onload=function(){
   updateMonthLabel();
   refreshHome();
   initAddScreen();
+  checkWeeklyBackup();
   removeSplash();
-  console.log('[PaisaBook] App initialized ✓ – Stats screen ready ✓');
+  console.log('[PaisaBook] App initialized ✓ – Stats + AutoBackup ready ✓');
 };
 
 /* ══════════════════════════════════════════
@@ -2102,6 +2148,362 @@ function dismissBanner(){
     if (s.theme === 'light') applyTheme('light');
   } catch(e){}
 })();
+
+/* ══════════════════════════════════════════
+   AUTO BACKUP SYSTEM
+══════════════════════════════════════════ */
+
+var BACKUP_INTERVAL_DAYS = 7;
+var _backupBannerDismissed = false;
+
+/* Build full backup payload */
+function buildBackupPayload() {
+  var now = new Date();
+  return {
+    app: 'PaisaBook',
+    version: '1.0',
+    exportedAt: now.toISOString(),
+    exportedAtDisplay: now.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),
+    data: {
+      transactions: getData('pb_transactions'),
+      udhar:        getData('pb_udhar'),
+      budgets:      getData('pb_budgets'),
+      emis:         getData('pb_emis'),
+      settings: (function(){ try{return JSON.parse(localStorage.getItem('pb_settings'))||{};}catch(e){return{};} })()
+    },
+    stats: {
+      totalTransactions: getData('pb_transactions').length,
+      totalUdhar:        getData('pb_udhar').length,
+      totalBudgets:      getData('pb_budgets').filter(function(b){return !b.type;}).length,
+      totalEmis:         getData('pb_emis').length
+    }
+  };
+}
+
+/* Get YYYY-MM-DD string for filename */
+function getTodayDateStr() {
+  var d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+/* Backup Now – download beautiful HTML report (opens in any mobile browser) */
+function backupNow() {
+  var btn = document.getElementById('backupNowBtn');
+  if (btn) { btn.classList.add('loading'); btn.textContent = 'Saving…'; }
+
+  setTimeout(function() {
+    try {
+      var p        = buildBackupPayload();
+      var filename = 'paisabook-backup-' + getTodayDateStr() + '.html';
+      var html     = buildBackupHTML(p);
+      var blob     = new Blob([html], {type:'text/html;charset=utf-8;'});
+      var url      = URL.createObjectURL(blob);
+      var a        = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+
+      localStorage.setItem('pb_last_backup', new Date().toISOString());
+      updateBackupStatusUI();
+      dismissBackupBanner();
+      showToast('💾 ' + filename + ' download hua! Browser mein seedha khulega.', 'success');
+    } catch(e) {
+      showToast('❌ Backup fail hua. Try again.', 'error');
+    }
+    if (btn) { btn.classList.remove('loading'); btn.textContent = 'Backup Now'; }
+  }, 250);
+}
+
+/* Build the self-contained HTML backup report */
+function buildBackupHTML(p) {
+  var txns  = p.data.transactions || [];
+  var ulist = p.data.udhar        || [];
+  var budgets = (p.data.budgets || []).filter(function(b){ return !b.type; });
+  var emis  = p.data.emis         || [];
+
+  /* ── Helpers ── */
+  function fc(n){ return '₹' + new Intl.NumberFormat('en-IN').format(Math.abs(n||0)); }
+  function fd(iso){ return iso ? new Date(iso).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '–'; }
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  /* ── Summary numbers ── */
+  var totalInc=0, totalExp=0;
+  txns.forEach(function(t){ if(t.type==='income') totalInc+=t.amount; else totalExp+=t.amount; });
+  var totalSav = totalInc - totalExp;
+  var lena=0, dena=0;
+  ulist.filter(function(u){return !u.settled;}).forEach(function(u){ if(u.type==='lena') lena+=u.remainingAmount; else dena+=u.remainingAmount; });
+
+  /* ── Transaction rows ── */
+  var txnRows = txns.slice().sort(function(a,b){return new Date(b.date)-new Date(a.date);})
+    .map(function(t,i){
+      var isInc = t.type==='income';
+      return '<tr style="background:'+(i%2===0?'#1A1A24':'#16161F')+'">'
+        +'<td>'+fd(t.date)+'</td>'
+        +'<td><span style="font-size:11px;padding:2px 8px;border-radius:100px;background:'+(isInc?'rgba(64,208,128,.15)':'rgba(240,80,96,.12)')+';color:'+(isInc?'#40D080':'#F05060')+'">'+esc(t.type)+'</span></td>'
+        +'<td>'+esc(t.category)+'</td>'
+        +'<td>'+esc(t.paymentMethod||'')+'</td>'
+        +'<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(t.note||'')+'</td>'
+        +'<td style="text-align:right;font-weight:700;color:'+(isInc?'#40D080':'#F05060')+'">'+(isInc?'+':'-')+fc(t.amount)+'</td>'
+        +'</tr>';
+    }).join('');
+
+  /* ── Udhar rows ── */
+  var udharRows = ulist.map(function(u,i){
+    var isLena = u.type==='lena';
+    return '<tr style="background:'+(i%2===0?'#1A1A24':'#16161F')+'">'
+      +'<td style="font-weight:600">'+esc(u.name)+'</td>'
+      +'<td><span style="font-size:11px;padding:2px 8px;border-radius:100px;background:'+(isLena?'rgba(64,208,128,.15)':'rgba(240,80,96,.12)')+';color:'+(isLena?'#40D080':'#F05060')+'">'+(isLena?'Lena Hai':'Dena Hai')+'</span></td>'
+      +'<td style="color:#F0C040;font-weight:700">'+fc(u.totalAmount)+'</td>'
+      +'<td style="color:'+(u.settled?'#7070A0':(isLena?'#40D080':'#F05060'))+';font-weight:700">'+fc(u.remainingAmount)+'</td>'
+      +'<td>'+fd(u.date)+'</td>'
+      +'<td><span style="font-size:11px;padding:2px 8px;border-radius:100px;background:'+(u.settled?'rgba(64,208,128,.15)':'rgba(240,80,96,.12)')+';color:'+(u.settled?'#40D080':'#F05060')+'">'+(u.settled?'✅ Settled':'⏳ Pending')+'</span></td>'
+      +'<td style="color:#7070A0;font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(u.reason||'')+'</td>'
+      +'</tr>';
+  }).join('');
+
+  /* ── Budget rows ── */
+  var budgetRows = budgets.map(function(b,i){
+    var mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][b.month]||'';
+    return '<tr style="background:'+(i%2===0?'#1A1A24':'#16161F')+'">'
+      +'<td style="font-weight:600">'+esc(b.category)+'</td>'
+      +'<td>'+mName+' '+(b.year||'')+'</td>'
+      +'<td style="color:#F0C040;font-weight:700">'+fc(b.limit)+'</td>'
+      +'</tr>';
+  }).join('');
+
+  /* ── EMI rows ── */
+  var emiRows = emis.map(function(e,i){
+    var paid = e.totalMonths - e.remainingMonths;
+    var pct  = Math.round((paid/e.totalMonths)*100);
+    return '<tr style="background:'+(i%2===0?'#1A1A24':'#16161F')+'">'
+      +'<td style="font-weight:600">'+esc(e.name)+'</td>'
+      +'<td style="color:#F0C040;font-weight:700">'+fc(e.amount)+'/mo</td>'
+      +'<td>'+paid+' / '+e.totalMonths+' months</td>'
+      +'<td>'
+        +'<div style="height:6px;background:#2A2A3A;border-radius:100px;width:100%;min-width:80px">'
+          +'<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#F0C040,#F09040);border-radius:100px"></div>'
+        +'</div>'
+        +'<div style="font-size:10px;color:#7070A0;margin-top:3px">'+pct+'% paid</div>'
+      +'</td>'
+      +'<td>'+e.remainingMonths+' remaining</td>'
+      +'</tr>';
+  }).join('');
+
+  /* ── Stat card helper ── */
+  function statCard(icon, label, val, color) {
+    return '<div style="background:#1A1A24;border:1px solid #2A2A3A;border-radius:16px;padding:16px 14px;text-align:center;min-width:0">'
+      +'<div style="font-size:22px;margin-bottom:6px">'+icon+'</div>'
+      +'<div style="font-size:11px;color:#7070A0;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">'+label+'</div>'
+      +'<div style="font-family:\'Syne\',sans-serif;font-size:18px;font-weight:800;color:'+color+';letter-spacing:-.5px">'+val+'</div>'
+      +'</div>';
+  }
+
+  /* ── Section header helper ── */
+  function secHeader(emoji, title, count) {
+    return '<div style="display:flex;align-items:center;justify-content:space-between;margin:28px 0 14px">'
+      +'<h2 style="font-family:\'Syne\',sans-serif;font-size:18px;font-weight:800;color:#F0F0F5;letter-spacing:-.3px;margin:0">'+emoji+' '+title+'</h2>'
+      +'<span style="font-size:12px;color:#7070A0;background:#1A1A24;border:1px solid #2A2A3A;padding:3px 10px;border-radius:100px">'+count+'</span>'
+      +'</div>';
+  }
+
+  /* ── Table wrapper helper ── */
+  function tableWrap(headers, rows, emptyMsg) {
+    if (!rows) {
+      return '<div style="text-align:center;padding:24px;color:#7070A0;font-size:13px">'+emptyMsg+'</div>';
+    }
+    var ths = headers.map(function(h){ return '<th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:#7070A0;white-space:nowrap;border-bottom:1px solid #2A2A3A;background:#13131A">'+h+'</th>'; }).join('');
+    return '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">'
+      +'<table style="width:100%;border-collapse:collapse;font-size:13px">'
+      +'<thead><tr>'+ths+'</tr></thead>'
+      +'<tbody>'+rows+'</tbody>'
+      +'</table></div>';
+  }
+
+  /* ── Full HTML ── */
+  return '<!DOCTYPE html><html lang="en"><head>'
+    +'<meta charset="UTF-8">'
+    +'<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">'
+    +'<title>PaisaBook Backup – '+p.exportedAtDisplay+'</title>'
+    +'<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">'
+    +'<style>'
+    +'*{margin:0;padding:0;box-sizing:border-box}'
+    +'body{background:#0A0A0F;color:#F0F0F5;font-family:"DM Sans",sans-serif;font-size:14px;line-height:1.5;padding:0 0 40px}'
+    +'a{color:#F0C040}'
+    +'@media(max-width:480px){.hide-mobile{display:none!important}}'
+    +'</style>'
+    +'</head><body>'
+
+    /* Header */
+    +'<div style="background:linear-gradient(135deg,#13131A 0%,#1A1A2E 100%);border-bottom:1px solid #2A2A3A;padding:20px 20px 16px">'
+      +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'
+        +'<div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#F0C040,#E08020);display:flex;align-items:center;justify-content:center;font-family:\'Syne\',sans-serif;font-size:22px;font-weight:800;color:#0A0A0F;flex-shrink:0">₹</div>'
+        +'<div>'
+          +'<div style="font-family:\'Syne\',sans-serif;font-size:22px;font-weight:800;color:#F0F0F5;letter-spacing:-.5px">Paisa<span style="color:#F0C040">Book</span></div>'
+          +'<div style="font-size:12px;color:#7070A0">Apna Paisa, Apna Hisaab</div>'
+        +'</div>'
+      +'</div>'
+      +'<div style="background:#1A1A24;border:1px solid #2A2A3A;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px">'
+        +'<div style="font-size:20px">💾</div>'
+        +'<div>'
+          +'<div style="font-family:\'Syne\',sans-serif;font-size:13px;font-weight:700;color:#F0F0F5">Data Backup Report</div>'
+          +'<div style="font-size:11px;color:#7070A0;margin-top:2px">📅 '+esc(p.exportedAtDisplay)+'</div>'
+        +'</div>'
+        +'<div style="margin-left:auto;font-size:11px;color:#7070A0;text-align:right">'
+          +txns.length+' txns<br>'+ulist.length+' udhar'
+        +'</div>'
+      +'</div>'
+    +'</div>'
+
+    /* Summary Cards */
+    +'<div style="padding:20px 16px 0">'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px">'
+        +statCard('💰','Total Income',fc(totalInc),'#40D080')
+        +statCard('💸','Total Expense',fc(totalExp),'#F05060')
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">'
+        +statCard('🏦','Net Savings',fc(totalSav),totalSav>=0?'#F0C040':'#F05060')
+        +statCard('🤝','Udhar Net',fc(lena-dena),lena>=dena?'#40D080':'#F05060')
+      +'</div>'
+    +'</div>'
+
+    /* Udhar quick pills */
+    +(ulist.filter(function(u){return !u.settled;}).length > 0
+      ? '<div style="padding:14px 16px 0;display:flex;gap:8px;flex-wrap:wrap">'
+          +'<div style="padding:6px 14px;border-radius:100px;background:rgba(64,208,128,.12);border:1px solid rgba(64,208,128,.25);color:#40D080;font-size:12px;font-weight:600">💰 Lena Hai: '+fc(lena)+'</div>'
+          +'<div style="padding:6px 14px;border-radius:100px;background:rgba(240,80,96,.10);border:1px solid rgba(240,80,96,.22);color:#F05060;font-size:12px;font-weight:600">🙏 Dena Hai: '+fc(dena)+'</div>'
+        +'</div>'
+      : '')
+
+    /* Transactions */
+    +'<div style="padding:0 16px">'
+      +secHeader('💸','Transactions',txns.length+' entries')
+      +(txns.length
+        ? tableWrap(['Date','Type','Category','Payment','Note','Amount'], txnRows, '')
+        : '<div style="text-align:center;padding:24px;color:#7070A0">Koi transaction nahi</div>')
+    +'</div>'
+
+    /* Udhar */
+    +'<div style="padding:0 16px">'
+      +secHeader('🤝','Udhar',ulist.length+' records')
+      +(ulist.length
+        ? tableWrap(['Name','Type','Total','Remaining','Date','Status','Reason'], udharRows, '')
+        : '<div style="text-align:center;padding:24px;color:#7070A0">Koi udhar nahi</div>')
+    +'</div>'
+
+    /* Budgets */
+    +(budgets.length ? '<div style="padding:0 16px">'
+      +secHeader('🎯','Budget Goals',budgets.length+' set')
+      +tableWrap(['Category','Month','Limit'], budgetRows, '')
+      +'</div>' : '')
+
+    /* EMIs */
+    +(emis.length ? '<div style="padding:0 16px">'
+      +secHeader('📱','EMI Tracker',emis.length+' active')
+      +tableWrap(['Name','Amount','Progress','Bar','Remaining'], emiRows, '')
+      +'</div>' : '')
+
+    /* Footer */
+    +'<div style="margin:28px 16px 0;background:#1A1A24;border:1px solid #2A2A3A;border-radius:16px;padding:16px;text-align:center">'
+      +'<div style="font-size:22px;margin-bottom:8px">🔒</div>'
+      +'<div style="font-family:\'Syne\',sans-serif;font-size:13px;font-weight:700;color:#F0F0F5;margin-bottom:4px">100% Private & Offline</div>'
+      +'<div style="font-size:12px;color:#7070A0;line-height:1.7">'
+        +'Yeh file sirf aapke device pe hai – koi server pe upload nahi.<br>'
+        +'Google Drive mein save karo backup ke liye. 📂'
+      +'</div>'
+      +'<div style="margin-top:12px;padding-top:12px;border-top:1px solid #2A2A3A;font-size:11px;color:#4A4A6A">'
+        +'Made with PaisaBook 💰 · Apna Paisa, Apna Hisaab'
+      +'</div>'
+    +'</div>'
+
+    +'</body></html>';
+}
+
+/* Update "Last backup" text in Settings card */
+function updateBackupStatusUI() {
+  var raw = localStorage.getItem('pb_last_backup');
+  var dot = document.getElementById('backupDot');
+  var txt = document.getElementById('backupLastText');
+  if (!txt) return;
+
+  if (!raw || raw === 'null') {
+    if (dot) dot.style.background = 'var(--muted)';
+    txt.textContent = 'Kabhi backup nahi hua';
+    return;
+  }
+
+  var last      = new Date(raw);
+  var daysSince = Math.floor((new Date() - last) / 864e5);
+  var display   = last.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+
+  if (daysSince === 0)    { if(dot)dot.style.background='var(--green)';  txt.textContent='Aaj backup hua ✓'; }
+  else if (daysSince < 7) { if(dot)dot.style.background='var(--accent)'; txt.textContent=daysSince+' din pehle – '+display; }
+  else                    { if(dot)dot.style.background='var(--red)';    txt.textContent=daysSince+' din pehle – '+display+' ⚠️'; }
+}
+
+/* Wrap setMoreTab to refresh backup status when Settings opens */
+(function(){
+  var _orig = setMoreTab;
+  setMoreTab = function(tab) {
+    _orig(tab);
+    if (tab === 'settings') updateBackupStatusUI();
+  };
+})();
+
+/* Weekly reminder check – runs on app load */
+function checkWeeklyBackup() {
+  var raw = localStorage.getItem('pb_last_backup');
+  var hasTxns = getData('pb_transactions').length > 0;
+  if (!hasTxns) return; /* no data = no reminder */
+
+  var daysSince = Infinity;
+  if (raw && raw !== 'null') {
+    daysSince = Math.floor((new Date() - new Date(raw)) / 864e5);
+  }
+
+  if (daysSince >= BACKUP_INTERVAL_DAYS) {
+    setTimeout(function() {
+      if (!_backupBannerDismissed) {
+        var msg = (daysSince === Infinity)
+          ? 'Abhi tak koi backup nahi hua! Data safe karo.'
+          : daysSince + ' din se backup nahi hua!';
+        showBackupBanner(msg);
+      }
+    }, 3500); /* show after splash clears */
+  }
+}
+
+function showBackupBanner(msg) {
+  var banner = document.getElementById('backup-banner');
+  if (!banner) return;
+  var t = banner.querySelector('.backup-banner-title');
+  if (t) t.textContent = msg;
+  banner.classList.add('visible');
+}
+
+function dismissBackupBanner() {
+  _backupBannerDismissed = true;
+  var banner = document.getElementById('backup-banner');
+  if (banner) banner.classList.remove('visible');
+}
+
+/* Restore helper (power user / future use) */
+function restoreFromBackup(jsonString) {
+  try {
+    var p = JSON.parse(jsonString);
+    if (!p || !p.data) throw new Error('Invalid');
+    if (p.data.transactions) saveData('pb_transactions', p.data.transactions);
+    if (p.data.udhar)        saveData('pb_udhar',        p.data.udhar);
+    if (p.data.budgets)      saveData('pb_budgets',      p.data.budgets);
+    if (p.data.emis)         saveData('pb_emis',         p.data.emis);
+    refreshHome();
+    if(typeof refreshStats==='function') refreshStats();
+    showToast('✅ Backup restore hua! '+(p.data.transactions||[]).length+' transactions.', 'success');
+    return true;
+  } catch(e) {
+    showToast('❌ Invalid backup file', 'error');
+    return false;
+  }
+}
 </script>
 </body>
 </html>
