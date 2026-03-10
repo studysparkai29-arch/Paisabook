@@ -1,0 +1,2107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0A0A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PaisaBook">
+<title>PaisaBook – Apna Paisa, Apna Hisaab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════════════════
+   DESIGN SYSTEM
+═══════════════════════════════════ */
+:root {
+  --bg:#0A0A0F; --surface:#13131A; --card:#1A1A24; --border:#2A2A3A;
+  --accent:#F0C040; --green:#40D080; --red:#F05060; --orange:#F09040;
+  --muted:#7070A0; --text:#F0F0F5;
+  --font-head:'Syne',sans-serif; --font-body:'DM Sans',sans-serif;
+  --radius-sm:8px; --radius-md:14px; --radius-lg:20px; --radius-xl:28px;
+  --nav-h:72px; --header-h:64px;
+  --shadow-card:0 4px 24px rgba(0,0,0,0.4);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.5;overflow:hidden;-webkit-font-smoothing:antialiased}
+#app{width:100%;max-width:430px;height:100dvh;margin:0 auto;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column}
+
+/* SPLASH */
+#splash{position:absolute;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;animation:splashOut .5s ease-in-out 1.5s forwards}
+@keyframes splashOut{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.06);pointer-events:none}}
+.splash-logo-ring{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,var(--accent) 0%,#F07020 100%);display:flex;align-items:center;justify-content:center;animation:splashPulse 1s ease-in-out infinite alternate,splashGrow .6s cubic-bezier(.34,1.56,.64,1) forwards;box-shadow:0 0 40px rgba(240,192,64,.35),0 0 80px rgba(240,192,64,.12)}
+@keyframes splashGrow{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes splashPulse{from{box-shadow:0 0 32px rgba(240,192,64,.3)}to{box-shadow:0 0 56px rgba(240,192,64,.55)}}
+.splash-logo-inner{font-family:var(--font-head);font-size:36px;font-weight:800;color:#0A0A0F;letter-spacing:-1px}
+.splash-app-name{font-family:var(--font-head);font-size:30px;font-weight:800;color:var(--text);letter-spacing:-.5px;animation:fadeUp .5s ease .4s both}
+.splash-app-name span{color:var(--accent)}
+.splash-tagline{font-size:13px;color:var(--muted);letter-spacing:.5px;animation:fadeUp .5s ease .6s both}
+.splash-dots{display:flex;gap:6px;margin-top:12px;animation:fadeUp .5s ease .8s both}
+.splash-dot{width:6px;height:6px;border-radius:50%;background:var(--border)}
+.splash-dot:nth-child(1){animation:dotPulse .8s .9s infinite alternate}
+.splash-dot:nth-child(2){animation:dotPulse .8s 1.05s infinite alternate}
+.splash-dot:nth-child(3){animation:dotPulse .8s 1.2s infinite alternate}
+@keyframes dotPulse{from{background:var(--border);transform:scale(.8)}to{background:var(--accent);transform:scale(1.2)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* HEADER */
+#header{height:var(--header-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 18px;flex-shrink:0;position:relative;z-index:10}
+.header-logo{display:flex;align-items:center;gap:10px}
+.header-logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent) 0%,#E08020 100%);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:16px;font-weight:800;color:#0A0A0F;box-shadow:0 2px 12px rgba(240,192,64,.3);flex-shrink:0}
+.header-logo-text{font-family:var(--font-head);font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.header-logo-text span{color:var(--accent)}
+.month-selector{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:6px 10px;transition:border-color .2s}
+.month-selector:hover{border-color:var(--accent)}
+.month-btn{width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:color .2s,background .2s}
+.month-btn:hover{color:var(--accent);background:rgba(240,192,64,.1)}
+.month-label{font-family:var(--font-head);font-size:13px;font-weight:600;color:var(--text);min-width:72px;text-align:center;letter-spacing:.3px}
+
+/* MAIN */
+#main{flex:1;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+#main::-webkit-scrollbar{display:none}
+
+/* SCREENS */
+.screen{display:none;min-height:100%;padding:16px 16px calc(var(--nav-h) + 20px);animation:screenIn .3s cubic-bezier(.25,.46,.45,.94) both}
+.screen.active{display:block}
+@keyframes screenIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* PLACEHOLDER */
+.placeholder-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100dvh - var(--header-h) - var(--nav-h) - 40px);gap:16px;text-align:center;padding:20px}
+.placeholder-icon{width:80px;height:80px;border-radius:var(--radius-xl);background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:4px;box-shadow:var(--shadow-card);animation:floatIcon 3s ease-in-out infinite}
+@keyframes floatIcon{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.placeholder-title{font-family:var(--font-head);font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.placeholder-sub{font-size:13px;color:var(--muted);max-width:220px;line-height:1.6}
+.placeholder-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:100px;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.2);color:var(--accent)}
+.tag-coming{background:rgba(112,112,160,.15)!important;color:var(--muted)!important;border-color:var(--border)!important}
+
+/* NAV */
+#nav{height:var(--nav-h);background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;flex-shrink:0;position:relative;z-index:10;padding:0 8px;padding-bottom:env(safe-area-inset-bottom,0px)}
+#nav::before{content:'';position:absolute;top:0;left:var(--indicator-x,3%);width:20%;height:2px;background:var(--accent);border-radius:0 0 4px 4px;transition:left .35s cubic-bezier(.34,1.3,.64,1);box-shadow:0 0 8px rgba(240,192,64,.5)}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:8px 4px;border:none;background:transparent;color:var(--muted);border-radius:var(--radius-sm);transition:color .25s,transform .2s;-webkit-tap-highlight-color:transparent;min-height:54px}
+.nav-tab:active{transform:scale(.92)}
+.nav-tab.active{color:var(--accent)}
+.nav-tab .nav-icon{font-size:22px;display:block;transition:transform .3s cubic-bezier(.34,1.56,.64,1);line-height:1}
+.nav-tab.active .nav-icon{transform:scale(1.15) translateY(-1px)}
+.nav-tab .nav-label{font-size:10px;font-weight:600;letter-spacing:.3px;line-height:1}
+.nav-tab.add-tab{color:#0A0A0F}
+.nav-tab.add-tab .nav-icon-wrap{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--accent) 0%,#E08020 100%);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 16px rgba(240,192,64,.35);transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;margin-bottom:1px}
+.nav-tab.add-tab:active .nav-icon-wrap{transform:scale(.9) rotate(-5deg)}
+.nav-tab.add-tab.active .nav-icon-wrap{transform:scale(1.08) rotate(45deg);box-shadow:0 6px 24px rgba(240,192,64,.5)}
+.nav-tab.add-tab .nav-label{color:var(--accent);font-weight:700}
+
+/* ═══════════ HOME STYLES ═══════════ */
+.home-greeting{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.greeting-text{font-family:var(--font-head);font-size:19px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.greeting-date{font-size:12px;color:var(--muted);font-weight:500}
+.udhar-banner{display:none;align-items:center;gap:10px;background:rgba(240,80,96,.08);border:1px solid rgba(240,80,96,.28);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:14px;cursor:pointer;transition:background .2s,border-color .2s,transform .15s;animation:bannerSlide .4s cubic-bezier(.34,1.2,.64,1) both}
+.udhar-banner.visible{display:flex}
+.udhar-banner:hover{background:rgba(240,80,96,.14);border-color:rgba(240,80,96,.45)}
+.udhar-banner:active{transform:scale(.98)}
+@keyframes bannerSlide{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.banner-icon{font-size:20px;flex-shrink:0;animation:wiggle 2.5s ease-in-out infinite}
+@keyframes wiggle{0%,85%,100%{transform:rotate(0)}88%{transform:rotate(-12deg)}92%{transform:rotate(12deg)}96%{transform:rotate(-6deg)}}
+.banner-text{flex:1}
+.banner-title{font-size:13px;font-weight:600;color:var(--red);line-height:1.3}
+.banner-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.banner-arrow{color:var(--red);font-size:18px;font-weight:700;opacity:.7}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.summary-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 14px;position:relative;overflow:hidden;transition:transform .2s}
+.summary-card:active{transform:scale(.97)}
+.summary-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.summary-card.income::before{background:var(--green);box-shadow:0 0 10px rgba(64,208,128,.5)}
+.summary-card.expense::before{background:var(--red);box-shadow:0 0 10px rgba(240,80,96,.5)}
+.summary-card.savings::before{background:var(--accent);box-shadow:0 0 10px rgba(240,192,64,.5)}
+.summary-card.savings-pct::before{background:linear-gradient(90deg,var(--accent),var(--green))}
+.summary-card.income{background:linear-gradient(145deg,var(--card) 60%,rgba(64,208,128,.04) 100%)}
+.summary-card.expense{background:linear-gradient(145deg,var(--card) 60%,rgba(240,80,96,.04) 100%)}
+.summary-card.savings{background:linear-gradient(145deg,var(--card) 60%,rgba(240,192,64,.05) 100%)}
+.summary-card.savings-pct{background:linear-gradient(145deg,var(--card) 60%,rgba(240,192,64,.04) 100%)}
+.sc-icon{font-size:20px;margin-bottom:8px;display:block;line-height:1}
+.sc-label{font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.sc-amount{font-family:var(--font-head);font-size:19px;font-weight:700;letter-spacing:-.5px;line-height:1.15;word-break:break-all}
+.sc-amount.green{color:var(--green)} .sc-amount.red{color:var(--red)} .sc-amount.gold{color:var(--accent)}
+.sc-sub{font-size:11px;color:var(--muted);margin-top:4px;font-weight:500}
+.savings-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;margin-top:5px;transition:background .3s,color .3s}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.section-title{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.2px}
+.section-count{font-size:11px;color:var(--muted);background:var(--card);border:1px solid var(--border);padding:3px 9px;border-radius:100px;font-weight:600}
+.txn-list{display:flex;flex-direction:column;gap:8px}
+.txn-item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;transition:border-color .2s,transform .15s;cursor:default;animation:txnIn .35s ease both}
+@keyframes txnIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.txn-item:hover{border-color:rgba(112,112,160,.4)}
+.txn-icon-wrap{width:40px;height:40px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.txn-icon-wrap.income-bg{background:rgba(64,208,128,.12)} .txn-icon-wrap.expense-bg{background:rgba(240,80,96,.10)}
+.txn-info{flex:1;min-width:0}
+.txn-name{font-size:13.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.txn-meta{display:flex;align-items:center;gap:6px;margin-top:2px;flex-wrap:wrap}
+.txn-cat{font-size:11px;color:var(--muted);background:var(--surface);padding:1px 7px;border-radius:100px;border:1px solid var(--border);font-weight:500}
+.txn-date{font-size:11px;color:var(--muted)}
+.txn-amount{font-family:var(--font-head);font-size:14.5px;font-weight:700;flex-shrink:0;letter-spacing:-.3px}
+.txn-amount.income{color:var(--green)} .txn-amount.expense{color:var(--red)}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:10px;text-align:center}
+.empty-state-icon{font-size:44px;opacity:.4;animation:floatIcon 3s ease-in-out infinite}
+.empty-state-text{font-size:14px;color:var(--muted);line-height:1.6}
+.empty-state-hint{font-size:12px;color:var(--muted);opacity:.55;margin-top:2px}
+
+/* ═══════════ ADD SCREEN STYLES ═══════════ */
+.add-toggle-wrap{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:4px;margin-bottom:20px;position:relative}
+.add-toggle-slider{position:absolute;top:4px;bottom:4px;width:calc(50% - 4px);border-radius:calc(var(--radius-xl) - 4px);background:var(--green);transition:transform .35s cubic-bezier(.34,1.2,.64,1),background .3s;box-shadow:0 2px 12px rgba(64,208,128,.3);z-index:0;left:4px}
+.add-toggle-wrap.expense-mode .add-toggle-slider{transform:translateX(calc(100%));background:var(--red);box-shadow:0 2px 12px rgba(240,80,96,.3)}
+.add-toggle-btn{flex:1;padding:11px 0;border:none;background:transparent;cursor:pointer;border-radius:calc(var(--radius-xl) - 4px);font-family:var(--font-head);font-size:14px;font-weight:700;letter-spacing:.3px;color:var(--muted);transition:color .3s;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:6px}
+.add-toggle-btn.active{color:#0A0A0F}
+.add-amount-block{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-xl);padding:20px 20px 16px;margin-bottom:16px;text-align:center;transition:border-color .3s,box-shadow .3s}
+.add-amount-block.income-focus{border-color:rgba(64,208,128,.4);box-shadow:0 0 0 3px rgba(64,208,128,.07)}
+.add-amount-block.expense-focus{border-color:rgba(240,80,96,.4);box-shadow:0 0 0 3px rgba(240,80,96,.07)}
+.add-amount-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:6px}
+.add-amount-row{display:flex;align-items:center;justify-content:center;gap:4px}
+.add-amount-symbol{font-family:var(--font-head);font-size:32px;font-weight:800;color:var(--accent);opacity:.6;line-height:1;margin-top:2px}
+#addAmountInput{font-family:var(--font-head);font-size:44px;font-weight:800;color:var(--accent);background:transparent;border:none;outline:none;width:100%;max-width:240px;text-align:center;letter-spacing:-2px;caret-color:var(--accent);line-height:1}
+#addAmountInput::placeholder{color:rgba(240,192,64,.25)}
+.add-amount-hint{font-size:12px;color:var(--muted);margin-top:8px;min-height:18px}
+.add-form-section{margin-bottom:16px}
+.add-form-label{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cat-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:12px 6px 10px;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:border-color .2s,background .2s,transform .15s;-webkit-tap-highlight-color:transparent}
+.cat-btn:active{transform:scale(.93)}
+.cat-btn.selected-income{border-color:var(--green);background:rgba(64,208,128,.1);box-shadow:0 0 0 2px rgba(64,208,128,.12)}
+.cat-btn.selected-expense{border-color:var(--red);background:rgba(240,80,96,.1);box-shadow:0 0 0 2px rgba(240,80,96,.12)}
+.cat-btn-icon{font-size:22px;line-height:1}
+.cat-btn-label{font-size:10.5px;font-weight:600;color:var(--muted);text-align:center;letter-spacing:.2px;line-height:1.2}
+.cat-btn.selected-income .cat-btn-label{color:var(--green)} .cat-btn.selected-expense .cat-btn-label{color:var(--red)}
+.pay-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pay-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:12px 4px 10px;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:border-color .2s,background .2s,transform .15s;-webkit-tap-highlight-color:transparent}
+.pay-btn:active{transform:scale(.93)}
+.pay-btn.selected{border-color:var(--accent);background:rgba(240,192,64,.1);box-shadow:0 0 0 2px rgba(240,192,64,.12)}
+.pay-btn-icon{font-size:20px;line-height:1}
+.pay-btn-label{font-size:10px;font-weight:600;color:var(--muted);text-align:center;line-height:1.2}
+.pay-btn.selected .pay-btn-label{color:var(--accent)}
+.add-input-row{display:flex;gap:10px}
+.add-input-group{flex:1;display:flex;flex-direction:column;gap:6px}
+.add-input-group label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}
+.add-input{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-md);color:var(--text);font-family:var(--font-body);font-size:14px;font-weight:500;padding:11px 14px;outline:none;width:100%;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
+.add-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(240,192,64,.08)}
+.add-input::placeholder{color:var(--muted);opacity:.6}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5) sepia(1) saturate(2) hue-rotate(10deg);cursor:pointer}
+.add-save-btn{width:100%;padding:16px;border:none;border-radius:var(--radius-xl);background:linear-gradient(135deg,var(--green) 0%,#20B060 100%);color:#0A0A0F;font-family:var(--font-head);font-size:17px;font-weight:800;letter-spacing:.3px;cursor:pointer;margin-top:20px;transition:transform .2s,box-shadow .2s,background .3s;box-shadow:0 4px 20px rgba(64,208,128,.3);display:flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden}
+.add-save-btn.expense-btn{background:linear-gradient(135deg,var(--red) 0%,#C02040 100%);box-shadow:0 4px 20px rgba(240,80,96,.3)}
+.add-save-btn:hover{transform:translateY(-1px)} .add-save-btn:active{transform:scale(.97)}
+.save-ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.3);transform:scale(0);animation:saveRipple .5s ease-out forwards;pointer-events:none}
+@keyframes saveRipple{to{transform:scale(4);opacity:0}}
+
+/* TOAST */
+#toast{position:fixed;bottom:calc(var(--nav-h) + 16px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 20px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:500;opacity:0;pointer-events:none;transition:opacity .25s,transform .3s cubic-bezier(.34,1.3,.64,1);white-space:nowrap;max-width:calc(100% - 32px)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.toast-success{border-color:rgba(64,208,128,.35)} #toast.toast-error{border-color:rgba(240,80,96,.35)}
+
+
+.udhar-summary-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px}
+.udhar-sum-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 10px;position:relative;overflow:hidden}
+.udhar-sum-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.udhar-sum-card.lena::before{background:var(--green)} .udhar-sum-card.dena::before{background:var(--red)} .udhar-sum-card.net::before{background:var(--accent)}
+.udhar-sum-card.lena{background:linear-gradient(145deg,var(--card) 60%,rgba(64,208,128,.04))}
+.udhar-sum-card.dena{background:linear-gradient(145deg,var(--card) 60%,rgba(240,80,96,.04))}
+.udhar-sum-card.net{background:linear-gradient(145deg,var(--card) 60%,rgba(240,192,64,.05))}
+.usc-icon{font-size:16px;margin-bottom:4px;display:block} .usc-label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.usc-val{font-family:var(--font-head);font-size:15px;font-weight:700;letter-spacing:-.4px;word-break:break-all}
+.usc-val.green{color:var(--green)} .usc-val.red{color:var(--red)} .usc-val.gold{color:var(--accent)}
+.udhar-tabs{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:4px;margin-bottom:16px;position:relative}
+.udhar-tab-slider{position:absolute;top:4px;bottom:4px;width:calc(50% - 4px);border-radius:calc(var(--radius-xl) - 4px);background:var(--green);transition:transform .35s cubic-bezier(.34,1.2,.64,1),background .3s;box-shadow:0 2px 10px rgba(64,208,128,.25);z-index:0;left:4px}
+.udhar-tabs.dena-active .udhar-tab-slider{transform:translateX(100%);background:var(--red);box-shadow:0 2px 10px rgba(240,80,96,.25)}
+.udhar-tab-btn{flex:1;padding:10px 0;border:none;background:transparent;cursor:pointer;font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--muted);transition:color .3s;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:6px}
+.udhar-tab-btn.active{color:#0A0A0F}
+.udhar-add-btn{width:100%;padding:13px;border:1.5px dashed var(--border);border-radius:var(--radius-lg);background:transparent;color:var(--muted);font-family:var(--font-head);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:border-color .2s,color .2s,background .2s;margin-bottom:14px}
+.udhar-add-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(240,192,64,.04)} .udhar-add-btn:active{transform:scale(.98)}
+.udhar-form-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:18px 16px;margin-bottom:14px;display:none;animation:fadeUp .3s ease both}
+.udhar-form-wrap.open{display:block}
+.udhar-form-title{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.uf-row{display:flex;gap:10px;margin-bottom:10px} .uf-group{flex:1;display:flex;flex-direction:column;gap:5px}
+.uf-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.uf-input{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-md);color:var(--text);font-family:var(--font-body);font-size:14px;font-weight:500;padding:10px 13px;outline:none;width:100%;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
+.uf-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(240,192,64,.08)} .uf-input::placeholder{color:var(--muted);opacity:.6} .uf-input.error{border-color:var(--red);box-shadow:0 0 0 3px rgba(240,80,96,.08)}
+.uf-err{font-size:11px;color:var(--red);margin-top:3px;display:none;font-weight:500} .uf-err.show{display:block}
+.uf-type-toggle{display:flex;gap:8px;margin-bottom:10px}
+.uf-type-btn{flex:1;padding:10px 8px;border:1.5px solid var(--border);border-radius:var(--radius-md);background:var(--surface);color:var(--muted);font-family:var(--font-head);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.uf-type-btn.sel-lena{border-color:var(--green);background:rgba(64,208,128,.1);color:var(--green)} .uf-type-btn.sel-dena{border-color:var(--red);background:rgba(240,80,96,.1);color:var(--red)}
+.uf-save-btn{width:100%;padding:13px;border:none;border-radius:var(--radius-lg);font-family:var(--font-head);font-size:15px;font-weight:800;cursor:pointer;transition:transform .2s,box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;position:relative;overflow:hidden}
+.uf-save-btn.lena-btn{background:linear-gradient(135deg,var(--green),#20B060);color:#0A0A0F;box-shadow:0 4px 16px rgba(64,208,128,.3)}
+.uf-save-btn.dena-btn{background:linear-gradient(135deg,var(--red),#C02040);color:#fff;box-shadow:0 4px 16px rgba(240,80,96,.3)}
+.uf-save-btn:hover{transform:translateY(-1px)} .uf-save-btn:active{transform:scale(.97)}
+.udhar-filter-row{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.udhar-filter-row::-webkit-scrollbar{display:none}
+.filter-pill{padding:6px 14px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--card);color:var(--muted);white-space:nowrap;transition:all .2s}
+.filter-pill.active{border-color:var(--accent);background:rgba(240,192,64,.1);color:var(--accent)} .filter-pill:active{transform:scale(.95)}
+.udhar-cards{display:flex;flex-direction:column;gap:10px}
+.udhar-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:border-color .2s,transform .15s;animation:cardIn .3s ease both}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.udhar-card.lena-card{border-left:3px solid var(--green)} .udhar-card.dena-card{border-left:3px solid var(--red)} .udhar-card.settled-card{opacity:.6;border-left-color:var(--muted)}
+.udhar-card-header{display:flex;align-items:center;gap:12px;padding:14px 14px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.uc-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:17px;font-weight:800;flex-shrink:0;text-transform:uppercase}
+.uc-avatar.lena{background:rgba(64,208,128,.15);color:var(--green)} .uc-avatar.dena{background:rgba(240,80,96,.12);color:var(--red)} .uc-avatar.settled{background:rgba(112,112,160,.15);color:var(--muted)}
+.uc-info{flex:1;min-width:0}
+.uc-name{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.uc-meta{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap}
+.uc-type-badge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:100px;letter-spacing:.3px}
+.uc-type-badge.lena{background:rgba(64,208,128,.12);color:var(--green)} .uc-type-badge.dena{background:rgba(240,80,96,.10);color:var(--red)} .uc-type-badge.settled-badge{background:rgba(64,208,128,.15);color:var(--green)}
+.uc-days-badge{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:100px}
+.days-recent{background:rgba(64,208,128,.1);color:var(--green)} .days-follow{background:rgba(240,192,64,.1);color:var(--accent)} .days-overdue{background:rgba(240,80,96,.12);color:var(--red)} .days-settled{background:rgba(112,112,160,.1);color:var(--muted)}
+.uc-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.uc-amount{font-family:var(--font-head);font-size:17px;font-weight:800;letter-spacing:-.5px}
+.uc-amount.lena{color:var(--green)} .uc-amount.dena{color:var(--red)} .uc-amount.settled-amt{color:var(--muted);text-decoration:line-through}
+.uc-remaining{font-size:11px;color:var(--muted);font-weight:500}
+.uc-chevron{font-size:16px;color:var(--muted);transition:transform .3s;margin-top:2px}
+.udhar-card.expanded .uc-chevron{transform:rotate(180deg)}
+.udhar-card-body{display:none;border-top:1px solid var(--border);padding:14px}
+.udhar-card.expanded .udhar-card-body{display:block}
+.uc-reason{font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.5;display:flex;gap:6px}
+.payment-history{margin-bottom:14px}
+.ph-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px}
+.ph-empty{font-size:12px;color:var(--muted);opacity:.6;font-style:italic}
+.ph-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--surface);border-radius:var(--radius-sm);margin-bottom:6px;border:1px solid var(--border)}
+.ph-item-date{font-size:12px;color:var(--muted)} .ph-item-amt{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--green)}
+.uc-actions{display:flex;gap:8px}
+.uc-pay-btn{flex:1;padding:10px 8px;border:none;border-radius:var(--radius-md);font-family:var(--font-head);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;background:rgba(64,208,128,.1);border:1.5px solid rgba(64,208,128,.3);color:var(--green)}
+.uc-pay-btn:hover{background:rgba(64,208,128,.18)} .uc-pay-btn:active{transform:scale(.96)} .uc-pay-btn:disabled{opacity:.4;cursor:not-allowed}
+.uc-wa-btn{padding:10px 10px;border-radius:var(--radius-md);font-family:var(--font-head);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap}
+.uc-wa-btn.wa-active{background:rgba(37,211,102,.12);border:1.5px solid rgba(37,211,102,.35);color:#25D366} .uc-wa-btn.wa-active:hover{background:rgba(37,211,102,.2)}
+.uc-wa-btn.wa-disabled{background:rgba(112,112,160,.08);border:1.5px solid var(--border);color:var(--muted);cursor:not-allowed;opacity:.7}
+.pay-inline{display:none;flex-direction:column;gap:8px;margin-bottom:12px;padding:12px;background:var(--surface);border-radius:var(--radius-md);border:1.5px solid rgba(64,208,128,.25);animation:fadeUp .2s ease both}
+.pay-inline.open{display:flex}
+.pay-inline-row{display:flex;gap:8px;align-items:center}
+.pay-inline-input{flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-head);font-size:16px;font-weight:700;padding:9px 12px;outline:none;transition:border-color .2s}
+.pay-inline-input:focus{border-color:var(--green)} .pay-inline-input::placeholder{color:var(--muted);opacity:.5;font-weight:400;font-size:14px}
+.pay-inline-confirm{padding:9px 16px;border:none;border-radius:var(--radius-sm);background:var(--green);color:#0A0A0F;font-family:var(--font-head);font-size:13px;font-weight:800;cursor:pointer;transition:transform .15s;white-space:nowrap}
+.pay-inline-confirm:active{transform:scale(.95)}
+.pay-inline-cancel{padding:9px 12px;border:none;border-radius:var(--radius-sm);background:var(--card);color:var(--muted);font-size:13px;cursor:pointer;font-weight:600}
+.settled-overlay{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:rgba(64,208,128,.1);border:1px solid rgba(64,208,128,.25);border-radius:var(--radius-md);color:var(--green);font-size:13px;font-weight:700;width:100%;justify-content:center}
+
+/* ═══════════════════════════════════════════
+   STATS SCREEN STYLES
+═══════════════════════════════════════════ */
+
+/* 3-tab switcher */
+.stats-tabs{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:4px;margin-bottom:18px;position:relative}
+.stats-tab-slider{position:absolute;top:4px;bottom:4px;width:calc(33.33% - 3px);border-radius:calc(var(--radius-xl) - 4px);background:linear-gradient(135deg,var(--accent),#E08020);transition:transform .35s cubic-bezier(.34,1.2,.64,1);box-shadow:0 2px 10px rgba(240,192,64,.25);z-index:0;left:4px}
+.stats-tab-btn{flex:1;padding:10px 4px;border:none;background:transparent;cursor:pointer;font-family:var(--font-head);font-size:11.5px;font-weight:700;color:var(--muted);transition:color .3s;position:relative;z-index:1;letter-spacing:.2px;text-align:center;line-height:1.3}
+.stats-tab-btn.active{color:#0A0A0F}
+
+/* Tab panels */
+.stats-panel{display:none} .stats-panel.active{display:block}
+
+/* Chart card */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px;position:relative;overflow:hidden}
+.chart-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.chart-card.accent-top::before{background:linear-gradient(90deg,var(--accent),var(--orange))}
+.chart-card.green-top::before{background:var(--green);box-shadow:0 0 8px rgba(64,208,128,.4)}
+.chart-card.blue-top::before{background:linear-gradient(90deg,#5080F0,#8040F0)}
+.chart-title{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;letter-spacing:-.1px}
+.chart-sub{font-size:11px;color:var(--muted);margin-bottom:14px;font-weight:500}
+.chart-canvas-wrap{position:relative;width:100%}
+.chart-canvas-wrap.pie{max-width:220px;margin:0 auto}
+.chart-canvas-wrap.donut-sm{max-width:170px;margin:0 auto}
+.chart-legend{display:flex;gap:16px;margin-bottom:10px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* Top-cats list */
+.top-cats{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+.top-cat-item{display:flex;align-items:center;gap:10px}
+.top-cat-rank{font-family:var(--font-head);font-size:13px;font-weight:800;color:var(--muted);width:22px;text-align:center;flex-shrink:0}
+.top-cat-icon{font-size:20px;width:36px;height:36px;border-radius:var(--radius-sm);background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.top-cat-info{flex:1;min-width:0}
+.top-cat-name{font-size:13px;font-weight:600;color:var(--text)}
+.top-cat-bar-wrap{height:4px;background:var(--border);border-radius:100px;margin-top:4px;overflow:hidden}
+.top-cat-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--red),var(--orange));transition:width .6s cubic-bezier(.34,1.2,.64,1)}
+.top-cat-amt{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--red);flex-shrink:0}
+
+/* Insights */
+.insight-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:15px;margin-bottom:10px;display:flex;align-items:flex-start;gap:12px;animation:cardIn .3s ease both}
+.insight-icon{font-size:26px;flex-shrink:0;width:44px;height:44px;border-radius:var(--radius-md);background:var(--surface);display:flex;align-items:center;justify-content:center}
+.insight-body{flex:1;min-width:0}
+.insight-label{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px}
+.insight-value{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--text);line-height:1.4;letter-spacing:-.2px}
+.insight-value .hl{color:var(--accent)}
+.insight-value .igreen{color:var(--green)}
+.insight-value .ired{color:var(--red)}
+
+/* No-data inside stats */
+.stats-empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px 20px;text-align:center}
+.stats-empty-icon{font-size:38px;opacity:.35}
+.stats-empty-text{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ═══════════════════════════════════════
+   MORE / GOALS SCREEN STYLES
+═══════════════════════════════════════ */
+
+/* Sub-page nav within More */
+.more-tabs{display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.more-tabs::-webkit-scrollbar{display:none}
+.more-tab-btn{padding:8px 16px;border-radius:100px;font-family:var(--font-head);font-size:12px;font-weight:700;border:1.5px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .2s;letter-spacing:.2px}
+.more-tab-btn.active{border-color:var(--accent);background:rgba(240,192,64,.12);color:var(--accent);box-shadow:0 0 0 2px rgba(240,192,64,.08)}
+.more-tab-btn:active{transform:scale(.95)}
+.more-panel{display:none}.more-panel.active{display:block}
+
+/* Section header */
+.goals-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;margin-top:4px}
+.goals-section-title{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.2px;display:flex;align-items:center;gap:7px}
+.goals-add-btn{padding:7px 14px;border:1.5px solid var(--border);border-radius:100px;background:transparent;color:var(--muted);font-family:var(--font-head);font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}
+.goals-add-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(240,192,64,.06)}
+
+/* Budget goal card */
+.budget-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 15px;margin-bottom:10px;position:relative;overflow:hidden;animation:cardIn .3s ease both}
+.budget-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.bc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.bc-left{display:flex;align-items:center;gap:9px}
+.bc-icon{width:36px;height:36px;border-radius:var(--radius-sm);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.bc-info{min-width:0}
+.bc-name{font-family:var(--font-head);font-size:13.5px;font-weight:700;color:var(--text);letter-spacing:-.2px}
+.bc-month{font-size:11px;color:var(--muted);font-weight:500;margin-top:1px}
+.bc-right{text-align:right;flex-shrink:0}
+.bc-amounts{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--text);letter-spacing:-.3px;white-space:nowrap}
+.bc-spent-label{font-size:10px;color:var(--muted);margin-top:2px;font-weight:500}
+.bc-progress-wrap{height:7px;background:var(--border);border-radius:100px;overflow:hidden;margin-bottom:8px}
+.bc-progress-bar{height:100%;border-radius:100px;transition:width .7s cubic-bezier(.34,1.2,.64,1)}
+.bc-footer{display:flex;align-items:center;justify-content:space-between}
+.bc-status-pill{padding:3px 9px;border-radius:100px;font-size:10.5px;font-weight:700;display:inline-flex;align-items:center;gap:4px}
+.bc-prediction{font-size:10.5px;color:var(--muted);font-style:italic;text-align:right;flex:1;margin-left:8px;line-height:1.3}
+.bc-del-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;margin-left:6px;flex-shrink:0}
+.bc-del-btn:hover{border-color:var(--red);color:var(--red);background:rgba(240,80,96,.08)}
+
+/* Budget add form */
+.goals-form-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:16px;margin-bottom:14px;display:none;animation:fadeUp .3s ease both}
+.goals-form-wrap.open{display:block}
+.gf-row{display:flex;gap:10px;margin-bottom:10px}
+.gf-group{flex:1;display:flex;flex-direction:column;gap:5px}
+.gf-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.gf-input{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-md);color:var(--text);font-family:var(--font-body);font-size:14px;font-weight:500;padding:10px 13px;outline:none;width:100%;transition:border-color .2s;-webkit-appearance:none;appearance:none}
+.gf-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(240,192,64,.08)}
+.gf-input::placeholder{color:var(--muted);opacity:.6}
+.gf-input.error{border-color:var(--red)}
+.gf-save-btn{width:100%;padding:12px;border:none;border-radius:var(--radius-lg);background:linear-gradient(135deg,var(--accent),#E08020);color:#0A0A0F;font-family:var(--font-head);font-size:14px;font-weight:800;cursor:pointer;transition:transform .2s;margin-top:4px}
+.gf-save-btn:active{transform:scale(.97)}
+
+/* EMI card */
+.emi-health-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.emi-health-icon{font-size:32px;flex-shrink:0}
+.emi-health-body{flex:1;min-width:0}
+.emi-health-title{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px}
+.emi-health-sub{font-size:12px;color:var(--muted);line-height:1.4}
+.emi-health-badge{padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0}
+
+.emi-card{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-lg);padding:14px 15px;margin-bottom:10px;animation:cardIn .3s ease both}
+.emi-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.emi-name{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.2px}
+.emi-amount{font-family:var(--font-head);font-size:16px;font-weight:800;color:var(--accent);letter-spacing:-.3px}
+.emi-amount span{font-size:11px;color:var(--muted);font-weight:500;font-family:var(--font-body)}
+.emi-progress-wrap{height:6px;background:var(--border);border-radius:100px;overflow:hidden;margin-bottom:8px}
+.emi-progress-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--accent),var(--orange));transition:width .7s cubic-bezier(.34,1.2,.64,1)}
+.emi-footer{display:flex;align-items:center;justify-content:space-between}
+.emi-months{font-size:11.5px;color:var(--muted);font-weight:600}
+.emi-months strong{color:var(--text)}
+.emi-del-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s}
+.emi-del-btn:hover{border-color:var(--red);color:var(--red);background:rgba(240,80,96,.08)}
+.emi-freedom{font-size:11px;font-weight:700;color:var(--green)}
+
+/* Festive goal card */
+.festive-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 15px;margin-bottom:10px;animation:cardIn .3s ease both;position:relative;overflow:hidden}
+.festive-card::after{content:'';position:absolute;top:0;right:0;width:60px;height:60px;background:radial-gradient(circle at top right,rgba(240,192,64,.07),transparent 70%)}
+.fc-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.fc-emoji{font-size:28px;flex-shrink:0}
+.fc-info{flex:1;min-width:0}
+.fc-name{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.2px}
+.fc-date{font-size:11px;color:var(--muted);margin-top:1px}
+.fc-target{font-family:var(--font-head);font-size:15px;font-weight:800;color:var(--accent);flex-shrink:0;letter-spacing:-.3px}
+.fc-progress-wrap{height:6px;background:var(--border);border-radius:100px;overflow:hidden;margin-bottom:8px}
+.fc-progress-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,#F0C040,#F07040);transition:width .7s cubic-bezier(.34,1.2,.64,1)}
+.fc-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px}
+.fc-daily{font-size:11.5px;color:var(--muted);font-weight:600}
+.fc-daily strong{color:var(--green)}
+.fc-udhar-warn{font-size:11px;color:var(--red);font-weight:600;display:flex;align-items:center;gap:4px;margin-top:6px;padding:6px 10px;background:rgba(240,80,96,.07);border:1px solid rgba(240,80,96,.2);border-radius:var(--radius-sm)}
+.fc-del-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;flex-shrink:0}
+.fc-del-btn:hover{border-color:var(--red);color:var(--red);background:rgba(240,80,96,.08)}
+
+/* Goals empty state */
+.goals-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:28px 16px;text-align:center}
+.goals-empty-icon{font-size:36px;opacity:.35;margin-bottom:2px}
+.goals-empty-text{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ═══════════════════════════════════════
+   SETTINGS PANEL
+═══════════════════════════════════════ */
+.settings-section-title{font-family:var(--font-head);font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;margin-top:4px;display:flex;align-items:center;gap:6px}
+.settings-card{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 15px;margin-bottom:10px;transition:border-color .2s;animation:cardIn .3s ease both}
+.settings-card:hover{border-color:rgba(112,112,160,.4)}
+.settings-card-icon{width:40px;height:40px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.settings-card-body{flex:1;min-width:0}
+.settings-card-title{font-family:var(--font-head);font-size:13.5px;font-weight:700;color:var(--text);letter-spacing:-.2px}
+.settings-card-sub{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+.settings-action-btn{padding:9px 16px;border:none;border-radius:var(--radius-md);font-family:var(--font-head);font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;transition:transform .15s,opacity .2s;flex-shrink:0}
+.settings-action-btn:active{transform:scale(.92)}
+.btn-wa{background:rgba(37,211,102,.15);color:#25D366;border:1.5px solid rgba(37,211,102,.3)}
+.btn-wa:hover{background:rgba(37,211,102,.25)}
+.btn-export{background:rgba(64,160,240,.15);color:#40A0F0;border:1.5px solid rgba(64,160,240,.3)}
+.btn-export:hover{background:rgba(64,160,240,.25)}
+.btn-install{background:rgba(240,192,64,.15);color:var(--accent);border:1.5px solid rgba(240,192,64,.3)}
+.btn-install:hover{background:rgba(240,192,64,.25)}
+.btn-reset{background:rgba(240,80,96,.12);color:var(--red);border:1.5px solid rgba(240,80,96,.25)}
+.btn-reset:hover{background:rgba(240,80,96,.2)}
+.settings-divider{height:1px;background:var(--border);margin:14px 0}
+/* Theme toggle switch */
+.theme-toggle-wrap{width:46px;height:26px;border-radius:100px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;position:relative;transition:background .3s,border-color .3s;flex-shrink:0}
+.theme-toggle-wrap.on{background:rgba(240,192,64,.2);border-color:var(--accent)}
+.theme-toggle-knob{width:20px;height:20px;border-radius:50%;background:var(--muted);position:absolute;top:1px;left:1px;transition:transform .3s cubic-bezier(.34,1.56,.64,1),background .3s}
+.theme-toggle-wrap.on .theme-toggle-knob{transform:translateX(20px);background:var(--accent)}
+/* App footer */
+.settings-footer{text-align:center;padding:20px 0 4px;color:var(--muted);font-size:11px;line-height:2}
+.settings-footer-logo{font-family:var(--font-head);font-size:16px;font-weight:800;color:var(--text);margin-bottom:2px}
+.settings-footer-logo span{color:var(--accent)}
+
+/* ═══════════════════════════════════════
+   LIGHT THEME
+═══════════════════════════════════════ */
+body.light{--bg:#F0F0F6;--surface:#FFFFFF;--card:#FFFFFF;--border:#DCDCE8;--muted:#8080A0;--text:#18182E}
+body.light #header,body.light #nav{box-shadow:0 1px 12px rgba(0,0,30,.08)}
+body.light .summary-card,body.light .chart-card,body.light .udhar-card,body.light .budget-card,body.light .emi-card,body.light .festive-card,body.light .settings-card,body.light .insight-card{box-shadow:0 2px 12px rgba(0,0,30,.06)}
+body.light #splash{background:#F0F0F6}
+
+/* ═══════════════════════════════════════
+   PWA INSTALL BANNER
+═══════════════════════════════════════ */
+#pwa-banner{position:fixed;bottom:calc(var(--nav-h) + 14px);left:50%;transform:translateX(-50%) translateY(30px);width:calc(100% - 32px);max-width:398px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 40px rgba(0,0,0,.45);z-index:480;opacity:0;pointer-events:none;transition:opacity .3s,transform .4s cubic-bezier(.34,1.3,.64,1)}
+#pwa-banner.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.pwa-banner-icon{font-size:30px;flex-shrink:0}
+.pwa-banner-body{flex:1;min-width:0}
+.pwa-banner-title{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--text);letter-spacing:-.2px}
+.pwa-banner-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.pwa-banner-btn{padding:9px 16px;border:none;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--accent),#E08020);color:#0A0A0F;font-family:var(--font-head);font-size:12px;font-weight:800;cursor:pointer;flex-shrink:0;transition:transform .15s}
+.pwa-banner-btn:active{transform:scale(.92)}
+.pwa-banner-close{width:26px;height:26px;border-radius:50%;border:none;background:var(--surface);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;transition:background .2s}
+.pwa-banner-close:hover{background:var(--border)}
+
+/* Reset confirm overlay */
+#reset-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.78);display:flex;align-items:flex-end;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .25s}
+#reset-overlay.show{opacity:1;pointer-events:auto}
+.reset-sheet{background:var(--card);border-radius:var(--radius-xl) var(--radius-xl) 0 0;padding:28px 20px 32px;width:100%;max-width:430px;text-align:center;transform:translateY(100%);transition:transform .35s cubic-bezier(.34,1.2,.64,1);animation:none}
+#reset-overlay.show .reset-sheet{transform:translateY(0)}
+.reset-sheet-icon{font-size:44px;margin-bottom:12px}
+.reset-sheet-title{font-family:var(--font-head);font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.4px;margin-bottom:8px}
+.reset-sheet-sub{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:24px}
+.reset-sheet-sub strong{color:var(--red)}
+.reset-sheet-actions{display:flex;gap:10px}
+.reset-cancel-btn{flex:1;padding:14px;border:1.5px solid var(--border);border-radius:var(--radius-lg);background:transparent;color:var(--muted);font-family:var(--font-head);font-size:14px;font-weight:700;cursor:pointer;transition:border-color .2s}
+.reset-cancel-btn:hover{border-color:var(--muted)}
+.reset-confirm-btn{flex:1;padding:14px;border:none;border-radius:var(--radius-lg);background:linear-gradient(135deg,var(--red),#C02040);color:#fff;font-family:var(--font-head);font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(240,80,96,.3);transition:transform .15s}
+.reset-confirm-btn:active{transform:scale(.97)}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo-ring"><span class="splash-logo-inner">₹</span></div>
+  <div class="splash-app-name">Paisa<span>Book</span></div>
+  <div class="splash-tagline">Apna Paisa, Apna Hisaab</div>
+  <div class="splash-dots">
+    <div class="splash-dot"></div><div class="splash-dot"></div><div class="splash-dot"></div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header id="header">
+  <div class="header-logo">
+    <div class="header-logo-icon">₹</div>
+    <div class="header-logo-text">Paisa<span>Book</span></div>
+  </div>
+  <div class="month-selector">
+    <button class="month-btn" id="prevMonth">&#8249;</button>
+    <span class="month-label" id="monthLabel">Mar 2026</span>
+    <button class="month-btn" id="nextMonth">&#8250;</button>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ████ HOME ████ -->
+<div id="screen-home" class="screen active" data-tab="home">
+  <div class="home-greeting">
+    <div class="greeting-text">Namaste! <span>👋</span></div>
+    <div class="greeting-date" id="homeDate"></div>
+  </div>
+  <div class="udhar-banner" id="udharBanner">
+    <span class="banner-icon">⚠️</span>
+    <div class="banner-text">
+      <div class="banner-title" id="bannerTitle">Purane udhar pending hain</div>
+      <div class="banner-sub">Tap karke check karo</div>
+    </div>
+    <span class="banner-arrow">›</span>
+  </div>
+  <div class="summary-grid">
+    <div class="summary-card income"><span class="sc-icon">💰</span><div class="sc-label">Income</div><div class="sc-amount green" id="sc-income">₹0</div><div class="sc-sub" id="sc-income-sub">0 transactions</div></div>
+    <div class="summary-card expense"><span class="sc-icon">💸</span><div class="sc-label">Expense</div><div class="sc-amount red" id="sc-expense">₹0</div><div class="sc-sub" id="sc-expense-sub">0 transactions</div></div>
+    <div class="summary-card savings"><span class="sc-icon">🏦</span><div class="sc-label">Savings</div><div class="sc-amount gold" id="sc-savings">₹0</div><div class="sc-sub" id="sc-savings-sub">Saved this month</div></div>
+    <div class="summary-card savings-pct"><span class="sc-icon" id="sc-pct-emoji">📊</span><div class="sc-label">Saved %</div><div class="sc-amount gold" id="sc-pct">0%</div><div class="savings-pill" id="sc-pct-pill" style="background:rgba(112,112,160,.15);color:var(--muted)">No data</div></div>
+  </div>
+  <div class="section-header">
+    <div class="section-title">Recent Transactions</div>
+    <div class="section-count" id="txn-count">0 entries</div>
+  </div>
+  <div class="txn-list" id="txn-list"></div>
+</div>
+
+<!-- ████ ADD ████ -->
+<div id="screen-add" class="screen" data-tab="add">
+  <div class="add-toggle-wrap" id="addToggle">
+    <div class="add-toggle-slider"></div>
+    <button class="add-toggle-btn active" id="toggleIncomeBtn" onclick="setAddType('income')"><span>💰</span> Income</button>
+    <button class="add-toggle-btn" id="toggleExpenseBtn" onclick="setAddType('expense')"><span>💸</span> Expense</button>
+  </div>
+  <div class="add-amount-block income-focus" id="addAmountBlock">
+    <div class="add-amount-label">Amount kitna hai?</div>
+    <div class="add-amount-row">
+      <span class="add-amount-symbol">₹</span>
+      <input type="number" id="addAmountInput" inputmode="decimal" placeholder="0" min="0" step="any" autocomplete="off">
+    </div>
+    <div class="add-amount-hint" id="addAmountHint">Tap karke amount daalo</div>
+  </div>
+  <div class="add-form-section"><div class="add-form-label">📂 Category</div><div class="cat-grid" id="catGrid"></div></div>
+  <div class="add-form-section"><div class="add-form-label">💳 Payment Method</div><div class="pay-grid" id="payGrid"></div></div>
+  <div class="add-form-section"><div class="add-input-row"><div class="add-input-group"><label for="addDateInput">📅 Date</label><input type="date" id="addDateInput" class="add-input"></div></div></div>
+  <div class="add-form-section"><div class="add-input-group"><label for="addNoteInput">📝 Note (Optional)</label><input type="text" id="addNoteInput" class="add-input" placeholder="Kuch likhna ho toh..." maxlength="80" autocomplete="off"></div></div>
+  <button class="add-save-btn" id="addSaveBtn" onclick="saveTransaction()">
+    <span id="saveBtnIcon">✓</span><span id="saveBtnText">Income Save Karo</span>
+  </button>
+</div>
+
+<!-- ████ UDHAR ████ -->
+<div id="screen-udhar" class="screen" data-tab="udhar">
+  <div class="udhar-summary-grid">
+    <div class="udhar-sum-card lena"><span class="usc-icon">💰</span><div class="usc-label">Lena Hai</div><div class="usc-val green" id="u-lena-total">₹0</div></div>
+    <div class="udhar-sum-card dena"><span class="usc-icon">🙏</span><div class="usc-label">Dena Hai</div><div class="usc-val red" id="u-dena-total">₹0</div></div>
+    <div class="udhar-sum-card net"><span class="usc-icon">📊</span><div class="usc-label">Net</div><div class="usc-val gold" id="u-net-total">₹0</div></div>
+  </div>
+  <div class="udhar-tabs" id="udharTabs">
+    <div class="udhar-tab-slider"></div>
+    <button class="udhar-tab-btn active" id="uTabLena" onclick="setUdharTab('lena')">💰 Lena Hai</button>
+    <button class="udhar-tab-btn" id="uTabDena" onclick="setUdharTab('dena')">🙏 Dena Hai</button>
+  </div>
+  <button class="udhar-add-btn" id="udharAddBtn" onclick="toggleUdharForm()">
+    <span id="udharAddBtnIcon">➕</span><span id="udharAddBtnText">Naya Udhar Add Karo</span>
+  </button>
+  <div class="udhar-form-wrap" id="udharFormWrap">
+    <div class="udhar-form-title"><span id="uFormTitleIcon">💰</span><span id="uFormTitle">Lena Hai – Naya Add Karo</span></div>
+    <div class="uf-row"><div class="uf-group"><div class="uf-label">👤 Naam (Required)</div><input type="text" id="uf-name" class="uf-input" placeholder="Person ka naam" maxlength="40" autocomplete="off"><div class="uf-err" id="uf-name-err">Naam daalna zaroori hai</div></div></div>
+    <div class="uf-row"><div class="uf-group"><div class="uf-label">📱 Phone (WhatsApp ke liye)</div><input type="tel" id="uf-phone" class="uf-input" placeholder="WhatsApp ke liye" maxlength="10" inputmode="numeric" autocomplete="off"><div class="uf-err" id="uf-phone-err">Valid 10 digit daalo</div></div></div>
+    <div class="uf-row">
+      <div class="uf-group"><div class="uf-label">₹ Amount (Required)</div><input type="number" id="uf-amount" class="uf-input" placeholder="0" min="1" step="any" inputmode="decimal" autocomplete="off"><div class="uf-err" id="uf-amount-err">Valid amount daalo</div></div>
+      <div class="uf-group"><div class="uf-label">📅 Date</div><input type="date" id="uf-date" class="uf-input"></div>
+    </div>
+    <div class="uf-row"><div class="uf-group"><div class="uf-label">📝 Reason (Optional)</div><input type="text" id="uf-reason" class="uf-input" placeholder="Kisliye udhar diya/liya..." maxlength="80" autocomplete="off"></div></div>
+    <div style="margin-bottom:14px;"><div class="uf-label" style="margin-bottom:8px;">Type</div><div class="uf-type-toggle"><button class="uf-type-btn sel-lena" id="ufTypeLena" onclick="setUfType('lena')">💰 Lena Hai</button><button class="uf-type-btn" id="ufTypeDena" onclick="setUfType('dena')">🙏 Dena Hai</button></div></div>
+    <button class="uf-save-btn lena-btn" id="ufSaveBtn" onclick="saveUdhar()">💰 Udhar Save Karo</button>
+  </div>
+  <div class="udhar-filter-row" id="udharFilterRow">
+    <button class="filter-pill active" data-filter="active" onclick="setUdharFilter('active')">🔵 Active</button>
+    <button class="filter-pill" data-filter="settled" onclick="setUdharFilter('settled')">✅ Settled</button>
+    <button class="filter-pill" data-filter="all" onclick="setUdharFilter('all')">📋 Sab</button>
+  </div>
+  <div class="udhar-cards" id="udharCards"></div>
+</div>
+
+<!-- ████████████████████████████████████████
+     STATS SCREEN
+████████████████████████████████████████ -->
+<div id="screen-stats" class="screen" data-tab="stats">
+
+  <!-- 3-tab row -->
+  <div class="stats-tabs">
+    <div class="stats-tab-slider" id="statsSlider"></div>
+    <button class="stats-tab-btn active" data-stab="mahine" onclick="setStatsTab('mahine')">📅 Is Mahine</button>
+    <button class="stats-tab-btn" data-stab="chhe"   onclick="setStatsTab('chhe')">📈 6 Mahine</button>
+    <button class="stats-tab-btn" data-stab="insight" onclick="setStatsTab('insight')">💡 Insights</button>
+  </div>
+
+  <!-- TAB 1 – IS MAHINE -->
+  <div class="stats-panel active" id="spanel-mahine">
+    <div class="chart-card accent-top">
+      <div class="chart-title">Kharch Kahan Gaya? 💸</div>
+      <div class="chart-sub" id="pieSub">Is mahine ki category-wise spending</div>
+      <div class="chart-canvas-wrap pie"><canvas id="pieChart" height="220"></canvas></div>
+      <div class="top-cats" id="topCatsList"></div>
+    </div>
+  </div>
+
+  <!-- TAB 2 – 6 MAHINE -->
+  <div class="stats-panel" id="spanel-chhe">
+
+    <!-- Bar: Income vs Expense -->
+    <div class="chart-card green-top">
+      <div class="chart-title">Income vs Expense 💰💸</div>
+      <div class="chart-sub">Pichhle 6 mahine</div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Income</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Expense</div>
+      </div>
+      <div class="chart-canvas-wrap"><canvas id="barChart" height="180"></canvas></div>
+    </div>
+
+    <!-- Line: Savings trend -->
+    <div class="chart-card accent-top">
+      <div class="chart-title">Savings Trend 📊</div>
+      <div class="chart-sub">Month-by-month bachat</div>
+      <div class="chart-canvas-wrap"><canvas id="lineChart" height="150"></canvas></div>
+    </div>
+
+    <!-- Doughnut: Udhar lena vs dena -->
+    <div class="chart-card blue-top">
+      <div class="chart-title">Udhar Overview 🤝</div>
+      <div class="chart-sub">Active lena hai vs dena hai</div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Lena Hai</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Dena Hai</div>
+      </div>
+      <div class="chart-canvas-wrap donut-sm"><canvas id="udharChart" height="170"></canvas></div>
+    </div>
+
+  </div>
+
+  <!-- TAB 3 – INSIGHTS -->
+  <div class="stats-panel" id="spanel-insight">
+    <div id="insightsList"></div>
+  </div>
+
+</div>
+<!-- ████ END STATS ████ -->
+
+<!-- ████ MORE / GOALS ████ -->
+<div id="screen-more" class="screen" data-tab="more">
+
+  <!-- Sub-tabs -->
+  <div class="more-tabs">
+    <button class="more-tab-btn active" data-mpanel="budget"   onclick="setMoreTab('budget')">🎯 Budget Goals</button>
+    <button class="more-tab-btn" data-mpanel="emi"     onclick="setMoreTab('emi')">📱 EMI Tracker</button>
+    <button class="more-tab-btn" data-mpanel="festive" onclick="setMoreTab('festive')">🪔 Festive Goals</button>
+    <button class="more-tab-btn" data-mpanel="settings" onclick="setMoreTab('settings')">⚙️ Settings</button>
+  </div>
+
+  <!-- ── PANEL 1: BUDGET GOALS ── -->
+  <div class="more-panel active" id="mpanel-budget">
+
+    <div class="goals-section-header">
+      <div class="goals-section-title">🎯 Budget Limits</div>
+      <button class="goals-add-btn" id="budgetAddToggle" onclick="toggleBudgetForm()"><span id="budgetAddIcon">➕</span> Add Karo</button>
+    </div>
+
+    <!-- Add Budget Form -->
+    <div class="goals-form-wrap" id="budgetFormWrap">
+      <div class="gf-row">
+        <div class="gf-group">
+          <div class="gf-label">📂 Category</div>
+          <select id="gf-budget-cat" class="gf-input">
+            <option value="">Category choose karo</option>
+            <option>Ghar</option><option>Khaana</option><option>Transport</option>
+            <option>Entertainment</option><option>Health</option><option>Education</option>
+            <option>Bills</option><option>Family</option><option>EMI</option><option>Other</option>
+          </select>
+        </div>
+        <div class="gf-group">
+          <div class="gf-label">₹ Limit / Month</div>
+          <input type="number" id="gf-budget-amt" class="gf-input" placeholder="0" min="1" inputmode="decimal" autocomplete="off">
+        </div>
+      </div>
+      <button class="gf-save-btn" onclick="saveBudget()">🎯 Budget Set Karo</button>
+    </div>
+
+    <div id="budgetCards"></div>
+  </div>
+
+  <!-- ── PANEL 2: EMI TRACKER ── -->
+  <div class="more-panel" id="mpanel-emi">
+
+    <!-- EMI Health Score -->
+    <div class="emi-health-card" id="emiHealthCard">
+      <div class="emi-health-icon" id="emiHealthIcon">💚</div>
+      <div class="emi-health-body">
+        <div class="emi-health-title" id="emiHealthTitle">EMI Health Score</div>
+        <div class="emi-health-sub" id="emiHealthSub">Loading...</div>
+      </div>
+      <div class="emi-health-badge" id="emiHealthBadge">–</div>
+    </div>
+
+    <div class="goals-section-header">
+      <div class="goals-section-title">📱 Active EMIs</div>
+      <button class="goals-add-btn" id="emiAddToggle" onclick="toggleEmiForm()"><span id="emiAddIcon">➕</span> Add Karo</button>
+    </div>
+
+    <!-- Add EMI Form -->
+    <div class="goals-form-wrap" id="emiFormWrap">
+      <div class="gf-row">
+        <div class="gf-group">
+          <div class="gf-label">📝 EMI Name</div>
+          <input type="text" id="gf-emi-name" class="gf-input" placeholder="e.g. Phone EMI" maxlength="40" autocomplete="off">
+        </div>
+      </div>
+      <div class="gf-row">
+        <div class="gf-group">
+          <div class="gf-label">₹ Monthly Amount</div>
+          <input type="number" id="gf-emi-amount" class="gf-input" placeholder="0" min="1" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="gf-group">
+          <div class="gf-label">📅 Total Months</div>
+          <input type="number" id="gf-emi-total" class="gf-input" placeholder="12" min="1" max="360" inputmode="numeric" autocomplete="off">
+        </div>
+        <div class="gf-group">
+          <div class="gf-label">⏳ Remaining</div>
+          <input type="number" id="gf-emi-remaining" class="gf-input" placeholder="12" min="1" max="360" inputmode="numeric" autocomplete="off">
+        </div>
+      </div>
+      <button class="gf-save-btn" onclick="saveEmi()">📱 EMI Add Karo</button>
+    </div>
+
+    <div id="emiCards"></div>
+  </div>
+
+  <!-- ── PANEL 3: FESTIVE GOALS ── -->
+  <div class="more-panel" id="mpanel-festive">
+
+    <div class="goals-section-header">
+      <div class="goals-section-title">🪔 Festive Savings</div>
+      <button class="goals-add-btn" id="festiveAddToggle" onclick="toggleFestiveForm()"><span id="festiveAddIcon">➕</span> Add Karo</button>
+    </div>
+
+    <!-- Add Festive Form -->
+    <div class="goals-form-wrap" id="festiveFormWrap">
+      <div class="gf-row">
+        <div class="gf-group">
+          <div class="gf-label">🪔 Festival</div>
+          <select id="gf-fest-name" class="gf-input">
+            <option value="">Festival choose karo</option>
+            <option>Diwali 🪔</option><option>Holi 🎨</option><option>Eid 🌙</option>
+            <option>Christmas 🎄</option><option>Navratri 🕺</option><option>Raksha Bandhan 🧶</option>
+          </select>
+        </div>
+      </div>
+      <div class="gf-row">
+        <div class="gf-group">
+          <div class="gf-label">₹ Target Amount</div>
+          <input type="number" id="gf-fest-target" class="gf-input" placeholder="0" min="1" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="gf-group">
+          <div class="gf-label">📅 Festival Date</div>
+          <input type="date" id="gf-fest-date" class="gf-input">
+        </div>
+      </div>
+      <button class="gf-save-btn" onclick="saveFestive()">🪔 Goal Set Karo</button>
+    </div>
+
+    <div id="festiveCards"></div>
+
+  </div>
+
+  <!-- ── PANEL 4: SETTINGS ── -->
+  <div class="more-panel" id="mpanel-settings">
+
+    <!-- Share & Export -->
+    <div class="settings-section-title">📤 Share & Export</div>
+
+    <div class="settings-card">
+      <div class="settings-card-icon" style="background:rgba(37,211,102,.12);color:#25D366">📊</div>
+      <div class="settings-card-body">
+        <div class="settings-card-title">Monthly Summary</div>
+        <div class="settings-card-sub">WhatsApp pe bhejo apna mahine ka report</div>
+      </div>
+      <button class="settings-action-btn btn-wa" onclick="shareWhatsApp()">WhatsApp</button>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-card-icon" style="background:rgba(64,160,240,.12);color:#40A0F0">📥</div>
+      <div class="settings-card-body">
+        <div class="settings-card-title">CSV Export</div>
+        <div class="settings-card-sub">Transactions + Udhar — Excel mein kholo</div>
+      </div>
+      <button class="settings-action-btn btn-export" onclick="exportCSV()">Export</button>
+    </div>
+
+    <div class="settings-divider"></div>
+
+    <!-- App Preferences -->
+    <div class="settings-section-title">🎨 Preferences</div>
+
+    <div class="settings-card" onclick="toggleTheme()" style="cursor:pointer">
+      <div class="settings-card-icon" id="themeCardIcon" style="background:rgba(240,192,64,.12);color:var(--accent)">🌙</div>
+      <div class="settings-card-body">
+        <div class="settings-card-title">Theme</div>
+        <div class="settings-card-sub" id="themeCardSub">Dark mode active hai</div>
+      </div>
+      <div class="theme-toggle-wrap" id="themeToggleWrap">
+        <div class="theme-toggle-knob"></div>
+      </div>
+    </div>
+
+    <!-- PWA Install (shown only when browser supports it) -->
+    <div class="settings-card" id="installCard" style="display:none">
+      <div class="settings-card-icon" style="background:rgba(240,192,64,.12);color:var(--accent)">📲</div>
+      <div class="settings-card-body">
+        <div class="settings-card-title">Home Screen Pe Add Karo</div>
+        <div class="settings-card-sub">Offline bhi kaam karega, faster launch</div>
+      </div>
+      <button class="settings-action-btn btn-install" onclick="triggerInstall()">Install</button>
+    </div>
+
+    <div class="settings-divider"></div>
+
+    <!-- Danger Zone -->
+    <div class="settings-section-title" style="color:var(--red)">⚠️ Danger Zone</div>
+
+    <div class="settings-card" style="border-color:rgba(240,80,96,.18)">
+      <div class="settings-card-icon" style="background:rgba(240,80,96,.1);color:var(--red)">🗑️</div>
+      <div class="settings-card-body">
+        <div class="settings-card-title" style="color:var(--red)">Sab Data Reset Karo</div>
+        <div class="settings-card-sub">Saara data permanently delete hoga</div>
+      </div>
+      <button class="settings-action-btn btn-reset" onclick="showResetConfirm()">Reset</button>
+    </div>
+
+    <!-- Footer -->
+    <div class="settings-footer">
+      <div class="settings-footer-logo">Paisa<span>Book</span></div>
+      Apna Paisa, Apna Hisaab<br>
+      <span style="opacity:.45">v1.0 · Made with ❤️ in India 🇮🇳</span>
+    </div>
+
+  </div>
+
+</div>
+<!-- ████ END MORE ████ -->
+
+<!-- PWA Install Banner -->
+<div id="pwa-banner">
+  <div class="pwa-banner-icon">📲</div>
+  <div class="pwa-banner-body">
+    <div class="pwa-banner-title">Home Screen Pe Add Karo!</div>
+    <div class="pwa-banner-sub">PaisaBook – offline bhi kaam karega</div>
+  </div>
+  <button class="pwa-banner-btn" onclick="triggerInstall()">Install</button>
+  <button class="pwa-banner-close" onclick="dismissBanner()">✕</button>
+</div>
+
+<!-- Reset Confirm Sheet -->
+<div id="reset-overlay">
+  <div class="reset-sheet">
+    <div class="reset-sheet-icon">⚠️</div>
+    <div class="reset-sheet-title">Sab Kuch Delete?</div>
+    <div class="reset-sheet-sub">
+      Saare transactions, udhar, budgets, EMIs permanently delete ho jayenge.<br>
+      <strong>Yeh undo nahi ho sakta!</strong>
+    </div>
+    <div class="reset-sheet-actions">
+      <button class="reset-cancel-btn" onclick="hideResetConfirm()">Cancel</button>
+      <button class="reset-confirm-btn" onclick="confirmReset()">Haan, Delete Karo</button>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- NAV -->
+<nav id="nav">
+  <button class="nav-tab active" data-screen="home"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
+  <button class="nav-tab" data-screen="udhar"><span class="nav-icon">🤝</span><span class="nav-label">Udhar</span></button>
+  <button class="nav-tab add-tab" data-screen="add"><div class="nav-icon-wrap">➕</div><span class="nav-label">Add</span></button>
+  <button class="nav-tab" data-screen="stats"><span class="nav-icon">📊</span><span class="nav-label">Stats</span></button>
+  <button class="nav-tab" data-screen="more"><span class="nav-icon">⚙️</span><span class="nav-label">More</span></button>
+</nav>
+
+<div id="toast"></div>
+</div><!-- #app -->
+
+<script>
+/* ══════════════════════════════════════════
+   DATA LAYER
+══════════════════════════════════════════ */
+function initStorage(){
+  ['pb_transactions','pb_udhar','pb_budgets','pb_emis'].forEach(function(k){if(!localStorage.getItem(k))localStorage.setItem(k,'[]');});
+  if(!localStorage.getItem('pb_settings'))localStorage.setItem('pb_settings',JSON.stringify({theme:'dark',currency:'INR'}));
+}
+function getData(k){try{return JSON.parse(localStorage.getItem(k))||[];}catch(e){return[];}}
+function saveData(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
+function formatCurrency(n){return '₹'+new Intl.NumberFormat('en-IN').format(Math.abs(n));}
+function generateId(){return Date.now().toString()+Math.random().toString(16).slice(2);}
+function formatDate(iso){return new Date(iso).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}
+function formatDateShort(iso){return new Date(iso).toLocaleDateString('en-IN',{day:'2-digit',month:'short'});}
+function getDaysBetween(a,b){return Math.floor(Math.abs(new Date(b)-new Date(a))/(864e5));}
+function getDaysPending(iso){return getDaysBetween(iso,new Date().toISOString());}
+function escapeHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+var chartInstances={};
+function destroyChart(id){if(chartInstances[id]){chartInstances[id].destroy();chartInstances[id]=null;}}
+function saveChart(id,inst){chartInstances[id]=inst;}
+function getBudgetStatus(p){if(p<60)return{color:'var(--green)',label:'Safe hai'};if(p<80)return{color:'var(--accent)',label:'Dhyan do'};if(p<100)return{color:'var(--orange)',label:'Almost cross!'};return{color:'var(--red)',label:'Budget khatam!'};}
+
+/* CHART.JS GLOBAL DEFAULTS */
+Chart.defaults.color='#7070A0';
+Chart.defaults.font.family="'DM Sans',sans-serif";
+Chart.defaults.font.size=11;
+
+/* CATEGORY ICONS */
+var CAT_ICONS={'Salary':'💼','Freelance':'💻','Business':'🏪','Investment':'📈','Other Income':'💵','Food':'🍱','Groceries':'🛒','Transport':'🚗','Shopping':'🛍️','Bills':'📄','Health':'💊','EMI':'🏦','Entertainment':'🎬','Education':'📚','Rent':'🏠','Petrol':'⛽','Other':'📦','Trading':'📈','YouTube':'📺','Ghar':'🏠','Khaana':'🍔','Family':'👨‍👩‍👧'};
+function getCatIcon(c){return CAT_ICONS[c]||'📦';}
+var INCOME_CATS=[{icon:'💼',label:'Salary'},{icon:'💻',label:'Freelance'},{icon:'📈',label:'Trading'},{icon:'📺',label:'YouTube'},{icon:'🏪',label:'Business'},{icon:'➕',label:'Other'}];
+var EXPENSE_CATS=[{icon:'🏠',label:'Ghar'},{icon:'🛵',label:'Transport'},{icon:'🍔',label:'Khaana'},{icon:'📚',label:'Education'},{icon:'💊',label:'Health'},{icon:'🎬',label:'Entertainment'},{icon:'📱',label:'EMI'},{icon:'💰',label:'Investment'},{icon:'👨‍👩‍👧',label:'Family'},{icon:'⚡',label:'Bills'},{icon:'➕',label:'Other'}];
+var PAYMENT_METHODS=[{icon:'📱',label:'UPI'},{icon:'💵',label:'Cash'},{icon:'💳',label:'Card'},{icon:'🏦',label:'Bank'}];
+
+/* ══════════════════════════════════════════
+   STATS – STATE & HELPERS
+══════════════════════════════════════════ */
+var activeStatsTab='mahine';
+var PIE_COLORS=['#F05060','#F09040','#F0C040','#40D080','#40A0F0','#A040F0','#F040A0','#40D0D0','#80F040','#F07040'];
+
+function getLastNMonths(n){
+  var r=[],m=selectedMonth,y=selectedYear;
+  for(var i=0;i<n;i++){
+    r.unshift({month:m,year:y,label:MONTHS[m].slice(0,3)+"'"+(y+'').slice(2)});
+    if(--m<0){m=11;y--;}
+  }
+  return r;
+}
+
+function txnsForMonth(all,m,y){
+  return all.filter(function(t){var d=new Date(t.date);return d.getMonth()===m&&d.getFullYear()===y;});
+}
+
+function catTotals(txns){
+  var map={};
+  txns.filter(function(t){return t.type==='expense';}).forEach(function(t){map[t.category]=(map[t.category]||0)+t.amount;});
+  return Object.keys(map).map(function(k){return{cat:k,amt:map[k]};}).sort(function(a,b){return b.amt-a.amt;});
+}
+
+/* ── TAB SWITCHER ── */
+function setStatsTab(tab){
+  activeStatsTab=tab;
+  document.querySelectorAll('.stats-tab-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-stab')===tab);});
+  document.querySelectorAll('.stats-panel').forEach(function(p){p.classList.remove('active');});
+  var panel=document.getElementById('spanel-'+tab); if(panel)panel.classList.add('active');
+  var idx={mahine:0,chhe:1,insight:2}[tab]||0;
+  document.getElementById('statsSlider').style.transform='translateX(calc('+idx+' * 100%))';
+  renderStatsTab(tab);
+}
+
+function renderStatsTab(tab){
+  if(tab==='mahine')  renderTabMahine();
+  else if(tab==='chhe') renderTabChhe();
+  else if(tab==='insight') renderTabInsight();
+}
+
+/* ══════════════════════════════════════════
+   TAB 1 – IS MAHINE (PIE + TOP CATS)
+══════════════════════════════════════════ */
+function renderTabMahine(){
+  var all=getData('pb_transactions');
+  var txns=txnsForMonth(all,selectedMonth,selectedYear);
+  var cats=catTotals(txns);
+  document.getElementById('pieSub').textContent=MONTHS[selectedMonth]+' '+selectedYear+' – category-wise spending';
+
+  destroyChart('pieChart');
+  var ctx=document.getElementById('pieChart').getContext('2d');
+
+  if(!cats.length){
+    saveChart('pieChart',new Chart(ctx,{type:'doughnut',data:{labels:['Koi expense nahi'],datasets:[{data:[1],backgroundColor:['#2A2A3A'],borderWidth:0}]},options:{cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(){return 'Koi expense nahi';}}}}}}));
+    document.getElementById('topCatsList').innerHTML='<div class="stats-empty"><div class="stats-empty-icon">💸</div><div class="stats-empty-text">'+MONTHS[selectedMonth]+' mein koi expense nahi</div></div>';
+    return;
+  }
+
+  var labels=cats.map(function(c){return c.cat;});
+  var data=cats.map(function(c){return c.amt;});
+  var colors=cats.map(function(_,i){return PIE_COLORS[i%PIE_COLORS.length];});
+
+  saveChart('pieChart',new Chart(ctx,{
+    type:'doughnut',
+    data:{labels:labels,datasets:[{data:data,backgroundColor:colors,borderColor:'#1A1A24',borderWidth:3,hoverOffset:6}]},
+    options:{cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c2){return ' '+c2.label+': '+formatCurrency(c2.parsed);}}}},animation:{duration:700,easing:'easeOutQuart'}}
+  }));
+
+  /* Top 5 list */
+  var top=cats.slice(0,5), maxAmt=top[0].amt;
+  var medals=['🥇','🥈','🥉','4️⃣','5️⃣'];
+  var el=document.getElementById('topCatsList'); el.innerHTML='';
+  top.forEach(function(c,i){
+    var pct=Math.round((c.amt/maxAmt)*100);
+    var item=document.createElement('div'); item.className='top-cat-item';
+    item.innerHTML=
+      '<div class="top-cat-rank">'+medals[i]+'</div>'+
+      '<div class="top-cat-icon">'+getCatIcon(c.cat)+'</div>'+
+      '<div class="top-cat-info">'+
+        '<div class="top-cat-name">'+escapeHtml(c.cat)+'</div>'+
+        '<div class="top-cat-bar-wrap"><div class="top-cat-bar" style="width:'+pct+'%;background:'+colors[i]+'"></div></div>'+
+      '</div>'+
+      '<div class="top-cat-amt">'+formatCurrency(c.amt)+'</div>';
+    el.appendChild(item);
+  });
+}
+
+/* ══════════════════════════════════════════
+   TAB 2 – 6 MAHINE (BAR + LINE + UDHAR)
+══════════════════════════════════════════ */
+function renderTabChhe(){
+  var all=getData('pb_transactions');
+  var months=getLastNMonths(6);
+  var inc=[],exp=[],sav=[],labels=[];
+
+  months.forEach(function(mo){
+    var t=txnsForMonth(all,mo.month,mo.year);
+    var i=0,e=0; t.forEach(function(tx){if(tx.type==='income')i+=tx.amount;else e+=tx.amount;});
+    inc.push(i); exp.push(e); sav.push(i-e); labels.push(mo.label);
+  });
+
+  /* Bar chart */
+  destroyChart('barChart');
+  var bCtx=document.getElementById('barChart').getContext('2d');
+  saveChart('barChart',new Chart(bCtx,{
+    type:'bar',
+    data:{labels:labels,datasets:[
+      {label:'Income',data:inc,backgroundColor:'rgba(64,208,128,.7)',borderColor:'rgba(64,208,128,.9)',borderWidth:1,borderRadius:5,borderSkipped:false},
+      {label:'Expense',data:exp,backgroundColor:'rgba(240,80,96,.65)',borderColor:'rgba(240,80,96,.85)',borderWidth:1,borderRadius:5,borderSkipped:false}
+    ]},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c2){return ' '+c2.dataset.label+': '+formatCurrency(c2.parsed.y);}}}},
+      scales:{x:{grid:{color:'#2A2A3A'},ticks:{color:'#7070A0'}},y:{grid:{color:'#2A2A3A'},ticks:{color:'#7070A0',callback:function(v){return '₹'+new Intl.NumberFormat('en-IN',{notation:'compact'}).format(v);}}}},
+      animation:{duration:700}}
+  }));
+
+  /* Line chart – savings */
+  destroyChart('lineChart');
+  var lCtx=document.getElementById('lineChart').getContext('2d');
+  var grad=lCtx.createLinearGradient(0,0,0,150);
+  grad.addColorStop(0,'rgba(240,192,64,.2)'); grad.addColorStop(1,'rgba(240,192,64,0)');
+  saveChart('lineChart',new Chart(lCtx,{
+    type:'line',
+    data:{labels:labels,datasets:[{label:'Savings',data:sav,borderColor:'#F0C040',backgroundColor:grad,borderWidth:2.5,pointBackgroundColor:'#F0C040',pointBorderColor:'#1A1A24',pointBorderWidth:2,pointRadius:5,fill:true,tension:.4}]},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c2){return ' Bachat: '+formatCurrency(c2.parsed.y);}}}},
+      scales:{x:{grid:{color:'#2A2A3A'},ticks:{color:'#7070A0'}},y:{grid:{color:'#2A2A3A'},ticks:{color:'#7070A0',callback:function(v){return '₹'+new Intl.NumberFormat('en-IN',{notation:'compact'}).format(v);}}}},
+      animation:{duration:700}}
+  }));
+
+  /* Udhar doughnut */
+  var udharList=getData('pb_udhar');
+  var lena=0,dena=0;
+  udharList.filter(function(u){return !u.settled;}).forEach(function(u){if(u.type==='lena')lena+=u.remainingAmount;else dena+=u.remainingAmount;});
+  var hasU=(lena+dena)>0;
+
+  destroyChart('udharChart');
+  var uCtx=document.getElementById('udharChart').getContext('2d');
+  saveChart('udharChart',new Chart(uCtx,{
+    type:'doughnut',
+    data:{labels:['Lena Hai','Dena Hai'],datasets:[{data:hasU?[lena,dena]:[1,1],backgroundColor:hasU?['rgba(64,208,128,.8)','rgba(240,80,96,.75)']:['#2A2A3A','#1A1A24'],borderColor:'#1A1A24',borderWidth:3,hoverOffset:6}]},
+    options:{cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c2){return !hasU?' Koi udhar nahi':' '+c2.label+': '+formatCurrency(c2.parsed);}}}},animation:{duration:600}}
+  }));
+}
+
+/* ══════════════════════════════════════════
+   TAB 3 – INSIGHTS
+══════════════════════════════════════════ */
+function renderTabInsight(){
+  var all=getData('pb_transactions');
+  var udharList=getData('pb_udhar');
+  var months6=getLastNMonths(6);
+  var container=document.getElementById('insightsList');
+  container.innerHTML='';
+  var delay=0;
+
+  function addCard(icon,label,html){
+    var c=document.createElement('div'); c.className='insight-card'; c.style.animationDelay=(delay+=0.07)+'s';
+    c.innerHTML='<div class="insight-icon">'+icon+'</div><div class="insight-body"><div class="insight-label">'+label+'</div><div class="insight-value">'+html+'</div></div>';
+    container.appendChild(c);
+  }
+
+  /* 1. Sabse zyada kharch (current month) */
+  var curTxns=txnsForMonth(all,selectedMonth,selectedYear);
+  var cats=catTotals(curTxns);
+  if(cats.length){
+    var top=cats[0];
+    addCard(getCatIcon(top.cat),'Sabse Zyada Kharch – '+MONTHS[selectedMonth],
+      '<span class="hl">'+escapeHtml(top.cat)+'</span> mein <span class="ired">'+formatCurrency(top.amt)+'</span> kharch hua');
+  } else {
+    addCard('💸','Sabse Zyada Kharch','<span style="color:var(--muted)">Is mahine koi expense nahi</span>');
+  }
+
+  /* 2. Best saving month (last 6) */
+  var bestMo=null, bestSav=-Infinity;
+  months6.forEach(function(mo){
+    var t=txnsForMonth(all,mo.month,mo.year);
+    var i=0,e=0; t.forEach(function(tx){if(tx.type==='income')i+=tx.amount;else e+=tx.amount;});
+    if(i-e>bestSav){bestSav=i-e;bestMo=mo;}
+  });
+  if(bestMo&&bestSav>0){
+    addCard('🏆','Best Saving Month (6 Mahine)',
+      '<span class="igreen">'+MONTHS[bestMo.month]+' '+bestMo.year+'</span> – <span class="hl">'+formatCurrency(bestSav)+'</span> bach gaya!');
+  } else {
+    addCard('🏆','Best Saving Month','<span style="color:var(--muted)">Koi positive saving nahi abhi tak</span>');
+  }
+
+  /* 3. Band karo toh saal mein X bachega */
+  if(cats.length){
+    var t2=cats[0]; var annual=t2.amt*12;
+    addCard('💡','Band Karo Toh...',
+      getCatIcon(t2.cat)+' <span class="hl">'+escapeHtml(t2.cat)+'</span> band karo toh saal mein <span class="igreen">'+formatCurrency(annual)+'</span> bachega!');
+  }
+
+  /* 4. Udhar baaki ka summary */
+  var activeU=udharList.filter(function(u){return !u.settled;});
+  var totalPend=activeU.reduce(function(s,u){return s+u.remainingAmount;},0);
+  var lenaC=activeU.filter(function(u){return u.type==='lena';}).length;
+  var denaC=activeU.filter(function(u){return u.type==='dena';}).length;
+  if(activeU.length){
+    addCard('🤝','Udhar Status',
+      '<span class="ired">'+formatCurrency(totalPend)+'</span> ka udhar '+activeU.length+' logon se baaki ('+lenaC+' lena, '+denaC+' dena)');
+  } else {
+    addCard('🤝','Udhar Status','<span class="igreen">✅ Sab settle! Koi udhar nahi.</span>');
+  }
+
+  /* 5. Average monthly expense (last 6) */
+  var totalExp6=0,moCount=0;
+  months6.forEach(function(mo){
+    var t=txnsForMonth(all,mo.month,mo.year);
+    var e=0; t.forEach(function(tx){if(tx.type==='expense')e+=tx.amount;});
+    if(e>0){totalExp6+=e;moCount++;}
+  });
+  if(moCount>0){
+    addCard('📉','Average Monthly Kharch',
+      'Pichhle '+moCount+' mahine ka average: <span class="ired">'+formatCurrency(Math.round(totalExp6/moCount))+'</span>/mahina');
+  }
+
+  /* 6. Is mahine saving rate */
+  var curI=0,curE=0; curTxns.forEach(function(t){if(t.type==='income')curI+=t.amount;else curE+=t.amount;});
+  if(curI>0){
+    var pct=Math.round(((curI-curE)/curI)*100);
+    var emoji=pct>=20?'🟢':pct>=10?'🟡':'🔴';
+    var label2=pct>=20?'Zabardast!':pct>=10?'Theek hai':'Thoda kam karo!';
+    addCard(emoji,'Is Mahine Saving Rate',pct+'% saved – <span>'+(pct>=20?'<span class="igreen">':pct>=10?'<span class="hl">':'<span class="ired">')+label2+'</span></span>');
+  }
+
+  if(!container.children.length){
+    container.innerHTML='<div class="stats-empty"><div class="stats-empty-icon">📊</div><div class="stats-empty-text">Koi data nahi – pehle transactions add karo!</div></div>';
+  }
+}
+
+/* ══════════════════════════════════════════
+   refreshStats() – FULL
+══════════════════════════════════════════ */
+function refreshStats(){
+  if(currentTab!=='stats') return;
+  renderStatsTab(activeStatsTab);
+}
+
+/* ══════════════════════════════════════════
+   ADD SCREEN
+══════════════════════════════════════════ */
+var addType='income',selectedCat='',selectedPay='UPI';
+function renderCatGrid(){
+  var cats=addType==='income'?INCOME_CATS:EXPENSE_CATS,grid=document.getElementById('catGrid'); grid.innerHTML='';
+  cats.forEach(function(c){var btn=document.createElement('button');btn.className='cat-btn'+(selectedCat===c.label?' selected-'+addType:'');btn.innerHTML='<span class="cat-btn-icon">'+c.icon+'</span><span class="cat-btn-label">'+c.label+'</span>';btn.addEventListener('click',function(){selectedCat=c.label;renderCatGrid();});grid.appendChild(btn);});
+}
+function renderPayGrid(){
+  var grid=document.getElementById('payGrid');grid.innerHTML='';
+  PAYMENT_METHODS.forEach(function(p){var btn=document.createElement('button');btn.className='pay-btn'+(selectedPay===p.label?' selected':'');btn.innerHTML='<span class="pay-btn-icon">'+p.icon+'</span><span class="pay-btn-label">'+p.label+'</span>';btn.addEventListener('click',function(){selectedPay=p.label;renderPayGrid();});grid.appendChild(btn);});
+}
+function setAddType(t){
+  addType=t;selectedCat='';
+  var tog=document.getElementById('addToggle'),iB=document.getElementById('toggleIncomeBtn'),eB=document.getElementById('toggleExpenseBtn'),bl=document.getElementById('addAmountBlock'),sb=document.getElementById('addSaveBtn'),st=document.getElementById('saveBtnText');
+  if(t==='income'){tog.classList.remove('expense-mode');iB.classList.add('active');eB.classList.remove('active');bl.className='add-amount-block income-focus';sb.className='add-save-btn';st.textContent='Income Save Karo';}
+  else{tog.classList.add('expense-mode');eB.classList.add('active');iB.classList.remove('active');bl.className='add-amount-block expense-focus';sb.className='add-save-btn expense-btn';st.textContent='Expense Save Karo';}
+  renderCatGrid();updateAmountHint();
+}
+function updateAmountHint(){
+  var v=parseFloat(document.getElementById('addAmountInput').value),h=document.getElementById('addAmountHint');
+  if(!isNaN(v)&&v>0){h.textContent=formatCurrency(v)+' '+(addType==='income'?'income':'expense');h.style.color=addType==='income'?'var(--green)':'var(--red)';}
+  else{h.textContent='Tap karke amount daalo';h.style.color='var(--muted)';}
+}
+var toastTimer=null;
+function showToast(msg,type){
+  var el=document.getElementById('toast');el.className='toast-'+(type||'success');el.innerHTML=(type==='error'?'❌':'✅')+' '+escapeHtml(msg);el.classList.add('show');
+  if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.classList.remove('show');},2800);
+}
+function triggerRipple(btn){
+  var r=document.createElement('span');r.className='save-ripple';var rc=btn.getBoundingClientRect(),sz=Math.max(rc.width,rc.height);
+  r.style.width=r.style.height=sz+'px';r.style.left=(rc.width/2-sz/2)+'px';r.style.top=(rc.height/2-sz/2)+'px';btn.appendChild(r);setTimeout(function(){r.remove();},600);
+}
+function saveTransaction(){
+  var amt=parseFloat(document.getElementById('addAmountInput').value),dt=document.getElementById('addDateInput').value,nt=document.getElementById('addNoteInput').value.trim(),btn=document.getElementById('addSaveBtn');
+  if(!amt||amt<=0){showToast('Amount daalo pehle!','error');document.getElementById('addAmountInput').focus();return;}
+  if(!selectedCat){showToast('Category choose karo!','error');return;}
+  if(!dt){showToast('Date select karo!','error');return;}
+  var txn={id:generateId(),type:addType,amount:amt,category:selectedCat,paymentMethod:selectedPay,note:nt,date:new Date(dt).toISOString(),createdAt:new Date().toISOString()};
+  var list=getData('pb_transactions');list.push(txn);if(!saveData('pb_transactions',list)){showToast('Save nahi hua!','error');return;}
+  triggerRipple(btn);
+  var oi=document.getElementById('saveBtnIcon').textContent,ot=document.getElementById('saveBtnText').textContent;
+  document.getElementById('saveBtnIcon').textContent='🎉';document.getElementById('saveBtnText').textContent='Saved!';btn.style.transform='scale(1.03)';
+  setTimeout(function(){btn.style.transform='';document.getElementById('saveBtnIcon').textContent=oi;document.getElementById('saveBtnText').textContent=ot;},1000);
+  showToast((addType==='income'?'💰':'💸')+' '+formatCurrency(amt)+' '+selectedCat+' add hua!','success');
+  refreshHome();refreshStats();
+  document.getElementById('addAmountInput').value='';document.getElementById('addNoteInput').value='';document.getElementById('addDateInput').value=getTodayISO();selectedCat='';renderCatGrid();updateAmountHint();
+}
+function getTodayISO(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function initAddScreen(){document.getElementById('addDateInput').value=getTodayISO();document.getElementById('addAmountInput').addEventListener('input',updateAmountHint);renderCatGrid();renderPayGrid();}
+
+/* ══════════════════════════════════════════
+   SAMPLE DATA  (multi-month for 6M charts)
+══════════════════════════════════════════ */
+function loadSampleData(){
+  if(getData('pb_transactions').length>0) return;
+  var now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  function md(mo,d){return new Date(y,mo,d).toISOString();}
+  var rows=[];
+  /* Past 5 months */
+  var expCats=['Ghar','Khaana','Transport','Bills','Entertainment','Health'];
+  for(var i=1;i<=5;i++){
+    var pm=m-i; var py=y; if(pm<0){pm+=12;py--;}
+    var incAmt=48000+Math.round(Math.random()*14000);
+    rows.push({id:generateId(),type:'income',amount:incAmt,category:'Salary',paymentMethod:'Bank',note:'Salary',date:new Date(py,pm,1).toISOString(),createdAt:new Date(py,pm,1).toISOString()});
+    for(var j=0;j<4;j++){
+      var cat=expCats[Math.floor(Math.random()*expCats.length)];
+      rows.push({id:generateId(),type:'expense',amount:2000+Math.round(Math.random()*9000),category:cat,paymentMethod:'UPI',note:cat,date:new Date(py,pm,3+j*5).toISOString(),createdAt:new Date(py,pm,3+j*5).toISOString()});
+    }
+  }
+  /* Current month */
+  rows=rows.concat([
+    {id:generateId(),type:'income', amount:55000,category:'Salary',      paymentMethod:'Bank',note:'March salary credited',         date:md(m,1), createdAt:md(m,1)},
+    {id:generateId(),type:'expense',amount:12500,category:'Ghar',        paymentMethod:'UPI', note:'Monthly rent – landlord',       date:md(m,2), createdAt:md(m,2)},
+    {id:generateId(),type:'expense',amount:3200, category:'Khaana',      paymentMethod:'UPI', note:'BigBazaar – monthly grocery',   date:md(m,4), createdAt:md(m,4)},
+    {id:generateId(),type:'income', amount:8000, category:'Freelance',   paymentMethod:'Bank',note:'Website work – client',         date:md(m,5), createdAt:md(m,5)},
+    {id:generateId(),type:'expense',amount:1850, category:'Transport',   paymentMethod:'Cash',note:'Full tank – Maruti Swift',      date:md(m,6), createdAt:md(m,6)},
+    {id:generateId(),type:'expense',amount:4200, category:'Entertainment',paymentMethod:'Card',note:'Amazon – clothes + accessories',date:md(m,7),createdAt:md(m,7)},
+    {id:generateId(),type:'expense',amount:2100, category:'Health',      paymentMethod:'UPI', note:'Pharmacy + doctor visit',       date:md(m,9), createdAt:md(m,9)},
+    {id:generateId(),type:'expense',amount:900,  category:'Bills',       paymentMethod:'UPI', note:'Electricity bill',              date:md(m,10),createdAt:md(m,10)}
+  ]);
+  saveData('pb_transactions',rows);
+  saveData('pb_udhar',[
+    {id:generateId(),name:'Rahul Sharma',phone:'9876543210',totalAmount:5000,payments:[],remainingAmount:5000,type:'lena',reason:'Movie + dinner last month',date:new Date(now.getTime()-35*864e5).toISOString(),settled:false,createdAt:new Date(now.getTime()-35*864e5).toISOString()},
+    {id:generateId(),name:'Priya Verma', phone:'9123456789',totalAmount:2000,payments:[],remainingAmount:2000,type:'dena',reason:'Auto fare borrowed',         date:new Date(now.getTime()-5*864e5).toISOString(), settled:false,createdAt:new Date(now.getTime()-5*864e5).toISOString()}
+  ]);
+}
+
+/* ══════════════════════════════════════════
+   UDHAR LOGIC (unchanged from 3.5)
+══════════════════════════════════════════ */
+var udharActiveTab='lena',udharFilter='active',udharFormOpen=false,ufType='lena',expandedCardId=null,payInlineOpenId=null;
+function setUdharTab(tab){
+  udharActiveTab=tab;var tabs=document.getElementById('udharTabs'),bL=document.getElementById('uTabLena'),bD=document.getElementById('uTabDena');
+  if(tab==='lena'){tabs.classList.remove('dena-active');bL.classList.add('active');bD.classList.remove('active');}
+  else{tabs.classList.add('dena-active');bD.classList.add('active');bL.classList.remove('active');}
+  renderUdharCards();
+}
+function setUdharFilter(f){
+  udharFilter=f;
+  document.querySelectorAll('#udharFilterRow .filter-pill').forEach(function(p){p.classList.toggle('active',p.getAttribute('data-filter')===f);});
+  renderUdharCards();
+}
+function toggleUdharForm(){
+  udharFormOpen=!udharFormOpen;
+  var wrap=document.getElementById('udharFormWrap'),ic=document.getElementById('udharAddBtnIcon'),tx=document.getElementById('udharAddBtnText');
+  wrap.classList.toggle('open',udharFormOpen);
+  if(udharFormOpen){ic.textContent='✕';tx.textContent='Baand Karo';setUfType(udharActiveTab);document.getElementById('main').scrollTop=60;}
+  else{ic.textContent='➕';tx.textContent='Naya Udhar Add Karo';resetUdharForm();}
+}
+function setUfType(t){
+  ufType=t;var lB=document.getElementById('ufTypeLena'),dB=document.getElementById('ufTypeDena'),sB=document.getElementById('ufSaveBtn'),ti=document.getElementById('uFormTitleIcon'),tt=document.getElementById('uFormTitle');
+  if(t==='lena'){lB.className='uf-type-btn sel-lena';dB.className='uf-type-btn';sB.className='uf-save-btn lena-btn';sB.textContent='💰 Lena Hai – Save Karo';ti.textContent='💰';tt.textContent='Lena Hai – Naya Add Karo';}
+  else{dB.className='uf-type-btn sel-dena';lB.className='uf-type-btn';sB.className='uf-save-btn dena-btn';sB.textContent='🙏 Dena Hai – Save Karo';ti.textContent='🙏';tt.textContent='Dena Hai – Naya Add Karo';}
+}
+function isValidPhone(p){return /^[6-9]\d{9}$/.test(p);}
+function saveUdhar(){
+  var name=document.getElementById('uf-name').value.trim(),phone=document.getElementById('uf-phone').value.trim(),amount=parseFloat(document.getElementById('uf-amount').value),date=document.getElementById('uf-date').value,reason=document.getElementById('uf-reason').value.trim();
+  var valid=true;
+  ['uf-name','uf-phone','uf-amount'].forEach(function(id){document.getElementById(id).classList.remove('error');document.getElementById(id+'-err').classList.remove('show');});
+  if(!name){document.getElementById('uf-name').classList.add('error');document.getElementById('uf-name-err').classList.add('show');valid=false;}
+  if(phone&&!isValidPhone(phone)){document.getElementById('uf-phone').classList.add('error');document.getElementById('uf-phone-err').classList.add('show');valid=false;}
+  if(!amount||amount<=0){document.getElementById('uf-amount').classList.add('error');document.getElementById('uf-amount-err').classList.add('show');valid=false;}
+  if(!valid)return;
+  var entry={id:generateId(),name:name,phone:isValidPhone(phone)?phone:'',totalAmount:amount,payments:[],remainingAmount:amount,type:ufType,reason:reason,date:date?new Date(date).toISOString():new Date().toISOString(),settled:false,createdAt:new Date().toISOString()};
+  var list=getData('pb_udhar');list.push(entry);if(!saveData('pb_udhar',list)){showToast('Save nahi hua!','error');return;}
+  showToast((ufType==='lena'?'💰':'🙏')+' '+name+' – '+formatCurrency(amount)+' add hua!','success');
+  refreshUdhar();refreshHome();udharFormOpen=true;toggleUdharForm();
+}
+function resetUdharForm(){
+  ['uf-name','uf-phone','uf-amount','uf-reason'].forEach(function(id){var e=document.getElementById(id);if(e){e.value='';e.classList.remove('error');}});
+  document.getElementById('uf-date').value=getTodayISO();
+  ['uf-name-err','uf-phone-err','uf-amount-err'].forEach(function(id){document.getElementById(id).classList.remove('show');});
+}
+function addPayment(uid){
+  var inp=document.getElementById('pay-input-'+uid);if(!inp)return;
+  var amt=parseFloat(inp.value);if(!amt||amt<=0){showToast('Valid amount daalo!','error');return;}
+  var list=getData('pb_udhar'),idx=list.findIndex(function(u){return u.id===uid;});if(idx===-1)return;
+  var u=list[idx];u.payments.push({amount:amt,date:new Date().toISOString()});
+  var paid=u.payments.reduce(function(s,p){return s+p.amount;},0);
+  u.remainingAmount=Math.max(0,u.totalAmount-paid);if(u.remainingAmount<=0)u.settled=true;
+  list[idx]=u;saveData('pb_udhar',list);payInlineOpenId=null;
+  showToast('✅ '+formatCurrency(amt)+' payment add hua!','success');
+  if(u.settled)setTimeout(function(){showToast('🎉 '+escapeHtml(u.name)+' ka udhar settle ho gaya!','success');},1200);
+  refreshUdhar();refreshHome();
+}
+function sendWhatsApp(u){
+  var msg='Hey '+u.name+'! 👋\n₹'+new Intl.NumberFormat('en-IN').format(u.remainingAmount)+' ka udhar baaki hai ('+formatDate(u.date)+' se).\nJab bhi ho sake. 😊';
+  window.open('https://wa.me/91'+u.phone+'?text='+encodeURIComponent(msg),'_blank');
+}
+function renderUdharSummary(list){
+  var lena=0,dena=0;list.forEach(function(u){if(!u.settled){if(u.type==='lena')lena+=u.remainingAmount;else dena+=u.remainingAmount;}});
+  var net=lena-dena;
+  document.getElementById('u-lena-total').textContent=formatCurrency(lena);document.getElementById('u-dena-total').textContent=formatCurrency(dena);
+  var ne=document.getElementById('u-net-total');ne.textContent=formatCurrency(Math.abs(net));
+  ne.className=net>0?'usc-val green':net<0?'usc-val red':'usc-val gold';
+}
+function buildWaBtn(u){
+  var btn=document.createElement('button');
+  if(u.phone&&isValidPhone(u.phone)){btn.className='uc-wa-btn wa-active';btn.innerHTML='💬 WhatsApp';btn.addEventListener('click',function(e){e.stopPropagation();sendWhatsApp(u);});}
+  else if(!u.phone){btn.className='uc-wa-btn wa-disabled';btn.innerHTML='💬 Number nahi';btn.disabled=true;}
+  else{btn.className='uc-wa-btn wa-disabled';btn.innerHTML='💬 Invalid no.';btn.disabled=true;}
+  return btn;
+}
+function buildDaysBadge(u){
+  if(u.settled)return'<span class="uc-days-badge days-settled">✅ Settled</span>';
+  var d=getDaysPending(u.date);
+  if(d<=7)return'<span class="uc-days-badge days-recent">🟢 '+d+' din</span>';
+  if(d<=30)return'<span class="uc-days-badge days-follow">🟡 '+d+' din</span>';
+  return'<span class="uc-days-badge days-overdue">🔴 '+d+' din</span>';
+}
+function renderUdharCards(){
+  var all=getData('pb_udhar');renderUdharSummary(all);
+  var byTab=all.filter(function(u){return u.type===udharActiveTab;});
+  var shown;
+  if(udharFilter==='active')shown=byTab.filter(function(u){return !u.settled;});
+  else if(udharFilter==='settled')shown=byTab.filter(function(u){return u.settled;});
+  else shown=byTab;
+  shown.sort(function(a,b){if(a.settled!==b.settled)return a.settled?1:-1;return getDaysPending(b.date)-getDaysPending(a.date);});
+  var container=document.getElementById('udharCards');container.innerHTML='';
+  if(!shown.length){
+    container.innerHTML='<div class="empty-state"><div class="empty-state-icon">'+(udharFilter==='settled'?'✅':'🤝')+'</div><div class="empty-state-text">'+(udharFilter==='settled'?'Koi settled udhar nahi':udharFilter==='active'?'Koi active udhar nahi<br>➕ Naya add karo upar se':'Koi udhar nahi')+'</div></div>';
+    return;
+  }
+  shown.forEach(function(u,idx){
+    var isEx=(expandedCardId===u.id),isPO=(payInlineOpenId===u.id);
+    var ini=u.name.trim().split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+    var avCls=u.settled?'settled':u.type,amCls=u.settled?'settled-amt':u.type;
+    var card=document.createElement('div');
+    card.className='udhar-card '+u.type+'-card'+(u.settled?' settled-card':'')+(isEx?' expanded':'');
+    card.style.animationDelay=(idx*.05)+'s';
+    var phHTML=u.payments.length?u.payments.map(function(p){return'<div class="ph-item"><span class="ph-item-date">'+formatDate(p.date)+'</span><span class="ph-item-amt">+'+formatCurrency(p.amount)+'</span></div>';}).join(''):'<div class="ph-empty">Koi payment nahi abhi</div>';
+    card.innerHTML=
+      '<div class="udhar-card-header">'+
+        '<div class="uc-avatar '+avCls+'">'+escapeHtml(ini)+'</div>'+
+        '<div class="uc-info"><div class="uc-name">'+escapeHtml(u.name)+'</div>'+
+        '<div class="uc-meta"><span class="uc-type-badge '+(u.settled?'settled-badge':u.type)+'">'+(u.settled?'✅ Settled':u.type==='lena'?'Lena Hai':'Dena Hai')+'</span>'+buildDaysBadge(u)+'</div></div>'+
+        '<div class="uc-right"><div class="uc-amount '+amCls+'">'+formatCurrency(u.remainingAmount)+'</div><div class="uc-remaining">Total: '+formatCurrency(u.totalAmount)+'</div><div class="uc-chevron">⌄</div></div>'+
+      '</div>'+
+      '<div class="udhar-card-body">'+
+        (u.reason?'<div class="uc-reason"><span>📝</span><span>'+escapeHtml(u.reason)+'</span></div>':'')+
+        '<div class="payment-history"><div class="ph-title">Payment History</div>'+phHTML+'</div>'+
+        (u.settled?'<div class="settled-overlay">✅ Fully Settled – '+formatDate(u.createdAt)+'</div>':
+          '<div class="pay-inline'+(isPO?' open':'')+'" id="pay-inline-'+u.id+'">'+
+            '<div class="pay-inline-row">'+
+              '<input class="pay-inline-input" id="pay-input-'+u.id+'" type="number" inputmode="decimal" placeholder="Payment amount..." min="1" step="any">'+
+              '<button class="pay-inline-confirm" onclick="addPayment(\''+u.id+'\')">Save</button>'+
+              '<button class="pay-inline-cancel" onclick="closePayInline(\''+u.id+'\')">✕</button>'+
+            '</div><div style="font-size:11px;color:var(--muted);">Remaining: '+formatCurrency(u.remainingAmount)+'</div></div>'+
+          '<div class="uc-actions" id="uc-actions-'+u.id+'"></div>')+
+      '</div>';
+    card.querySelector('.udhar-card-header').addEventListener('click',function(){expandedCardId=isEx?null:u.id;renderUdharCards();});
+    if(!u.settled){
+      var ac=card.querySelector('#uc-actions-'+u.id);
+      if(ac){
+        var pb=document.createElement('button');pb.className='uc-pay-btn';pb.innerHTML='➕ Payment Add Karo';
+        pb.addEventListener('click',function(e){e.stopPropagation();payInlineOpenId=(payInlineOpenId===u.id)?null:u.id;renderUdharCards();setTimeout(function(){var i=document.getElementById('pay-input-'+u.id);if(i)i.focus();},100);});
+        ac.appendChild(pb);ac.appendChild(buildWaBtn(u));
+      }
+    }
+    container.appendChild(card);
+  });
+}
+function closePayInline(id){payInlineOpenId=null;renderUdharCards();}
+function refreshUdhar(){renderUdharCards();}
+
+/* ══════════════════════════════════════════
+   refreshHome()
+══════════════════════════════════════════ */
+function refreshHome(){
+  var all=getData('pb_transactions'),udharList=getData('pb_udhar');
+  var filtered=all.filter(function(t){var d=new Date(t.date);return d.getMonth()===selectedMonth&&d.getFullYear()===selectedYear;});
+  var ti=0,te=0; filtered.forEach(function(t){if(t.type==='income')ti+=t.amount;else te+=t.amount;});
+  var sav=ti-te,pct=ti>0?Math.round((sav/ti)*100):0;
+  var ic=filtered.filter(function(t){return t.type==='income';}).length,ec=filtered.filter(function(t){return t.type==='expense';}).length;
+  document.getElementById('sc-income').textContent=formatCurrency(ti); document.getElementById('sc-income-sub').textContent=ic+' transaction'+(ic!==1?'s':'');
+  document.getElementById('sc-expense').textContent=formatCurrency(te); document.getElementById('sc-expense-sub').textContent=ec+' transaction'+(ec!==1?'s':'');
+  var ss=document.getElementById('sc-savings'),ssb=document.getElementById('sc-savings-sub');
+  ss.textContent=formatCurrency(Math.abs(sav));
+  if(sav<0){ss.className='sc-amount red';ssb.textContent='Overspent ⚠️';ssb.style.color='var(--red)';}
+  else{ss.className='sc-amount gold';ssb.textContent='Saved this month';ssb.style.color='var(--muted)';}
+  var sp=document.getElementById('sc-pct'),se=document.getElementById('sc-pct-emoji'),spl=document.getElementById('sc-pct-pill');
+  sp.textContent=pct+'%';
+  if(ti===0){se.textContent='📊';sp.style.color='var(--muted)';spl.textContent='Koi data nahi';spl.style.background='rgba(112,112,160,.15)';spl.style.color='var(--muted)';}
+  else if(pct<10){se.textContent='🔴';sp.style.color='var(--red)';spl.textContent='Kharcha zyada!';spl.style.background='rgba(240,80,96,.15)';spl.style.color='var(--red)';}
+  else if(pct<20){se.textContent='🟡';sp.style.color='var(--accent)';spl.textContent='Theek hai';spl.style.background='rgba(240,192,64,.15)';spl.style.color='var(--accent)';}
+  else{se.textContent='🟢';sp.style.color='var(--green)';spl.textContent='Zabardast! 🎉';spl.style.background='rgba(64,208,128,.15)';spl.style.color='var(--green)';}
+  var sorted=filtered.slice().sort(function(a,b){return new Date(b.date)-new Date(a.date);}),recent=sorted.slice(0,5);
+  document.getElementById('txn-count').textContent=filtered.length+(filtered.length===1?' entry':' entries');
+  var listEl=document.getElementById('txn-list');listEl.innerHTML='';
+  if(!recent.length){listEl.innerHTML='<div class="empty-state"><div class="empty-state-icon">💸</div><div class="empty-state-text">Koi transaction nahi –<br>pehla add karo! 👆</div><div class="empty-state-hint">Add tab se shuru karo</div></div>';}
+  else{recent.forEach(function(t,i){var icon=getCatIcon(t.category),isInc=t.type==='income',item=document.createElement('div');item.className='txn-item';item.style.animationDelay=(i*.06)+'s';item.innerHTML='<div class="txn-icon-wrap '+(isInc?'income-bg':'expense-bg')+'">'+icon+'</div><div class="txn-info"><div class="txn-name">'+escapeHtml(t.note||t.category)+'</div><div class="txn-meta"><span class="txn-cat">'+escapeHtml(t.category)+'</span><span class="txn-date">'+formatDateShort(t.date)+'</span></div></div><div class="txn-amount '+(isInc?'income':'expense')+'">'+(isInc?'+':'−')+formatCurrency(t.amount)+'</div>';listEl.appendChild(item);});}
+  var overdue=udharList.filter(function(u){return !u.settled&&getDaysPending(u.date)>=30;}),banner=document.getElementById('udharBanner');
+  if(overdue.length){document.getElementById('bannerTitle').textContent=overdue.length+(overdue.length===1?' udhar':' udhar entries')+' mein 30+ din ho gaye!';banner.classList.add('visible');}
+  else{banner.classList.remove('visible');}
+  document.getElementById('homeDate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+}
+
+/* ══════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════ */
+var currentTab='home';
+var NAV_POS={home:'3%',udhar:'23%',add:'43%',stats:'63%',more:'83%'};
+function switchTab(name){
+  if(name===currentTab)return;
+  var prev=document.querySelector('.screen.active');if(prev)prev.classList.remove('active');
+  var next=document.getElementById('screen-'+name);if(next)next.classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(function(b){b.classList.remove('active');});
+  var btn=document.querySelector('.nav-tab[data-screen="'+name+'"]');if(btn)btn.classList.add('active');
+  document.getElementById('nav').style.setProperty('--indicator-x',NAV_POS[name]||'3%');
+  document.getElementById('main').scrollTop=0;
+  currentTab=name;
+  if(name==='udhar')  refreshUdhar();
+  if(name==='stats')  { activeStatsTab='mahine'; setStatsTab('mahine'); }
+  if(name==='more')   { setMoreTab(activeMoreTab||'budget'); }
+}
+document.querySelectorAll('.nav-tab').forEach(function(btn){
+  btn.addEventListener('click',function(){var t=this.getAttribute('data-screen');if(t)switchTab(t);});
+});
+document.getElementById('nav').style.setProperty('--indicator-x',NAV_POS['home']);
+document.getElementById('udharBanner').addEventListener('click',function(){switchTab('udhar');});
+
+/* MONTH SELECTOR */
+var MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var selectedMonth=new Date().getMonth(),selectedYear=new Date().getFullYear();
+function updateMonthLabel(){document.getElementById('monthLabel').textContent=MONTHS[selectedMonth]+' '+selectedYear;}
+document.getElementById('prevMonth').addEventListener('click',function(){if(--selectedMonth<0){selectedMonth=11;selectedYear--;}updateMonthLabel();refreshHome();refreshStats();});
+document.getElementById('nextMonth').addEventListener('click',function(){if(++selectedMonth>11){selectedMonth=0;selectedYear++;}updateMonthLabel();refreshHome();refreshStats();});
+updateMonthLabel();
+
+/* SPLASH */
+function removeSplash(){var s=document.getElementById('splash');if(s)setTimeout(function(){s.style.display='none';},2100);}
+
+/* INIT */
+window.onload=function(){
+  initStorage();
+  loadSampleData();
+  updateMonthLabel();
+  refreshHome();
+  initAddScreen();
+  removeSplash();
+  console.log('[PaisaBook] App initialized ✓ – Stats screen ready ✓');
+};
+
+/* ══════════════════════════════════════════
+   MORE / GOALS SCREEN
+══════════════════════════════════════════ */
+
+/* ── Sub-tab state ── */
+var activeMoreTab = 'budget';
+var budgetFormOpen = false;
+var emiFormOpen = false;
+var festiveFormOpen = false;
+
+function setMoreTab(tab) {
+  activeMoreTab = tab;
+  document.querySelectorAll('.more-tab-btn').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-mpanel') === tab);
+  });
+  document.querySelectorAll('.more-panel').forEach(function(p){ p.classList.remove('active'); });
+  var panel = document.getElementById('mpanel-' + tab);
+  if (panel) panel.classList.add('active');
+  if (tab === 'budget')  renderBudgetCards();
+  if (tab === 'emi')     renderEmiSection();
+  if (tab === 'festive') renderFestiveCards();
+}
+
+/* ── Shared progress bar renderer ── */
+function renderProgressBar(pct, color) {
+  var safe = Math.min(pct, 100);
+  return '<div class="bc-progress-wrap"><div class="bc-progress-bar" style="width:' + safe + '%;background:' + color + '"></div></div>';
+}
+
+/* ══════════════════════════════════════════
+   BUDGET GOALS
+══════════════════════════════════════════ */
+
+function toggleBudgetForm() {
+  budgetFormOpen = !budgetFormOpen;
+  document.getElementById('budgetFormWrap').classList.toggle('open', budgetFormOpen);
+  document.getElementById('budgetAddIcon').textContent = budgetFormOpen ? '✕' : '➕';
+  document.getElementById('budgetAddToggle').querySelector('span + *') && (document.getElementById('budgetAddToggle').lastChild.textContent = budgetFormOpen ? ' Baand Karo' : ' Add Karo');
+  if (!budgetFormOpen) {
+    document.getElementById('gf-budget-cat').value = '';
+    document.getElementById('gf-budget-amt').value = '';
+  }
+}
+
+function saveBudget() {
+  var cat = document.getElementById('gf-budget-cat').value.trim();
+  var amt = parseFloat(document.getElementById('gf-budget-amt').value);
+  if (!cat)           { document.getElementById('gf-budget-cat').classList.add('error'); showToast('Category choose karo!', 'error'); return; }
+  if (!amt || amt<=0) { document.getElementById('gf-budget-amt').classList.add('error'); showToast('Valid amount daalo!', 'error'); return; }
+  document.getElementById('gf-budget-cat').classList.remove('error');
+  document.getElementById('gf-budget-amt').classList.remove('error');
+
+  var budgets = getData('pb_budgets');
+  /* Replace if same category already exists */
+  var exists = budgets.findIndex(function(b){ return b.category === cat && b.month === selectedMonth && b.year === selectedYear; });
+  var entry = { id: generateId(), category: cat, limit: amt, month: selectedMonth, year: selectedYear };
+  if (exists !== -1) budgets[exists] = entry;
+  else budgets.push(entry);
+
+  saveData('pb_budgets', budgets);
+  showToast('🎯 ' + cat + ' budget ₹' + new Intl.NumberFormat('en-IN').format(amt) + ' set hua!', 'success');
+  budgetFormOpen = true; toggleBudgetForm();
+  renderBudgetCards();
+}
+
+function deleteBudget(id) {
+  var budgets = getData('pb_budgets').filter(function(b){ return b.id !== id; });
+  saveData('pb_budgets', budgets);
+  showToast('Budget delete hua', 'success');
+  renderBudgetCards();
+}
+
+function renderBudgetCards() {
+  var budgets = getData('pb_budgets').filter(function(b){ return b.month === selectedMonth && b.year === (b.year || selectedYear); });
+  var txns    = getData('pb_transactions').filter(function(t){ var d = new Date(t.date); return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear; });
+  var container = document.getElementById('budgetCards');
+  container.innerHTML = '';
+
+  if (!budgets.length) {
+    container.innerHTML = '<div class="goals-empty"><div class="goals-empty-icon">🎯</div><div class="goals-empty-text">Koi budget set nahi hai<br>➕ Add Karo se set karo</div></div>';
+    return;
+  }
+
+  /* Days in month for prediction */
+  var today = new Date();
+  var dayOfMonth  = today.getDate();
+  var daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+
+  budgets.forEach(function(b, idx) {
+    var spent = txns.filter(function(t){ return t.type === 'expense' && t.category === b.category; })
+                    .reduce(function(s, t){ return s + t.amount; }, 0);
+    var pct   = b.limit > 0 ? Math.round((spent / b.limit) * 100) : 0;
+    var status = getBudgetStatus(pct);
+
+    /* Monthly prediction based on spending rate */
+    var dailyRate   = dayOfMonth > 0 ? spent / dayOfMonth : 0;
+    var predicted   = Math.round(dailyRate * daysInMonth);
+    var predText    = '';
+    if (spent > 0 && selectedMonth === today.getMonth() && selectedYear === today.getFullYear()) {
+      if (predicted > b.limit) {
+        predText = 'Is rate pe ' + formatCurrency(predicted) + ' end tak hoga ⚠️';
+      } else {
+        predText = 'Is rate pe ' + formatCurrency(predicted) + ' end tak hoga ✓';
+      }
+    }
+
+    var card = document.createElement('div');
+    card.className = 'budget-card';
+    card.style.animationDelay = (idx * 0.06) + 's';
+    card.style.setProperty('--bar-color', status.color);
+    /* Top accent line color */
+    card.style.cssText += ';--top-col:' + status.color;
+
+    /* Warning text */
+    var warnHTML = '';
+    if (pct >= 80 && pct < 100) {
+      warnHTML = '<div style="font-size:11px;color:var(--orange);font-weight:600;margin-top:4px;">⚠️ ' + pct + '% ho gaya! Sambhalo!</div>';
+    } else if (pct >= 100) {
+      warnHTML = '<div style="font-size:11px;color:var(--red);font-weight:600;margin-top:4px;">🔴 Budget khatam ho gaya!</div>';
+    }
+
+    card.innerHTML =
+      '<style>#bc-' + b.id + '::before{background:' + status.color + '}</style>' +
+      '<div class="bc-top">' +
+        '<div class="bc-left">' +
+          '<div class="bc-icon">' + getCatIcon(b.category) + '</div>' +
+          '<div class="bc-info">' +
+            '<div class="bc-name">' + escapeHtml(b.category) + '</div>' +
+            '<div class="bc-month">' + MONTHS[b.month] + ' ' + (b.year || selectedYear) + ' budget</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="bc-right">' +
+          '<div class="bc-amounts"><span style="color:var(--red)">' + formatCurrency(spent) + '</span><span style="color:var(--muted);font-size:11px;font-weight:500"> / </span>' + formatCurrency(b.limit) + '</div>' +
+          '<div class="bc-spent-label">' + pct + '% used</div>' +
+        '</div>' +
+      '</div>' +
+      renderProgressBar(pct, status.color) +
+      '<div class="bc-footer">' +
+        '<span class="bc-status-pill" style="background:' + status.color + '22;color:' + status.color + '">' + status.label + '</span>' +
+        (predText ? '<div class="bc-prediction">' + escapeHtml(predText) + '</div>' : '<div class="bc-prediction"></div>') +
+        '<button class="bc-del-btn" onclick="deleteBudget(\'' + b.id + '\')">🗑</button>' +
+      '</div>' +
+      warnHTML;
+
+    /* Fix the ::before dynamic color */
+    card.id = 'bc-' + b.id;
+    card.style.setProperty('border-top-color', status.color);
+    /* Apply accent line manually */
+    card.addEventListener('mouseenter', function(){});
+
+    container.appendChild(card);
+
+    /* Force ::before via inline pseudo-element workaround: use a div */
+    var topLine = document.createElement('div');
+    topLine.style.cssText = 'position:absolute;top:0;left:0;right:0;height:2px;background:' + status.color + ';border-radius:20px 20px 0 0';
+    card.style.position = 'relative';
+    card.insertBefore(topLine, card.firstChild);
+  });
+}
+
+/* ══════════════════════════════════════════
+   EMI TRACKER
+══════════════════════════════════════════ */
+
+function toggleEmiForm() {
+  emiFormOpen = !emiFormOpen;
+  document.getElementById('emiFormWrap').classList.toggle('open', emiFormOpen);
+  document.getElementById('emiAddIcon').textContent = emiFormOpen ? '✕' : '➕';
+  if (!emiFormOpen) {
+    ['gf-emi-name','gf-emi-amount','gf-emi-total','gf-emi-remaining'].forEach(function(id){ document.getElementById(id).value = ''; });
+  }
+}
+
+function saveEmi() {
+  var name      = document.getElementById('gf-emi-name').value.trim();
+  var amount    = parseFloat(document.getElementById('gf-emi-amount').value);
+  var total     = parseInt(document.getElementById('gf-emi-total').value);
+  var remaining = parseInt(document.getElementById('gf-emi-remaining').value);
+
+  if (!name)                       { showToast('EMI naam daalo!', 'error'); return; }
+  if (!amount || amount <= 0)      { showToast('Valid amount daalo!', 'error'); return; }
+  if (!total || total <= 0)        { showToast('Total months daalo!', 'error'); return; }
+  if (!remaining || remaining <= 0){ showToast('Remaining months daalo!', 'error'); return; }
+  if (remaining > total)           { showToast('Remaining, total se zyada nahi ho sakta!', 'error'); return; }
+
+  var emis = getData('pb_emis');
+  emis.push({ id: generateId(), name: name, amount: amount, totalMonths: total, remainingMonths: remaining, createdAt: new Date().toISOString() });
+  saveData('pb_emis', emis);
+  showToast('📱 ' + name + ' EMI add hua!', 'success');
+  emiFormOpen = true; toggleEmiForm();
+  renderEmiSection();
+}
+
+function deleteEmi(id) {
+  saveData('pb_emis', getData('pb_emis').filter(function(e){ return e.id !== id; }));
+  showToast('EMI delete hua', 'success');
+  renderEmiSection();
+}
+
+function renderEmiSection() {
+  var emis = getData('pb_emis');
+  var txns = getData('pb_transactions').filter(function(t){ var d = new Date(t.date); return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear && t.type === 'income'; });
+  var monthlyIncome = txns.reduce(function(s, t){ return s + t.amount; }, 0);
+  var totalEmi = emis.reduce(function(s, e){ return s + e.amount; }, 0);
+  var emiPct = monthlyIncome > 0 ? Math.round((totalEmi / monthlyIncome) * 100) : 0;
+
+  /* Health score */
+  var hIcon, hTitle, hSub, hBadge, hColor;
+  if (monthlyIncome === 0) {
+    hIcon = '📊'; hTitle = 'Income data nahi hai'; hSub = 'Is mahine ka income add karo correct score ke liye';
+    hBadge = '–'; hColor = 'var(--muted)';
+  } else if (emiPct < 30) {
+    hIcon = '💚'; hTitle = 'EMI Healthy Hai!'; hSub = 'Income ka sirf ' + emiPct + '% EMI mein – badhiya!';
+    hBadge = 'Healthy 💚'; hColor = 'var(--green)';
+  } else if (emiPct < 50) {
+    hIcon = '🟡'; hTitle = 'EMI Caution Zone'; hSub = 'Income ka ' + emiPct + '% EMI mein – thoda zyada hai';
+    hBadge = 'Caution 🟡'; hColor = 'var(--accent)';
+  } else {
+    hIcon = '🔴'; hTitle = 'EMI Danger Zone!'; hSub = 'Income ka ' + emiPct + '% EMI mein – bahut zyada!';
+    hBadge = 'Danger 🔴'; hColor = 'var(--red)';
+  }
+
+  document.getElementById('emiHealthIcon').textContent  = hIcon;
+  document.getElementById('emiHealthTitle').textContent = hTitle;
+  document.getElementById('emiHealthSub').textContent   = hSub;
+  var badge = document.getElementById('emiHealthBadge');
+  badge.textContent = hBadge;
+  badge.style.cssText = 'background:' + hColor + '22;color:' + hColor + ';border:1.5px solid ' + hColor + '44';
+
+  var container = document.getElementById('emiCards');
+  container.innerHTML = '';
+
+  if (!emis.length) {
+    container.innerHTML = '<div class="goals-empty"><div class="goals-empty-icon">📱</div><div class="goals-empty-text">Koi EMI nahi hai<br>➕ Add Karo se add karo</div></div>';
+    return;
+  }
+
+  emis.forEach(function(e, idx) {
+    var paidMonths = e.totalMonths - e.remainingMonths;
+    var pct = Math.round((paidMonths / e.totalMonths) * 100);
+    var card = document.createElement('div');
+    card.className = 'emi-card';
+    card.style.animationDelay = (idx * 0.06) + 's';
+
+    var freedomHTML = '';
+    if (e.remainingMonths === 1) {
+      freedomHTML = '<div class="emi-freedom">🎉 Last EMI! Agle mahine se free!</div>';
+    } else {
+      freedomHTML = '<span class="emi-months"><strong>' + e.remainingMonths + '</strong> mahine baaki</span>';
+    }
+
+    card.innerHTML =
+      '<div class="emi-top">' +
+        '<div>' +
+          '<div class="emi-name">📱 ' + escapeHtml(e.name) + '</div>' +
+          '<div style="font-size:11px;color:var(--muted);margin-top:2px;">' + paidMonths + '/' + e.totalMonths + ' mahine paid</div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<div class="emi-amount">' + formatCurrency(e.amount) + '<span>/mahina</span></div>' +
+        '</div>' +
+      '</div>' +
+      renderProgressBar(pct, 'linear-gradient(90deg, var(--accent), var(--orange))').replace('bc-progress-wrap', 'emi-progress-wrap').replace('bc-progress-bar', 'emi-progress-bar') +
+      '<div class="emi-footer">' +
+        freedomHTML +
+        '<button class="emi-del-btn" onclick="deleteEmi(\'' + e.id + '\')">🗑</button>' +
+      '</div>';
+
+    container.appendChild(card);
+  });
+}
+
+/* ══════════════════════════════════════════
+   FESTIVE GOALS
+══════════════════════════════════════════ */
+var FESTIVE_EMOJIS = { 'Diwali 🪔':'🪔','Holi 🎨':'🎨','Eid 🌙':'🌙','Christmas 🎄':'🎄','Navratri 🕺':'🕺','Raksha Bandhan 🧶':'🧶' };
+
+function toggleFestiveForm() {
+  festiveFormOpen = !festiveFormOpen;
+  document.getElementById('festiveFormWrap').classList.toggle('open', festiveFormOpen);
+  document.getElementById('festiveAddIcon').textContent = festiveFormOpen ? '✕' : '➕';
+  if (!festiveFormOpen) {
+    document.getElementById('gf-fest-name').value = '';
+    document.getElementById('gf-fest-target').value = '';
+    document.getElementById('gf-fest-date').value = '';
+  }
+}
+
+function saveFestive() {
+  var name   = document.getElementById('gf-fest-name').value.trim();
+  var target = parseFloat(document.getElementById('gf-fest-target').value);
+  var date   = document.getElementById('gf-fest-date').value;
+
+  if (!name)            { showToast('Festival choose karo!', 'error'); return; }
+  if (!target || target <= 0) { showToast('Target amount daalo!', 'error'); return; }
+  if (!date)            { showToast('Festival date daalo!', 'error'); return; }
+
+  /* Store festive goals in pb_budgets with type:'festive' flag */
+  var budgets = getData('pb_budgets');
+  budgets.push({ id: generateId(), type: 'festive', name: name, target: target, date: date, createdAt: new Date().toISOString() });
+  saveData('pb_budgets', budgets);
+  showToast('🪔 ' + name + ' goal set hua!', 'success');
+  festiveFormOpen = true; toggleFestiveForm();
+  renderFestiveCards();
+}
+
+function deleteFestive(id) {
+  saveData('pb_budgets', getData('pb_budgets').filter(function(b){ return b.id !== id; }));
+  showToast('Goal delete hua', 'success');
+  renderFestiveCards();
+}
+
+function renderFestiveCards() {
+  var goals = getData('pb_budgets').filter(function(b){ return b.type === 'festive'; });
+  var udharList = getData('pb_udhar');
+  var totalUdhar = udharList.filter(function(u){ return !u.settled; }).reduce(function(s, u){ return s + u.remainingAmount; }, 0);
+  var container = document.getElementById('festiveCards');
+  container.innerHTML = '';
+
+  if (!goals.length) {
+    container.innerHTML = '<div class="goals-empty"><div class="goals-empty-icon">🪔</div><div class="goals-empty-text">Koi festive goal nahi<br>➕ Add Karo se set karo</div></div>';
+    return;
+  }
+
+  var today = new Date();
+  goals.forEach(function(g, idx) {
+    var festDate   = new Date(g.date);
+    var daysLeft   = Math.max(0, Math.ceil((festDate - today) / 864e5));
+    var dailySave  = daysLeft > 0 ? Math.ceil(g.target / daysLeft) : g.target;
+    var emoji      = FESTIVE_EMOJIS[g.name] || '🎉';
+    var festName   = g.name.replace(emoji, '').trim();
+    var isPast     = festDate < today;
+
+    /* Rough "saved so far" – income in the months after goal was created */
+    var createdAt = new Date(g.createdAt);
+    var txns = getData('pb_transactions');
+    var savedSoFar = txns.filter(function(t){ return t.type === 'income' && new Date(t.date) >= createdAt; })
+                         .reduce(function(s, t){ return s + t.amount; }, 0);
+    /* Cap saved at target for display */
+    savedSoFar = Math.min(savedSoFar, g.target);
+    var pct = Math.round((savedSoFar / g.target) * 100);
+
+    var card = document.createElement('div');
+    card.className = 'festive-card';
+    card.style.animationDelay = (idx * 0.07) + 's';
+
+    var udharWarnHTML = '';
+    if (totalUdhar > 0) {
+      udharWarnHTML = '<div class="fc-udhar-warn">⚠️ ' + formatCurrency(totalUdhar) + ' ka udhar baaki hai – pehle settle karo!</div>';
+    }
+
+    card.innerHTML =
+      '<div class="fc-top">' +
+        '<div class="fc-emoji">' + emoji + '</div>' +
+        '<div class="fc-info">' +
+          '<div class="fc-name">' + escapeHtml(festName) + '</div>' +
+          '<div class="fc-date">' + (isPast ? '✅ Ho gaya!' : '📅 ' + daysLeft + ' din baaki – ' + formatDate(g.date)) + '</div>' +
+        '</div>' +
+        '<div class="fc-target">' + formatCurrency(g.target) + '</div>' +
+        '<button class="fc-del-btn" onclick="deleteFestive(\'' + g.id + '\')">🗑</button>' +
+      '</div>' +
+      renderProgressBar(pct, 'linear-gradient(90deg,#F0C040,#F07040)').replace('bc-progress-wrap', 'fc-progress-wrap').replace('bc-progress-bar', 'fc-progress-bar') +
+      '<div class="fc-footer">' +
+        '<div class="fc-daily">' + (isPast ? '🎉 Festival ho gaya!' : 'Roz <strong>' + formatCurrency(dailySave) + '</strong> bachao') + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);">' + pct + '% saved</div>' +
+      '</div>' +
+      udharWarnHTML;
+
+    container.appendChild(card);
+  });
+}
+
+/* ── Refresh More when active ── */
+function refreshMore() {
+  if (currentTab !== 'more') return;
+  setMoreTab(activeMoreTab);
+}
+
+/* ══════════════════════════════════════════
+   SETTINGS – THEME TOGGLE
+══════════════════════════════════════════ */
+var currentTheme = 'dark';
+
+function applyTheme(theme) {
+  currentTheme = theme;
+  var isLight = theme === 'light';
+  document.body.classList.toggle('light', isLight);
+  var icon = document.getElementById('themeCardIcon');
+  var sub  = document.getElementById('themeCardSub');
+  var wrap = document.getElementById('themeToggleWrap');
+  if (icon) icon.textContent = isLight ? '☀️' : '🌙';
+  if (sub)  sub.textContent  = isLight ? 'Light mode active hai' : 'Dark mode active hai';
+  if (wrap) wrap.classList.toggle('on', isLight);
+}
+
+function toggleTheme() {
+  var next = currentTheme === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  var s = {};
+  try { s = JSON.parse(localStorage.getItem('pb_settings')) || {}; } catch(e){}
+  s.theme = next;
+  saveData('pb_settings', s);
+}
+
+/* ══════════════════════════════════════════
+   SETTINGS – WHATSAPP SHARE
+══════════════════════════════════════════ */
+function shareWhatsApp() {
+  var all   = getData('pb_transactions');
+  var ulist = getData('pb_udhar');
+  var txns  = all.filter(function(t){
+    var d = new Date(t.date);
+    return d.getMonth()===selectedMonth && d.getFullYear()===selectedYear;
+  });
+  var income=0, expense=0;
+  txns.forEach(function(t){ if(t.type==='income') income+=t.amount; else expense+=t.amount; });
+  var savings = income - expense;
+  var pct = income > 0 ? Math.round((savings/income)*100) : 0;
+  var lena=0, dena=0;
+  ulist.filter(function(u){return !u.settled;}).forEach(function(u){
+    if(u.type==='lena') lena+=u.remainingAmount; else dena+=u.remainingAmount;
+  });
+
+  var lines = [
+    '📊 *' + MONTHS[selectedMonth] + ' ' + selectedYear + ' Summary* – PaisaBook',
+    '',
+    '💰 Income:  *' + formatCurrency(income) + '*',
+    '💸 Expense: *' + formatCurrency(expense) + '*',
+    '💚 Savings: *' + formatCurrency(savings) + '* (' + pct + '%)'
+  ];
+  if (lena > 0) lines.push('💰 Lena Hai: *' + formatCurrency(lena) + '*');
+  if (dena > 0) lines.push('🙏 Dena Hai: *' + formatCurrency(dena) + '*');
+  lines.push('', '_Made with PaisaBook 📱_', '_Apna Paisa, Apna Hisaab_');
+
+  window.open('https://wa.me/?text=' + encodeURIComponent(lines.join('\n')), '_blank');
+}
+
+/* ══════════════════════════════════════════
+   SETTINGS – CSV EXPORT
+══════════════════════════════════════════ */
+function exportCSV() {
+  var txns  = getData('pb_transactions');
+  var ulist = getData('pb_udhar');
+
+  function esc(v){ return '"' + String(v||'').replace(/"/g,'""') + '"'; }
+
+  var rows = ['PaisaBook Export – ' + new Date().toLocaleDateString('en-IN'), ''];
+
+  /* Transactions */
+  rows.push('TRANSACTIONS');
+  rows.push(['Type','Amount','Category','Payment','Note','Date'].join(','));
+  txns.forEach(function(t){
+    rows.push([t.type, t.amount, esc(t.category), esc(t.paymentMethod), esc(t.note||''), formatDate(t.date)].join(','));
+  });
+
+  /* Udhar */
+  rows.push('', 'UDHAR');
+  rows.push(['Name','Phone','Type','Total','Remaining','Reason','Date','Settled'].join(','));
+  ulist.forEach(function(u){
+    rows.push([esc(u.name), u.phone||'', u.type, u.totalAmount, u.remainingAmount, esc(u.reason||''), formatDate(u.date), u.settled?'Yes':'No'].join(','));
+  });
+
+  var csv  = rows.join('\n');
+  var blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'}); /* BOM for Excel */
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href   = url;
+  a.download = 'PaisaBook_' + MONTHS[selectedMonth] + '_' + selectedYear + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  showToast('📥 CSV export hua!', 'success');
+}
+
+/* ══════════════════════════════════════════
+   SETTINGS – DATA RESET
+══════════════════════════════════════════ */
+function showResetConfirm() {
+  var ov = document.getElementById('reset-overlay');
+  ov.classList.add('show');
+}
+
+function hideResetConfirm() {
+  document.getElementById('reset-overlay').classList.remove('show');
+}
+
+function confirmReset() {
+  hideResetConfirm();
+  ['pb_transactions','pb_udhar','pb_budgets','pb_emis','pb_settings'].forEach(function(k){
+    localStorage.removeItem(k);
+  });
+  initStorage();
+  loadSampleData();
+  refreshHome();
+  if (currentTab === 'stats') refreshStats();
+  showToast('🗑️ Sab data reset ho gaya!', 'success');
+}
+
+/* ══════════════════════════════════════════
+   PWA – MANIFEST (inline blob)
+══════════════════════════════════════════ */
+(function injectManifest(){
+  var manifest = {
+    name: 'PaisaBook',
+    short_name: 'PaisaBook',
+    description: 'Apna Paisa, Apna Hisaab – Indian Budget Tracker',
+    start_url: window.location.href,
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#0A0A0F',
+    theme_color: '#0A0A0F',
+    icons: [
+      { src: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="100" fill="#0A0A0F"/><text y="370" x="256" text-anchor="middle" font-size="320" font-family="Arial,sans-serif" fill="#F0C040">₹</text></svg>'), sizes: '512x512', type: 'image/svg+xml' }
+    ]
+  };
+  try {
+    var blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
+    var link = document.createElement('link');
+    link.rel  = 'manifest';
+    link.href = URL.createObjectURL(blob);
+    document.head.appendChild(link);
+  } catch(e){}
+})();
+
+/* ══════════════════════════════════════════
+   PWA – SERVICE WORKER (offline support)
+══════════════════════════════════════════ */
+(function registerSW(){
+  if (!('serviceWorker' in navigator)) return;
+  var sw = [
+    "const CACHE='pb-v1';",
+    "self.addEventListener('install',e=>{self.skipWaiting();",
+    "  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/'])).catch(()=>{}));});",
+    "self.addEventListener('activate',e=>{",
+    "  e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));",
+    "  self.clients.claim();});",
+    "self.addEventListener('fetch',e=>{",
+    "  if(e.request.method!=='GET')return;",
+    "  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{",
+    "    if(resp.status===200){var cl=resp.clone();caches.open(CACHE).then(c=>c.put(e.request,cl));}",
+    "    return resp;}).catch(()=>caches.match('/'))));});"
+  ].join('\n');
+  try {
+    var blob   = new Blob([sw], {type:'application/javascript'});
+    var swUrl  = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(function(){});
+  } catch(e){}
+})();
+
+/* ══════════════════════════════════════════
+   PWA – INSTALL PROMPT
+══════════════════════════════════════════ */
+var _installPrompt = null;
+var _bannerDismissed = false;
+
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  _installPrompt = e;
+  /* Show install card in Settings */
+  var card = document.getElementById('installCard');
+  if (card) card.style.display = 'flex';
+  /* Show banner after 5 s if not dismissed */
+  if (!_bannerDismissed) {
+    setTimeout(function(){ document.getElementById('pwa-banner').classList.add('show'); }, 5000);
+  }
+});
+
+window.addEventListener('appinstalled', function(){
+  _installPrompt = null;
+  var card = document.getElementById('installCard');
+  if (card) card.style.display = 'none';
+  dismissBanner();
+  showToast('🎉 PaisaBook install ho gaya!', 'success');
+});
+
+function triggerInstall(){
+  dismissBanner();
+  if (_installPrompt) {
+    _installPrompt.prompt();
+    _installPrompt.userChoice.then(function(r){
+      if (r.outcome === 'accepted') {
+        _installPrompt = null;
+        var card = document.getElementById('installCard');
+        if (card) card.style.display = 'none';
+      }
+    });
+  } else {
+    showToast('📱 Browser menu se "Add to Home Screen" karo', 'success');
+  }
+}
+
+function dismissBanner(){
+  _bannerDismissed = true;
+  document.getElementById('pwa-banner').classList.remove('show');
+}
+
+/* ══════════════════════════════════════════
+   INIT THEME ON LOAD
+══════════════════════════════════════════ */
+(function(){
+  try {
+    var s = JSON.parse(localStorage.getItem('pb_settings')) || {};
+    if (s.theme === 'light') applyTheme('light');
+  } catch(e){}
+})();
+</script>
+</body>
+</html>
