@@ -512,6 +512,117 @@ body.light #splash{background:#F0F0F6}
 .reset-cancel-btn:hover{border-color:var(--muted)}
 .reset-confirm-btn{flex:1;padding:14px;border:none;border-radius:var(--radius-lg);background:linear-gradient(135deg,var(--red),#C02040);color:#fff;font-family:var(--font-head);font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(240,80,96,.3);transition:transform .15s}
 .reset-confirm-btn:active{transform:scale(.97)}
+
+/* ═══════════════════════════════════════
+   FEATURE: STREAK BADGE
+═══════════════════════════════════════ */
+.streak-badge{display:none;align-items:center;gap:5px;padding:5px 11px 5px 8px;border-radius:100px;background:rgba(240,144,64,.1);border:1.5px solid rgba(240,144,64,.25);cursor:default;transition:all .3s}
+.streak-badge.visible{display:inline-flex;animation:fadeUp .4s ease both}
+.streak-fire{font-size:15px;animation:firePulse 1.4s ease-in-out infinite alternate}
+@keyframes firePulse{from{transform:scale(.88) rotate(-5deg)}to{transform:scale(1.15) rotate(5deg)}}
+.streak-num{font-family:var(--font-head);font-size:16px;font-weight:800;color:var(--orange);letter-spacing:-.3px}
+.streak-label{font-size:10px;font-weight:700;color:var(--orange);opacity:.8;letter-spacing:.2px}
+
+/* ═══════════════════════════════════════
+   FEATURE: DAILY SNAPSHOT CARD
+═══════════════════════════════════════ */
+.snapshot-card{background:linear-gradient(135deg,var(--card) 0%,rgba(240,192,64,.03) 100%);border:1px solid var(--border);border-radius:var(--radius-xl);padding:14px 15px 12px;margin-bottom:14px;position:relative;overflow:hidden;animation:cardIn .35s ease both}
+.snapshot-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,var(--accent),var(--orange),var(--green));border-radius:var(--radius-xl) var(--radius-xl) 0 0;box-shadow:0 0 10px rgba(240,192,64,.25)}
+.snapshot-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.snapshot-title{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;letter-spacing:-.1px}
+.snapshot-time{font-size:11px;color:var(--muted);font-weight:500}
+.snapshot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px}
+@media(max-width:340px){.snapshot-grid{grid-template-columns:repeat(2,1fr)}}
+.si{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px 7px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);transition:transform .15s}
+.si-icon{font-size:17px;line-height:1}
+.si-label{font-size:9.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.3px;text-align:center;line-height:1.2}
+.si-value{font-family:var(--font-head);font-size:13px;font-weight:800;letter-spacing:-.3px;text-align:center;line-height:1.1;word-break:break-all}
+.snapshot-insight{display:flex;align-items:flex-start;gap:8px;padding:9px 11px;background:rgba(240,192,64,.05);border:1px solid rgba(240,192,64,.15);border-radius:var(--radius-md);font-size:12px;color:var(--text);font-weight:500;line-height:1.5}
+.snapshot-insight-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+body.light .snapshot-card{background:linear-gradient(135deg,#fff 0%,rgba(240,192,64,.02) 100%)}
+body.light .si{background:#F4F4F8}
+body.light .snapshot-insight{background:rgba(240,192,64,.06);border-color:rgba(240,192,64,.2)}
+
+/* ═══════════════════════════════════════
+   FEATURE: MONTHLY REPORT MODAL
+═══════════════════════════════════════ */
+#report-overlay{position:fixed;inset:0;z-index:9100;background:rgba(0,0,0,.82);display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .25s;padding-bottom:env(safe-area-inset-bottom,0px)}
+#report-overlay.show{opacity:1;pointer-events:auto}
+.report-sheet{background:var(--surface);border-radius:var(--radius-xl) var(--radius-xl) 0 0;width:100%;max-width:430px;max-height:90dvh;overflow-y:auto;transform:translateY(100%);transition:transform .38s cubic-bezier(.34,1.2,.64,1)}
+.report-sheet::-webkit-scrollbar{display:none}
+#report-overlay.show .report-sheet{transform:translateY(0)}
+.rpt-header{position:sticky;top:0;z-index:2;background:var(--surface);padding:14px 16px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.rpt-header-title{font-family:var(--font-head);font-size:16px;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.rpt-close{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s}
+.rpt-close:hover{border-color:var(--muted)}
+.rpt-body{padding:16px 16px 24px}
+.rpt-hero{background:linear-gradient(135deg,var(--card),rgba(240,192,64,.04));border:1px solid var(--border);border-radius:var(--radius-xl);padding:16px;margin-bottom:14px;text-align:center;position:relative;overflow:hidden}
+.rpt-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--orange),var(--green));border-radius:var(--radius-xl) var(--radius-xl) 0 0}
+.rpt-month{font-family:var(--font-head);font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.4px;margin-bottom:4px}
+.rpt-grade-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 14px;border-radius:100px;font-family:var(--font-head);font-size:11.5px;font-weight:700;margin-bottom:0}
+.rpt-stats3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.rpt-stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 8px;text-align:center}
+.rst-icon{font-size:18px;margin-bottom:3px}
+.rst-label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.rst-value{font-family:var(--font-head);font-size:14px;font-weight:800;letter-spacing:-.3px;word-break:break-all}
+.rpt-section-title{font-family:var(--font-head);font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin:16px 0 9px;display:flex;align-items:center;gap:5px}
+.rpt-row{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:6px}
+.rpt-row-left{display:flex;align-items:center;gap:8px}
+.rpt-row-icon{width:30px;height:30px;border-radius:var(--radius-sm);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.rpt-row-label{font-size:13px;font-weight:600;color:var(--text)}
+.rpt-row-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.rpt-row-val{font-family:var(--font-head);font-size:14px;font-weight:800;flex-shrink:0}
+.rpt-wa-btn{width:100%;padding:14px;border:none;border-radius:var(--radius-xl);background:linear-gradient(135deg,#25D366,#1DA851);color:#fff;font-family:var(--font-head);font-size:15px;font-weight:800;cursor:pointer;margin-top:18px;display:flex;align-items:center;justify-content:center;gap:9px;transition:transform .2s;box-shadow:0 4px 18px rgba(37,211,102,.28)}
+.rpt-wa-btn:active{transform:scale(.97)}
+body.light .report-sheet{background:#F4F4F8}
+body.light .rpt-hero,.body.light .rpt-stat{background:#fff}
+
+/* ═══════════════════════════════════════
+   PHASE 2 – SUBSCRIPTION TRACKER
+═══════════════════════════════════════ */
+.sub-health-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.sub-health-icon{font-size:32px;flex-shrink:0}
+.sub-health-body{flex:1;min-width:0}
+.sub-health-title{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px}
+.sub-health-sub{font-size:12px;color:var(--muted);line-height:1.4}
+.sub-health-badge{padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0}
+.sub-card{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-lg);padding:14px 15px;margin-bottom:10px;animation:cardIn .3s ease both;display:flex;align-items:center;gap:12px}
+.sub-card-icon{width:42px;height:42px;border-radius:var(--radius-md);background:rgba(240,192,64,.1);border:1.5px solid rgba(240,192,64,.2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.sub-card-info{flex:1;min-width:0}
+.sub-card-name{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-card-meta{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap}
+.sub-card-cycle{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:100px;background:rgba(240,192,64,.1);color:var(--accent)}
+.sub-card-due{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:100px}
+.sub-due-soon{background:rgba(240,80,96,.1);color:var(--red)}
+.sub-due-ok{background:rgba(64,208,128,.1);color:var(--green)}
+.sub-due-near{background:rgba(240,192,64,.1);color:var(--accent)}
+.sub-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.sub-card-amount{font-family:var(--font-head);font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.sub-card-monthly{font-size:10.5px;color:var(--muted);font-weight:500}
+.sub-del-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;margin-left:4px;flex-shrink:0}
+.sub-del-btn:hover{border-color:var(--red);color:var(--red);background:rgba(240,80,96,.08)}
+.sub-total-strip{background:rgba(240,192,64,.06);border:1px solid rgba(240,192,64,.18);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.sub-total-label{font-size:12px;color:var(--muted);font-weight:600}
+.sub-total-val{font-family:var(--font-head);font-size:15px;font-weight:800;color:var(--accent)}
+
+/* ═══════════════════════════════════════
+   PHASE 2 – FINANCIAL HEALTH SCORE
+═══════════════════════════════════════ */
+.fhs-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:15px 16px;margin-bottom:14px;position:relative;overflow:hidden;animation:cardIn .35s ease both}
+.fhs-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;border-radius:var(--radius-xl) var(--radius-xl) 0 0}
+.fhs-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.fhs-title{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
+.fhs-score-pill{font-family:var(--font-head);font-size:12px;font-weight:800;padding:3px 12px;border-radius:100px;letter-spacing:-.1px}
+.fhs-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:11px}
+.fhm{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md)}
+.fhm-icon{font-size:16px;line-height:1}
+.fhm-label{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.3px;text-align:center;line-height:1.2}
+.fhm-score{font-family:var(--font-head);font-size:12px;font-weight:800;text-align:center}
+.fhs-bar-wrap{height:7px;background:var(--border);border-radius:100px;overflow:hidden}
+.fhs-bar{height:100%;border-radius:100px;transition:width 1s cubic-bezier(.34,1.2,.64,1)}
+.fhs-tip{font-size:11.5px;color:var(--muted);margin-top:9px;line-height:1.5;font-style:italic}
+body.light .fhm{background:#F4F4F8}
+body.light .fhs-card{background:var(--card)}
 </style>
 </head>
 
@@ -546,9 +657,50 @@ body.light #splash{background:#F0F0F6}
 <!-- ████ HOME ████ -->
 <div id="screen-home" class="screen active" data-tab="home">
   <div class="home-greeting">
-    <div class="greeting-text">Namaste! <span>👋</span></div>
-    <div class="greeting-date" id="homeDate"></div>
+    <div>
+      <div class="greeting-text" id="greetingText">Namaste! <span>👋</span></div>
+      <div class="greeting-date" id="homeDate"></div>
+    </div>
+    <div class="streak-badge" id="streakBadge">
+      <span class="streak-fire">🔥</span>
+      <span class="streak-num" id="streakCount">1</span>
+      <span class="streak-label">day streak</span>
+    </div>
   </div>
+
+  <!-- ⚡ Daily Snapshot Card -->
+  <div class="snapshot-card" id="snapshotCard">
+    <div class="snapshot-header">
+      <div class="snapshot-title">⚡ Aaj Ka Hisaab</div>
+      <div class="snapshot-time" id="snapshotTime"></div>
+    </div>
+    <div class="snapshot-grid">
+      <div class="si"><span class="si-icon">💸</span><span class="si-label">Aaj Kharch</span><span class="si-value" id="snap-today" style="color:var(--muted)">₹0</span></div>
+      <div class="si"><span class="si-icon">📅</span><span class="si-label">Is Mahine</span><span class="si-value" id="snap-month" style="color:var(--muted)">₹0</span></div>
+      <div class="si"><span class="si-icon">🎯</span><span class="si-label">Budget Left</span><span class="si-value" id="snap-budget" style="color:var(--muted)">–</span></div>
+      <div class="si"><span class="si-icon">📊</span><span class="si-label">Saving %</span><span class="si-value" id="snap-rate" style="color:var(--muted)">–</span></div>
+    </div>
+    <div class="snapshot-insight" id="snapshotInsight" style="display:none">
+      <span class="snapshot-insight-icon" id="snapInsightIcon">💡</span>
+      <span id="snapInsightText"></span>
+    </div>
+  </div>
+
+  <!-- 🏥 Financial Health Score Card -->
+  <div class="fhs-card" id="fhsCard">
+    <div class="fhs-header">
+      <div class="fhs-title">🏥 Financial Health</div>
+      <div class="fhs-score-pill" id="fhsPill" style="background:rgba(112,112,160,.15);color:var(--muted)">– / 100</div>
+    </div>
+    <div class="fhs-metrics">
+      <div class="fhm"><span class="fhm-icon">💰</span><span class="fhm-label">Savings</span><span class="fhm-score" id="fhm-savings" style="color:var(--muted)">–</span></div>
+      <div class="fhm"><span class="fhm-icon">📱</span><span class="fhm-label">EMI Load</span><span class="fhm-score" id="fhm-emi" style="color:var(--muted)">–</span></div>
+      <div class="fhm"><span class="fhm-icon">🤝</span><span class="fhm-label">Udhar</span><span class="fhm-score" id="fhm-udhar" style="color:var(--muted)">–</span></div>
+    </div>
+    <div class="fhs-bar-wrap"><div class="fhs-bar" id="fhsBar" style="width:0%;background:var(--muted)"></div></div>
+    <div class="fhs-tip" id="fhsTip">Data add karo score dekhne ke liye</div>
+  </div>
+
   <div class="udhar-banner" id="udharBanner">
     <span class="banner-icon">⚠️</span>
     <div class="banner-text">
@@ -714,6 +866,7 @@ body.light #splash{background:#F0F0F6}
   <div class="more-tabs">
     <button class="more-tab-btn active" data-mpanel="budget"   onclick="setMoreTab('budget')">🎯 Budget Goals</button>
     <button class="more-tab-btn" data-mpanel="emi"     onclick="setMoreTab('emi')">📱 EMI Tracker</button>
+    <button class="more-tab-btn" data-mpanel="subs"    onclick="setMoreTab('subs')">📺 Subscriptions</button>
     <button class="more-tab-btn" data-mpanel="festive" onclick="setMoreTab('festive')">🪔 Festive Goals</button>
     <button class="more-tab-btn" data-mpanel="settings" onclick="setMoreTab('settings')">⚙️ Settings</button>
   </div>
@@ -795,7 +948,77 @@ body.light #splash{background:#F0F0F6}
     <div id="emiCards"></div>
   </div>
 
-  <!-- ── PANEL 3: FESTIVE GOALS ── -->
+  <!-- ── PANEL 3: SUBSCRIPTIONS ── -->
+  <div class="more-panel" id="mpanel-subs">
+
+    <!-- Subscription Health Card -->
+    <div class="sub-health-card" id="subHealthCard">
+      <div class="sub-health-icon" id="subHealthIcon">📺</div>
+      <div class="sub-health-body">
+        <div class="sub-health-title" id="subHealthTitle">Subscription Load</div>
+        <div class="sub-health-sub" id="subHealthSub">Loading...</div>
+      </div>
+      <div class="sub-health-badge" id="subHealthBadge">–</div>
+    </div>
+
+    <div class="goals-section-header">
+      <div class="goals-section-title">📺 Active Subscriptions</div>
+      <button class="goals-add-btn" id="subAddToggle" onclick="toggleSubForm()"><span id="subAddIcon">➕</span> Add Karo</button>
+    </div>
+
+    <!-- Add Subscription Form -->
+    <div class="goals-form-wrap" id="subFormWrap">
+      <div class="gf-row">
+        <div class="gf-group">
+          <div class="gf-label">📝 Service Name</div>
+          <input type="text" id="gf-sub-name" class="gf-input" placeholder="e.g. Netflix, Spotify" maxlength="40" autocomplete="off">
+        </div>
+      </div>
+      <div class="gf-row">
+        <div class="gf-group">
+          <div class="gf-label">₹ Amount</div>
+          <input type="number" id="gf-sub-amount" class="gf-input" placeholder="0" min="1" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="gf-group">
+          <div class="gf-label">🔄 Cycle</div>
+          <select id="gf-sub-cycle" class="gf-input">
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+            <option value="quarterly">Quarterly</option>
+          </select>
+        </div>
+      </div>
+      <div class="gf-row">
+        <div class="gf-group">
+          <div class="gf-label">📅 Next Billing Date</div>
+          <input type="date" id="gf-sub-date" class="gf-input">
+        </div>
+        <div class="gf-group">
+          <div class="gf-label">📂 Category</div>
+          <select id="gf-sub-cat" class="gf-input">
+            <option value="Entertainment">Entertainment 🎬</option>
+            <option value="Music">Music 🎵</option>
+            <option value="News">News 📰</option>
+            <option value="Fitness">Fitness 💪</option>
+            <option value="Software">Software 💻</option>
+            <option value="Cloud">Cloud ☁️</option>
+            <option value="Education">Education 📚</option>
+            <option value="Other">Other 📦</option>
+          </select>
+        </div>
+      </div>
+      <button class="gf-save-btn" onclick="saveSubscription()">📺 Subscription Add Karo</button>
+    </div>
+
+    <div id="subTotalStrip" style="display:none" class="sub-total-strip">
+      <span class="sub-total-label">💸 Monthly Total</span>
+      <span class="sub-total-val" id="subMonthlyTotal">₹0</span>
+    </div>
+
+    <div id="subCards"></div>
+  </div>
+
+  <!-- ── PANEL 4: FESTIVE GOALS ── -->
   <div class="more-panel" id="mpanel-festive">
 
     <div class="goals-section-header">
@@ -847,6 +1070,16 @@ body.light #splash{background:#F0F0F6}
       <button class="settings-action-btn btn-wa" onclick="shareWhatsApp()">WhatsApp</button>
     </div>
 
+    <!-- Monthly Report Card (NEW) -->
+    <div class="settings-card" style="border-color:rgba(240,192,64,.18);background:linear-gradient(135deg,var(--card),rgba(240,192,64,.02))">
+      <div class="settings-card-icon" style="background:rgba(240,192,64,.12);color:var(--accent)">📋</div>
+      <div class="settings-card-body">
+        <div class="settings-card-title">Monthly Report</div>
+        <div class="settings-card-sub">Full analysis – top category, worst day, highlights</div>
+      </div>
+      <button class="settings-action-btn" style="background:rgba(240,192,64,.15);color:var(--accent);border:1.5px solid rgba(240,192,64,.28)" onclick="showMonthlyReport()">Report</button>
+    </div>
+
     <div class="settings-card">
       <div class="settings-card-icon" style="background:rgba(64,160,240,.12);color:#40A0F0">📥</div>
       <div class="settings-card-body">
@@ -893,6 +1126,31 @@ body.light #splash{background:#F0F0F6}
         <div class="settings-card-sub">Offline bhi kaam karega, faster launch</div>
       </div>
       <button class="settings-action-btn btn-install" onclick="triggerInstall()">Install</button>
+    </div>
+
+    <div class="settings-divider"></div>
+
+    <!-- Restore + Storage -->
+    <div class="settings-section-title">♻️ Restore & Storage</div>
+
+    <!-- Restore from Backup -->
+    <div class="settings-card">
+      <div class="settings-card-icon" style="background:rgba(64,208,128,.12);color:#40D080">📂</div>
+      <div class="settings-card-body">
+        <div class="settings-card-title">Backup se Restore</div>
+        <div class="settings-card-sub">HTML backup file select karo</div>
+      </div>
+      <button class="settings-action-btn" style="background:rgba(64,208,128,.12);color:#40D080;border-color:rgba(64,208,128,.25)" onclick="document.getElementById('restoreFileInput').click()">Restore</button>
+    </div>
+    <input type="file" id="restoreFileInput" accept=".html,.json" style="display:none" onchange="handleRestoreFile(this)">
+
+    <!-- Storage Usage -->
+    <div class="settings-card" id="storageCard">
+      <div class="settings-card-icon" style="background:rgba(112,112,160,.12);color:var(--muted)">💽</div>
+      <div class="settings-card-body">
+        <div class="settings-card-title">Storage Used</div>
+        <div class="settings-card-sub" id="storageText">Calculating…</div>
+      </div>
     </div>
 
     <div class="settings-divider"></div>
@@ -962,12 +1220,25 @@ body.light #splash{background:#F0F0F6}
 <div id="toast"></div>
 </div><!-- #app -->
 
+<!-- ████ MONTHLY REPORT MODAL ████ -->
+<div id="report-overlay">
+  <div class="report-sheet">
+    <div class="rpt-header">
+      <div class="rpt-header-title" id="rptTitle">📋 Monthly Report</div>
+      <button class="rpt-close" onclick="hideMonthlyReport()">✕</button>
+    </div>
+    <div class="rpt-body" id="rptBody">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</div>
+
 <script>
 /* ══════════════════════════════════════════
    DATA LAYER
 ══════════════════════════════════════════ */
 function initStorage(){
-  ['pb_transactions','pb_udhar','pb_budgets','pb_emis'].forEach(function(k){if(!localStorage.getItem(k))localStorage.setItem(k,'[]');});
+  ['pb_transactions','pb_udhar','pb_budgets','pb_festivals','pb_emis','pb_categories','pb_subscriptions'].forEach(function(k){if(!localStorage.getItem(k))localStorage.setItem(k,'[]');});
   if(!localStorage.getItem('pb_settings'))localStorage.setItem('pb_settings',JSON.stringify({theme:'dark',currency:'INR'}));
   /* backup timestamp – null means never backed up */
   if(!localStorage.getItem('pb_last_backup'))localStorage.setItem('pb_last_backup','null');
@@ -983,6 +1254,8 @@ function getDaysPending(iso){return getDaysBetween(iso,new Date().toISOString())
 function escapeHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 var chartInstances={};
 function destroyChart(id){if(chartInstances[id]){chartInstances[id].destroy();chartInstances[id]=null;}}
+/* ✅ Fix #8: Timezone-aware ISO date — India +5:30 ke liye accurate */
+function getLocalISODate(){var d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString();}
 function saveChart(id,inst){chartInstances[id]=inst;}
 function getBudgetStatus(p){if(p<60)return{color:'var(--green)',label:'Safe hai'};if(p<80)return{color:'var(--accent)',label:'Dhyan do'};if(p<100)return{color:'var(--orange)',label:'Almost cross!'};return{color:'var(--red)',label:'Budget khatam!'};}
 
@@ -1050,7 +1323,8 @@ function renderTabMahine(){
   document.getElementById('pieSub').textContent=MONTHS[selectedMonth]+' '+selectedYear+' – category-wise spending';
 
   destroyChart('pieChart');
-  var ctx=document.getElementById('pieChart').getContext('2d');
+  var _pieCanvas=document.getElementById('pieChart'); if(!_pieCanvas) return;
+  var ctx=_pieCanvas.getContext('2d');
 
   if(!cats.length){
     saveChart('pieChart',new Chart(ctx,{type:'doughnut',data:{labels:['Koi expense nahi'],datasets:[{data:[1],backgroundColor:['#2A2A3A'],borderWidth:0}]},options:{cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(){return 'Koi expense nahi';}}}}}}));
@@ -1103,7 +1377,8 @@ function renderTabChhe(){
 
   /* Bar chart */
   destroyChart('barChart');
-  var bCtx=document.getElementById('barChart').getContext('2d');
+  var _barCanvas=document.getElementById('barChart'); if(!_barCanvas) return;
+  var bCtx=_barCanvas.getContext('2d');
   saveChart('barChart',new Chart(bCtx,{
     type:'bar',
     data:{labels:labels,datasets:[
@@ -1117,7 +1392,8 @@ function renderTabChhe(){
 
   /* Line chart – savings */
   destroyChart('lineChart');
-  var lCtx=document.getElementById('lineChart').getContext('2d');
+  var _lineCanvas=document.getElementById('lineChart'); if(!_lineCanvas) return;
+  var lCtx=_lineCanvas.getContext('2d');
   var grad=lCtx.createLinearGradient(0,0,0,150);
   grad.addColorStop(0,'rgba(240,192,64,.2)'); grad.addColorStop(1,'rgba(240,192,64,0)');
   saveChart('lineChart',new Chart(lCtx,{
@@ -1135,7 +1411,8 @@ function renderTabChhe(){
   var hasU=(lena+dena)>0;
 
   destroyChart('udharChart');
-  var uCtx=document.getElementById('udharChart').getContext('2d');
+  var _uCanvas=document.getElementById('udharChart'); if(!_uCanvas) return;
+  var uCtx=_uCanvas.getContext('2d');
   saveChart('udharChart',new Chart(uCtx,{
     type:'doughnut',
     data:{labels:['Lena Hai','Dena Hai'],datasets:[{data:hasU?[lena,dena]:[1,1],backgroundColor:hasU?['rgba(64,208,128,.8)','rgba(240,80,96,.75)']:['#2A2A3A','#1A1A24'],borderColor:'#1A1A24',borderWidth:3,hoverOffset:6}]},
@@ -1149,16 +1426,32 @@ function renderTabChhe(){
 function renderTabInsight(){
   var all=getData('pb_transactions');
   var udharList=getData('pb_udhar');
+  var emis=getData('pb_emis');
+  var subs=getData('pb_subscriptions');
   var months6=getLastNMonths(6);
   var container=document.getElementById('insightsList');
   container.innerHTML='';
   var delay=0;
 
-  function addCard(icon,label,html){
+  function addCard(icon,label,html,border){
     var c=document.createElement('div'); c.className='insight-card'; c.style.animationDelay=(delay+=0.07)+'s';
+    if(border) c.style.borderColor=border;
     c.innerHTML='<div class="insight-icon">'+icon+'</div><div class="insight-body"><div class="insight-label">'+label+'</div><div class="insight-value">'+html+'</div></div>';
     container.appendChild(c);
   }
+
+  /* ── HEALTH SCORE CARD AT TOP ── */
+  var hScore=computeHealthScore();
+  var hGrade=hScore.grade,hColor=hScore.color;
+  var hHtml='Overall score: <span style="font-family:var(--font-head);font-size:17px;font-weight:800;color:'+hColor+'">'+hScore.total+'/100</span> – <span style="color:'+hColor+'">'+hGrade+'</span>'
+    +'<div style="height:7px;background:var(--border);border-radius:100px;overflow:hidden;margin-top:8px">'
+    +'<div style="height:100%;width:'+hScore.total+'%;background:'+hColor+';border-radius:100px;transition:width 1s"></div></div>'
+    +'<div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">'
+    +'<span style="font-size:11px;color:var(--muted)">💰 Savings: <span style="color:'+hScore.savingsColor+'">'+hScore.savingsScore+'/40</span></span>'
+    +'<span style="font-size:11px;color:var(--muted)">📱 EMI: <span style="color:'+hScore.emiColor+'">'+hScore.emiScore+'/30</span></span>'
+    +'<span style="font-size:11px;color:var(--muted)">🤝 Udhar: <span style="color:'+hScore.udharColor+'">'+hScore.udharScore+'/30</span></span>'
+    +'</div>';
+  addCard('🏥','Financial Health Score',hHtml,'rgba(240,192,64,.3)');
 
   /* 1. Sabse zyada kharch (current month) */
   var curTxns=txnsForMonth(all,selectedMonth,selectedYear);
@@ -1198,8 +1491,12 @@ function renderTabInsight(){
   var lenaC=activeU.filter(function(u){return u.type==='lena';}).length;
   var denaC=activeU.filter(function(u){return u.type==='dena';}).length;
   if(activeU.length){
+    /* Oldest pending udhar */
+    var oldest=activeU.slice().sort(function(a,b){return new Date(a.date)-new Date(b.date);})[0];
+    var oldestDays=getDaysPending(oldest.date);
     addCard('🤝','Udhar Status',
-      '<span class="ired">'+formatCurrency(totalPend)+'</span> ka udhar '+activeU.length+' logon se baaki ('+lenaC+' lena, '+denaC+' dena)');
+      '<span class="ired">'+formatCurrency(totalPend)+'</span> ka udhar '+activeU.length+' logon se baaki ('+lenaC+' lena, '+denaC+' dena)'
+      +(oldestDays>=30?'<br><span style="font-size:11px;color:var(--red)">⚠️ '+escapeHtml(oldest.name)+' – '+oldestDays+' din se pending!</span>':''));
   } else {
     addCard('🤝','Udhar Status','<span class="igreen">✅ Sab settle! Koi udhar nahi.</span>');
   }
@@ -1223,6 +1520,61 @@ function renderTabInsight(){
     var emoji=pct>=20?'🟢':pct>=10?'🟡':'🔴';
     var label2=pct>=20?'Zabardast!':pct>=10?'Theek hai':'Thoda kam karo!';
     addCard(emoji,'Is Mahine Saving Rate',pct+'% saved – <span>'+(pct>=20?'<span class="igreen">':pct>=10?'<span class="hl">':'<span class="ired">')+label2+'</span></span>');
+  }
+
+  /* NEW 7. Weekend vs Weekday spending */
+  var weekendExp=0, weekdayExp=0, weekendTxns=0, weekdayTxns=0;
+  curTxns.filter(function(t){return t.type==='expense';}).forEach(function(t){
+    var day=new Date(t.date).getDay(); /* 0=Sun, 6=Sat */
+    if(day===0||day===6){weekendExp+=t.amount;weekendTxns++;}
+    else{weekdayExp+=t.amount;weekdayTxns++;}
+  });
+  if(weekendTxns+weekdayTxns>0){
+    var wkdAvg=weekdayTxns>0?Math.round(weekdayExp/weekdayTxns):0;
+    var wkndAvg=weekendTxns>0?Math.round(weekendExp/weekendTxns):0;
+    var wkndRatio=wkdAvg>0?Math.round((wkndAvg/wkdAvg)*100):100;
+    var wkndText=wkndRatio>150?'🛑 Weekend pe '+Math.round(wkndRatio/100)+'x zyada kharcha karte ho!':
+                 wkndRatio>110?'Weekend kharch thoda zyada hai ('+wkndRatio+'% vs weekday).':
+                 '✅ Weekend aur weekday kharch balanced hai!';
+    addCard('📅','Weekend vs Weekday Kharch',
+      'Weekend avg: <span class="ired">'+formatCurrency(wkndAvg)+'</span> vs Weekday: <span class="hl">'+formatCurrency(wkdAvg)+'</span><br><span style="font-size:11px;color:var(--muted)">'+wkndText+'</span>');
+  }
+
+  /* NEW 8. Subscription burden */
+  if(subs.length>0){
+    var monthlySubTotal=subs.reduce(function(s,sub){
+      if(sub.billingCycle==='monthly')return s+sub.amount;
+      if(sub.billingCycle==='yearly')return s+Math.round(sub.amount/12);
+      if(sub.billingCycle==='quarterly')return s+Math.round(sub.amount/3);
+      return s;
+    },0);
+    var subPct=curI>0?Math.round((monthlySubTotal/curI)*100):0;
+    var subEmoji=subPct>15?'🔴':subPct>8?'🟡':'🟢';
+    addCard('📺','Subscription Burden',
+      subs.length+' subscriptions = <span class="ired">'+formatCurrency(monthlySubTotal)+'</span>/month'
+      +(curI>0?' (<span class="hl">'+subPct+'%</span> of income)':'')
+      +'<br><span style="font-size:11px;color:var(--muted)">'+subEmoji+' '+
+      (subPct>15?'Subscriptions bahut zyada hain – review karo!':subPct>8?'Manageable hai, thoda watch karo.':'Subscription load theek hai ✓')
+      +'</span>');
+  }
+
+  /* NEW 9. Projected annual savings */
+  if(curI>0 && curE>0){
+    var monthlySav=curI-curE;
+    var annualProjected=monthlySav*12;
+    addCard('🔮','Annual Savings Projection',
+      'Is mahine ki rate pe saal mein <span class="'+(annualProjected>=0?'igreen':'ired')+'">'+formatCurrency(Math.abs(annualProjected))+'</span> '
+      +(annualProjected>=0?'bachenge':'extra kharchoge!')
+      +'<br><span style="font-size:11px;color:var(--muted)">'+(annualProjected>=50000?'💪 FD / SIP ke liye enough!':annualProjected>=0?'Saving badha sakte ho!':'⚠️ Expenses kam karo!')+'</span>');
+  }
+
+  /* NEW 10. EMI freedom countdown */
+  if(emis.length>0){
+    var nearestFree=emis.slice().sort(function(a,b){return a.remainingMonths-b.remainingMonths;})[0];
+    var totalMonthlyEmi=emis.reduce(function(s,e){return s+e.amount;},0);
+    addCard('🎉','EMI Freedom',
+      '<span class="hl">'+escapeHtml(nearestFree.name)+'</span> sirf <span class="igreen">'+nearestFree.remainingMonths+' mahine</span> mein khatam!'
+      +'<br><span style="font-size:11px;color:var(--muted)">Total EMI burden: <span class="ired">'+formatCurrency(totalMonthlyEmi)+'</span>/month</span>');
   }
 
   if(!container.children.length){
@@ -1276,7 +1628,7 @@ function saveTransaction(){
   if(!amt||amt<=0){showToast('Amount daalo pehle!','error');document.getElementById('addAmountInput').focus();return;}
   if(!selectedCat){showToast('Category choose karo!','error');return;}
   if(!dt){showToast('Date select karo!','error');return;}
-  var txn={id:generateId(),type:addType,amount:amt,category:selectedCat,paymentMethod:selectedPay,note:nt,date:new Date(dt).toISOString(),createdAt:new Date().toISOString()};
+  var txn={id:generateId(),type:addType,amount:amt,category:selectedCat,paymentMethod:selectedPay,note:nt,date:new Date(dt+'T12:00:00').toISOString(),createdAt:getLocalISODate()};
   var list=getData('pb_transactions');list.push(txn);if(!saveData('pb_transactions',list)){showToast('Save nahi hua!','error');return;}
   triggerRipple(btn);
   var oi=document.getElementById('saveBtnIcon').textContent,ot=document.getElementById('saveBtnText').textContent;
@@ -1284,6 +1636,7 @@ function saveTransaction(){
   setTimeout(function(){btn.style.transform='';document.getElementById('saveBtnIcon').textContent=oi;document.getElementById('saveBtnText').textContent=ot;},1000);
   showToast((addType==='income'?'💰':'💸')+' '+formatCurrency(amt)+' '+selectedCat+' add hua!','success');
   refreshHome();refreshStats();
+  updateStreakOnEntry(); /* streak +1 for today's entry */
   document.getElementById('addAmountInput').value='';document.getElementById('addNoteInput').value='';document.getElementById('addDateInput').value=getTodayISO();selectedCat='';renderCatGrid();updateAmountHint();
 }
 function getTodayISO(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -1362,7 +1715,7 @@ function saveUdhar(){
   if(phone&&!isValidPhone(phone)){document.getElementById('uf-phone').classList.add('error');document.getElementById('uf-phone-err').classList.add('show');valid=false;}
   if(!amount||amount<=0){document.getElementById('uf-amount').classList.add('error');document.getElementById('uf-amount-err').classList.add('show');valid=false;}
   if(!valid)return;
-  var entry={id:generateId(),name:name,phone:isValidPhone(phone)?phone:'',totalAmount:amount,payments:[],remainingAmount:amount,type:ufType,reason:reason,date:date?new Date(date).toISOString():new Date().toISOString(),settled:false,createdAt:new Date().toISOString()};
+  var entry={id:generateId(),name:name,phone:isValidPhone(phone)?phone:'',totalAmount:amount,payments:[],remainingAmount:amount,type:ufType,reason:reason,date:date?new Date(date+'T12:00:00').toISOString():getLocalISODate(),settled:false,createdAt:getLocalISODate()};
   var list=getData('pb_udhar');list.push(entry);if(!saveData('pb_udhar',list)){showToast('Save nahi hua!','error');return;}
   showToast((ufType==='lena'?'💰':'🙏')+' '+name+' – '+formatCurrency(amount)+' add hua!','success');
   refreshUdhar();refreshHome();udharFormOpen=true;toggleUdharForm();
@@ -1376,7 +1729,10 @@ function addPayment(uid){
   var inp=document.getElementById('pay-input-'+uid);if(!inp)return;
   var amt=parseFloat(inp.value);if(!amt||amt<=0){showToast('Valid amount daalo!','error');return;}
   var list=getData('pb_udhar'),idx=list.findIndex(function(u){return u.id===uid;});if(idx===-1)return;
-  var u=list[idx];u.payments.push({amount:amt,date:new Date().toISOString()});
+  var u=list[idx];
+  /* ✅ Fix: overpayment check */
+  if(amt>u.remainingAmount){showToast('⚠️ '+formatCurrency(u.remainingAmount)+' se zyada payment nahi daal sakte!','error');return;}
+  u.payments.push({amount:amt,date:getLocalISODate()});
   var paid=u.payments.reduce(function(s,p){return s+p.amount;},0);
   u.remainingAmount=Math.max(0,u.totalAmount-paid);if(u.remainingAmount<=0)u.settled=true;
   list[idx]=u;saveData('pb_udhar',list);payInlineOpenId=null;
@@ -1494,6 +1850,10 @@ function refreshHome(){
   if(overdue.length){document.getElementById('bannerTitle').textContent=overdue.length+(overdue.length===1?' udhar':' udhar entries')+' mein 30+ din ho gaye!';banner.classList.add('visible');}
   else{banner.classList.remove('visible');}
   document.getElementById('homeDate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+  updateGreeting();
+  renderSnapshot();
+  renderStreakBadge();
+  renderHealthScore();
 }
 
 /* ══════════════════════════════════════════
@@ -1510,6 +1870,8 @@ function switchTab(name){
   document.getElementById('nav').style.setProperty('--indicator-x',NAV_POS[name]||'3%');
   document.getElementById('main').scrollTop=0;
   currentTab=name;
+  /* ✅ Fix #10: Persist last tab */
+  try{localStorage.setItem('pb_last_tab',name);}catch(e){}
   if(name==='udhar')  refreshUdhar();
   if(name==='stats')  { activeStatsTab='mahine'; setStatsTab('mahine'); }
   if(name==='more')   { setMoreTab(activeMoreTab||'budget'); }
@@ -1534,13 +1896,21 @@ function removeSplash(){var s=document.getElementById('splash');if(s)setTimeout(
 /* INIT */
 window.onload=function(){
   initStorage();
+  initStreak();
   loadSampleData();
   updateMonthLabel();
   refreshHome();
   initAddScreen();
   checkWeeklyBackup();
+  /* ✅ Fix #10: Restore last tab */
+  var lastTab=localStorage.getItem('pb_last_tab');
+  if(lastTab&&lastTab!=='home'&&document.getElementById('screen-'+lastTab)){
+    setTimeout(function(){switchTab(lastTab);},100);
+  }
+  /* ✅ Fix #4: localStorage size warning (>4MB) */
+  checkStorageSize();
   removeSplash();
-  console.log('[PaisaBook] App initialized ✓ – Stats + AutoBackup ready ✓');
+  console.log('[PaisaBook] v1.3 ready ✓ – Phase 2: Subscriptions + Health Score + Smart Insights ✓');
 };
 
 /* ══════════════════════════════════════════
@@ -1563,6 +1933,7 @@ function setMoreTab(tab) {
   if (panel) panel.classList.add('active');
   if (tab === 'budget')  renderBudgetCards();
   if (tab === 'emi')     renderEmiSection();
+  if (tab === 'subs')    renderSubscriptionSection();
   if (tab === 'festive') renderFestiveCards();
 }
 
@@ -1729,7 +2100,7 @@ function saveEmi() {
   if (remaining > total)           { showToast('Remaining, total se zyada nahi ho sakta!', 'error'); return; }
 
   var emis = getData('pb_emis');
-  emis.push({ id: generateId(), name: name, amount: amount, totalMonths: total, remainingMonths: remaining, createdAt: new Date().toISOString() });
+  emis.push({ id: generateId(), name: name, amount: amount, totalMonths: total, remainingMonths: remaining, createdAt: getLocalISODate() });
   saveData('pb_emis', emis);
   showToast('📱 ' + name + ' EMI add hua!', 'success');
   emiFormOpen = true; toggleEmiForm();
@@ -1839,23 +2210,23 @@ function saveFestive() {
   if (!target || target <= 0) { showToast('Target amount daalo!', 'error'); return; }
   if (!date)            { showToast('Festival date daalo!', 'error'); return; }
 
-  /* Store festive goals in pb_budgets with type:'festive' flag */
-  var budgets = getData('pb_budgets');
-  budgets.push({ id: generateId(), type: 'festive', name: name, target: target, date: date, createdAt: new Date().toISOString() });
-  saveData('pb_budgets', budgets);
+  /* Store festive goals in pb_festivals (separate from pb_budgets) */
+  var festivals = getData('pb_festivals');
+  festivals.push({ id: generateId(), type: 'festive', name: name, target: target, date: date, createdAt: getLocalISODate() });
+  saveData('pb_festivals', festivals);
   showToast('🪔 ' + name + ' goal set hua!', 'success');
   festiveFormOpen = true; toggleFestiveForm();
   renderFestiveCards();
 }
 
 function deleteFestive(id) {
-  saveData('pb_budgets', getData('pb_budgets').filter(function(b){ return b.id !== id; }));
+  saveData('pb_festivals', getData('pb_festivals').filter(function(b){ return b.id !== id; }));
   showToast('Goal delete hua', 'success');
   renderFestiveCards();
 }
 
 function renderFestiveCards() {
-  var goals = getData('pb_budgets').filter(function(b){ return b.type === 'festive'; });
+  var goals = getData('pb_festivals');
   var udharList = getData('pb_udhar');
   var totalUdhar = udharList.filter(function(u){ return !u.settled; }).reduce(function(s, u){ return s + u.remainingAmount; }, 0);
   var container = document.getElementById('festiveCards');
@@ -2029,16 +2400,54 @@ function hideResetConfirm() {
   document.getElementById('reset-overlay').classList.remove('show');
 }
 
+/* ✅ Fix #9: Handle .html or .json backup file for restore */
+function handleRestoreFile(input) {
+  var file = input.files[0]; if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var result = e.target.result;
+    restoreFromBackup(result);
+  };
+  reader.readAsText(file);
+  input.value = ''; /* reset so same file can be re-selected */
+}
+
+/* ✅ Fix #4: localStorage size check + warning */
+function checkStorageSize() {
+  try {
+    var total = 0;
+    for (var key in localStorage) {
+      if (localStorage.hasOwnProperty(key)) {
+        total += (localStorage[key].length + key.length) * 2;
+      }
+    }
+    var kb = (total / 1024).toFixed(1);
+    var mb = (total / (1024*1024)).toFixed(2);
+    var el = document.getElementById('storageText');
+    if (el) {
+      var pct = Math.min(100, Math.round((total / (5*1024*1024)) * 100));
+      var color = pct > 80 ? 'var(--red)' : pct > 60 ? 'var(--orange)' : 'var(--green)';
+      el.innerHTML = '<span style="color:'+color+';font-weight:600">'+mb+'MB</span> / 5MB used ('+pct+'%) '
+        + (pct > 80 ? '⚠️ Backup lo aur purana data archive karo!' : pct > 60 ? '🟡 Space kam ho rha hai' : '✅ Theek hai');
+    }
+    if (total > 4 * 1024 * 1024) {
+      showToast('⚠️ Storage 80%+ full! Backup karo aur purana data clear karo.', 'error');
+    }
+  } catch(e) {}
+}
+
 function confirmReset() {
   hideResetConfirm();
-  ['pb_transactions','pb_udhar','pb_budgets','pb_emis','pb_settings'].forEach(function(k){
+  ['pb_transactions','pb_udhar','pb_budgets','pb_festivals','pb_emis','pb_settings','pb_categories','pb_last_backup','pb_subscriptions'].forEach(function(k){
     localStorage.removeItem(k);
   });
   initStorage();
-  loadSampleData();
+  /* ⚠️ loadSampleData() intentionally NOT called – reset means truly empty */
   refreshHome();
-  if (currentTab === 'stats') refreshStats();
-  showToast('🗑️ Sab data reset ho gaya!', 'success');
+  refreshUdhar();
+  refreshStats();
+  if (typeof setMoreTab === 'function') setMoreTab('budget');
+  showToast('🗑️ Sab data reset ho gaya! Fresh start karo.', 'success');
 }
 
 /* ══════════════════════════════════════════
@@ -2161,20 +2570,24 @@ function buildBackupPayload() {
   var now = new Date();
   return {
     app: 'PaisaBook',
-    version: '1.0',
+    version: '1.1',
     exportedAt: now.toISOString(),
     exportedAtDisplay: now.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}),
     data: {
       transactions: getData('pb_transactions'),
       udhar:        getData('pb_udhar'),
       budgets:      getData('pb_budgets'),
+      festivals:    getData('pb_festivals'),
       emis:         getData('pb_emis'),
+      subscriptions:getData('pb_subscriptions'),
+      categories:   getData('pb_categories'),
       settings: (function(){ try{return JSON.parse(localStorage.getItem('pb_settings'))||{};}catch(e){return{};} })()
     },
     stats: {
       totalTransactions: getData('pb_transactions').length,
       totalUdhar:        getData('pb_udhar').length,
-      totalBudgets:      getData('pb_budgets').filter(function(b){return !b.type;}).length,
+      totalBudgets:      getData('pb_budgets').length,
+      totalFestivals:    getData('pb_festivals').length,
       totalEmis:         getData('pb_emis').length
     }
   };
@@ -2220,6 +2633,8 @@ function buildBackupHTML(p) {
   var ulist = p.data.udhar        || [];
   var budgets = (p.data.budgets || []).filter(function(b){ return !b.type; });
   var emis  = p.data.emis         || [];
+  var festivals = p.data.festivals || [];
+  var embedJson = JSON.stringify(p);
 
   /* ── Helpers ── */
   function fc(n){ return '₹' + new Intl.NumberFormat('en-IN').format(Math.abs(n||0)); }
@@ -2286,6 +2701,17 @@ function buildBackupHTML(p) {
         +'<div style="font-size:10px;color:#7070A0;margin-top:3px">'+pct+'% paid</div>'
       +'</td>'
       +'<td>'+e.remainingMonths+' remaining</td>'
+      +'</tr>';
+  }).join('');
+
+  /* ── Festive rows ── */
+  var festiveRows = festivals.map(function(g,i){
+    var daysLeft = Math.ceil((new Date(g.date)-new Date())/(864e5));
+    return '<tr style="background:'+(i%2===0?'#1A1A24':'#16161F')+'">'
+      +'<td style="font-weight:600">'+esc(g.name)+'</td>'
+      +'<td style="color:#F0C040;font-weight:700">'+fc(g.target)+'</td>'
+      +'<td>'+fd(g.date)+'</td>'
+      +'<td style="color:'+(daysLeft>0?'#40D080':'#F05060')+'">'+( daysLeft>0 ? daysLeft+' din bache' : 'Ho gaya!')+'</td>'
       +'</tr>';
   }).join('');
 
@@ -2402,18 +2828,49 @@ function buildBackupHTML(p) {
       +tableWrap(['Name','Amount','Progress','Bar','Remaining'], emiRows, '')
       +'</div>' : '')
 
+    /* Festive Goals */
+    +(festivals.length ? '<div style="padding:0 16px">'
+      +secHeader('🪔','Festive Goals',festivals.length+' goals')
+      +tableWrap(['Festival','Target','Date','Status'], festiveRows, '')
+      +'</div>' : '')
+
+    /* ✅ Fix #9: Embedded JSON for restore + Restore button */
+    +'<script type="application/json" id="pb-backup-json">'+embedJson.replace(/<\/script>/gi,'<\\/script>')+'<\/script>'
+
     /* Footer */
-    +'<div style="margin:28px 16px 0;background:#1A1A24;border:1px solid #2A2A3A;border-radius:16px;padding:16px;text-align:center">'
-      +'<div style="font-size:22px;margin-bottom:8px">🔒</div>'
-      +'<div style="font-family:\'Syne\',sans-serif;font-size:13px;font-weight:700;color:#F0F0F5;margin-bottom:4px">100% Private & Offline</div>'
-      +'<div style="font-size:12px;color:#7070A0;line-height:1.7">'
-        +'Yeh file sirf aapke device pe hai – koi server pe upload nahi.<br>'
-        +'Google Drive mein save karo backup ke liye. 📂'
+    +'<div style="margin:28px 16px 0;background:#1A1A24;border:1px solid #2A2A3A;border-radius:16px;padding:16px">'
+      +'<div style="text-align:center;margin-bottom:12px">'
+        +'<div style="font-size:22px;margin-bottom:6px">🔒</div>'
+        +'<div style="font-family:\'Syne\',sans-serif;font-size:13px;font-weight:700;color:#F0F0F5;margin-bottom:4px">100% Private & Offline</div>'
+        +'<div style="font-size:12px;color:#7070A0;line-height:1.7">Yeh file sirf aapke device pe hai – koi server nahi.<br>Google Drive mein save karo. 📂</div>'
       +'</div>'
-      +'<div style="margin-top:12px;padding-top:12px;border-top:1px solid #2A2A3A;font-size:11px;color:#4A4A6A">'
+      +'<div style="border-top:1px solid #2A2A3A;padding-top:12px">'
+        +'<div style="font-family:\'Syne\',sans-serif;font-size:12px;font-weight:700;color:#F0C040;margin-bottom:8px">♻️ Restore kaise karein?</div>'
+        +'<div style="font-size:11px;color:#7070A0;line-height:1.8;margin-bottom:10px">'
+          +'1. PaisaBook app kholo<br>'
+          +'2. More → Settings → Restore from Backup tap karo<br>'
+          +'3. Yeh .html file select karo – data restore ho jayega!'
+        +'</div>'
+        +'<button onclick="copyJsonToClipboard()" style="width:100%;padding:10px;background:rgba(240,192,64,.12);border:1px solid rgba(240,192,64,.3);border-radius:10px;color:#F0C040;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:600;cursor:pointer">📋 JSON Copy karo (Manual Restore)</button>'
+      +'</div>'
+      +'<div style="margin-top:12px;padding-top:12px;border-top:1px solid #2A2A3A;font-size:11px;color:#4A4A6A;text-align:center">'
         +'Made with PaisaBook 💰 · Apna Paisa, Apna Hisaab'
       +'</div>'
     +'</div>'
+
+    +'<script>'
+    +'function copyJsonToClipboard(){'
+      +'var el=document.getElementById(\'pb-backup-json\');'
+      +'if(!el)return;'
+      +'navigator.clipboard.writeText(el.textContent).then(function(){'
+        +'alert(\'✅ JSON copied! PaisaBook mein paste karo.\');'
+      +'}).catch(function(){'
+        +'var ta=document.createElement(\'textarea\');'
+        +'ta.value=el.textContent;document.body.appendChild(ta);ta.select();document.execCommand(\'copy\');document.body.removeChild(ta);'
+        +'alert(\'✅ JSON copied!\');'
+      +'});'
+    +'}'
+    +'<\/script>'
 
     +'</body></html>';
 }
@@ -2445,7 +2902,7 @@ function updateBackupStatusUI() {
   var _orig = setMoreTab;
   setMoreTab = function(tab) {
     _orig(tab);
-    if (tab === 'settings') updateBackupStatusUI();
+    if (tab === 'settings') { updateBackupStatusUI(); checkStorageSize(); }
   };
 })();
 
@@ -2487,22 +2944,714 @@ function dismissBackupBanner() {
 }
 
 /* Restore helper (power user / future use) */
-function restoreFromBackup(jsonString) {
+function restoreFromBackup(input) {
   try {
+    var jsonString = input;
+    /* ✅ Fix #9: If HTML file passed, extract embedded JSON */
+    if (typeof input === 'string' && input.trim().startsWith('<')) {
+      var match = input.match(/<script[^>]+id="pb-backup-json"[^>]*>([\s\S]*?)<\/script>/i);
+      if (!match) throw new Error('Embedded JSON not found in backup HTML');
+      jsonString = match[1];
+    }
     var p = JSON.parse(jsonString);
-    if (!p || !p.data) throw new Error('Invalid');
+    if (!p || !p.data) throw new Error('Invalid backup format');
     if (p.data.transactions) saveData('pb_transactions', p.data.transactions);
     if (p.data.udhar)        saveData('pb_udhar',        p.data.udhar);
     if (p.data.budgets)      saveData('pb_budgets',      p.data.budgets);
+    if (p.data.festivals)    saveData('pb_festivals',    p.data.festivals);
     if (p.data.emis)         saveData('pb_emis',         p.data.emis);
+    if (p.data.subscriptions)saveData('pb_subscriptions',p.data.subscriptions);
+    if (p.data.categories)   saveData('pb_categories',   p.data.categories);
     refreshHome();
+    refreshUdhar();
     if(typeof refreshStats==='function') refreshStats();
-    showToast('✅ Backup restore hua! '+(p.data.transactions||[]).length+' transactions.', 'success');
+    showToast('✅ Restore hua! '+(p.data.transactions||[]).length+' transactions wapas aaye.', 'success');
     return true;
   } catch(e) {
-    showToast('❌ Invalid backup file', 'error');
+    showToast('❌ Invalid backup file: '+e.message, 'error');
     return false;
   }
+}
+
+/* ══════════════════════════════════════════
+   PHASE 1 – FEATURE 1: STREAK SYSTEM 🔥
+══════════════════════════════════════════ */
+var STREAK_KEY = 'pb_streak';
+var STREAK_LAST_KEY = 'pb_streak_last';
+
+function initStreak() {
+  /* On load: check if yesterday had an entry. If not, reset streak. */
+  var txns = getData('pb_transactions');
+  var today = getTodayISO();
+  var yesterday = (function(){
+    var d=new Date(); d.setDate(d.getDate()-1);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  })();
+
+  var streakCount = parseInt(localStorage.getItem(STREAK_KEY)||'0',10);
+  var lastEntry   = localStorage.getItem(STREAK_LAST_KEY)||'';
+
+  /* Already counted today */
+  if (lastEntry === today) { return; }
+
+  /* Had entry yesterday → keep streak alive (don't reset) */
+  var hadYesterday = txns.some(function(t){ return t.date && t.date.slice(0,10) === yesterday; });
+  var hadToday     = txns.some(function(t){ return t.date && t.date.slice(0,10) === today; });
+
+  if (!hadYesterday && !hadToday && streakCount > 0) {
+    /* Miss → reset */
+    localStorage.setItem(STREAK_KEY, '0');
+    localStorage.setItem(STREAK_LAST_KEY, '');
+  } else if (hadToday && lastEntry !== today) {
+    /* Today has data but not yet counted → count it */
+    var newCount = (hadYesterday || lastEntry === yesterday) ? streakCount + 1 : 1;
+    localStorage.setItem(STREAK_KEY, String(newCount));
+    localStorage.setItem(STREAK_LAST_KEY, today);
+  }
+}
+
+function updateStreakOnEntry() {
+  var today = getTodayISO();
+  var lastEntry = localStorage.getItem(STREAK_LAST_KEY)||'';
+  if (lastEntry === today) return; /* already counted today */
+
+  var yesterday = (function(){
+    var d=new Date(); d.setDate(d.getDate()-1);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  })();
+
+  var current = parseInt(localStorage.getItem(STREAK_KEY)||'0',10);
+  var newCount = (lastEntry === yesterday) ? current + 1 : 1;
+  localStorage.setItem(STREAK_KEY, String(newCount));
+  localStorage.setItem(STREAK_LAST_KEY, today);
+  renderStreakBadge();
+}
+
+function renderStreakBadge() {
+  var count = parseInt(localStorage.getItem(STREAK_KEY)||'0',10);
+  var badge = document.getElementById('streakBadge');
+  var numEl = document.getElementById('streakCount');
+  if (!badge || !numEl) return;
+  if (count >= 2) {
+    numEl.textContent = count;
+    badge.classList.add('visible');
+    /* Milestone toasts */
+    var shown = localStorage.getItem('pb_streak_milestone');
+    if ((count===7||count===14||count===30||count===50||count===100) && shown !== String(count)) {
+      localStorage.setItem('pb_streak_milestone', String(count));
+      setTimeout(function(){
+        showToast('🔥 '+count+' din ka streak! Jabardast discipline! 💪','success');
+      }, 800);
+    }
+  } else {
+    badge.classList.remove('visible');
+  }
+}
+
+/* ══════════════════════════════════════════
+   PHASE 1 – FEATURE 2: DAILY SNAPSHOT ⚡
+══════════════════════════════════════════ */
+function updateGreeting() {
+  var h = new Date().getHours();
+  var greeting = h < 12 ? 'Suprabhat! ☀️' : h < 17 ? 'Namaste! 👋' : h < 21 ? 'Shubh Sham! 🌆' : 'Shubh Ratri! 🌙';
+  var el = document.getElementById('greetingText');
+  if (el) el.innerHTML = greeting;
+}
+
+function renderSnapshot() {
+  var now = new Date();
+  var todayStr = getTodayISO();
+  var all = getData('pb_transactions');
+
+  /* Today's expenses */
+  var todayExp = 0;
+  all.forEach(function(t) {
+    if (t.type === 'expense' && t.date && t.date.slice(0,10) === todayStr) todayExp += t.amount;
+  });
+
+  /* This month income & expense */
+  var monthTxns = all.filter(function(t) {
+    var d = new Date(t.date);
+    return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
+  });
+  var monthInc = 0, monthExp = 0;
+  monthTxns.forEach(function(t){ if(t.type==='income') monthInc+=t.amount; else monthExp+=t.amount; });
+  var savPct = monthInc > 0 ? Math.round(((monthInc-monthExp)/monthInc)*100) : null;
+
+  /* Budget left (sum of all budgets minus expenses) */
+  var budgets = getData('pb_budgets').filter(function(b){ return b.month===selectedMonth && (b.year||selectedYear)===selectedYear; });
+  var totalBudgetLimit = budgets.reduce(function(s,b){ return s+b.limit; },0);
+  var budgetCats = {};
+  budgets.forEach(function(b){ budgetCats[b.category] = b.limit; });
+  var budgetSpent = 0;
+  monthTxns.forEach(function(t){ if(t.type==='expense' && budgetCats[t.category]) budgetSpent+=t.amount; });
+  var budgetLeft = totalBudgetLimit > 0 ? (totalBudgetLimit - budgetSpent) : null;
+
+  /* Render values */
+  var snapToday  = document.getElementById('snap-today');
+  var snapMonth  = document.getElementById('snap-month');
+  var snapBudget = document.getElementById('snap-budget');
+  var snapRate   = document.getElementById('snap-rate');
+
+  if (snapToday)  { snapToday.textContent  = formatCurrency(todayExp); snapToday.style.color  = todayExp > 0 ? 'var(--red)' : 'var(--muted)'; }
+  if (snapMonth)  { snapMonth.textContent  = formatCurrency(monthExp); snapMonth.style.color  = monthExp > 0 ? 'var(--red)' : 'var(--muted)'; }
+
+  if (snapBudget) {
+    if (budgetLeft !== null) {
+      snapBudget.textContent  = formatCurrency(Math.abs(budgetLeft));
+      snapBudget.style.color  = budgetLeft >= 0 ? 'var(--green)' : 'var(--red)';
+    } else {
+      snapBudget.textContent  = '–';
+      snapBudget.style.color  = 'var(--muted)';
+    }
+  }
+
+  if (snapRate) {
+    if (savPct !== null) {
+      snapRate.textContent = savPct + '%';
+      snapRate.style.color = savPct >= 20 ? 'var(--green)' : savPct >= 10 ? 'var(--accent)' : 'var(--red)';
+    } else {
+      snapRate.textContent = '–';
+      snapRate.style.color = 'var(--muted)';
+    }
+  }
+
+  /* Time */
+  var timeEl = document.getElementById('snapshotTime');
+  if (timeEl) timeEl.textContent = now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+
+  /* Smart insight */
+  var insightEl  = document.getElementById('snapshotInsight');
+  var iconEl     = document.getElementById('snapInsightIcon');
+  var textEl     = document.getElementById('snapInsightText');
+  if (!insightEl || !iconEl || !textEl) return;
+
+  var insight = generateSnapshotInsight(monthTxns, todayExp, monthExp, monthInc, savPct, budgetLeft, totalBudgetLimit);
+  if (insight) {
+    iconEl.textContent = insight.icon;
+    textEl.textContent = insight.text;
+    insightEl.style.display = 'flex';
+  } else {
+    insightEl.style.display = 'none';
+  }
+}
+
+function generateSnapshotInsight(monthTxns, todayExp, monthExp, monthInc, savPct, budgetLeft, totalBudgetLimit) {
+  var now = new Date();
+  var dayOfMonth = now.getDate();
+  var daysInMonth = new Date(selectedYear, selectedMonth+1, 0).getDate();
+  var daysLeft = daysInMonth - dayOfMonth;
+
+  /* Priority 1: Budget almost khatam */
+  if (budgetLeft !== null && totalBudgetLimit > 0) {
+    var budgetPct = Math.round(((totalBudgetLimit - budgetLeft) / totalBudgetLimit) * 100);
+    if (budgetLeft < 0) return { icon:'🚨', text: 'Budget cross ho gaya! '+Math.abs(budgetLeft)>1000?formatCurrency(Math.abs(budgetLeft))+' overspent!':'Expenses control karo.' };
+    if (budgetPct >= 80) return { icon:'⚠️', text: 'Budget '+budgetPct+'% use ho gaya – sirf '+formatCurrency(budgetLeft)+' bacha hai.' };
+  }
+
+  /* Priority 2: Today high spending */
+  if (todayExp > 0 && monthInc > 0) {
+    var dailyAvg = monthExp / dayOfMonth;
+    if (todayExp > dailyAvg * 2 && todayExp > 500) {
+      return { icon:'📈', text: 'Aaj ka kharch average se '+Math.round(todayExp/dailyAvg)+'x zyada hai.' };
+    }
+  }
+
+  /* Priority 3: On-track savings */
+  if (savPct !== null && savPct >= 25 && monthExp > 0) {
+    return { icon:'🎉', text: savPct+'% bachat! Is mahine aap track pe hain.' };
+  }
+
+  /* Priority 4: Projection */
+  if (monthExp > 0 && monthInc > 0 && dayOfMonth >= 5) {
+    var dailyRate = monthExp / dayOfMonth;
+    var projected = Math.round(dailyRate * daysInMonth);
+    if (projected > monthInc) {
+      return { icon:'⚠️', text: 'Is rate pe '+formatCurrency(projected)+' kharch hoga – income se zyada!' };
+    }
+  }
+
+  /* Priority 5: Zero today = good */
+  if (todayExp === 0 && dayOfMonth > 1) {
+    return { icon:'✅', text: 'Aaj koi kharch nahi! Zero-spend day 🙌' };
+  }
+
+  return null;
+}
+
+/* ══════════════════════════════════════════
+   PHASE 1 – FEATURE 3: MONTHLY REPORT 📋
+══════════════════════════════════════════ */
+function showMonthlyReport() {
+  var overlay = document.getElementById('report-overlay');
+  if (!overlay) return;
+  buildReportUI();
+  overlay.classList.add('show');
+  document.getElementById('main').style.overflow = 'hidden';
+}
+
+function hideMonthlyReport() {
+  var overlay = document.getElementById('report-overlay');
+  if (overlay) overlay.classList.remove('show');
+  document.getElementById('main').style.overflow = '';
+}
+
+function buildReportUI() {
+  var all    = getData('pb_transactions');
+  var ulist  = getData('pb_udhar');
+  var budgets = getData('pb_budgets').filter(function(b){ return b.month===selectedMonth && (b.year||selectedYear)===selectedYear; });
+
+  var monthTxns = all.filter(function(t){
+    var d=new Date(t.date); return d.getMonth()===selectedMonth&&d.getFullYear()===selectedYear;
+  });
+
+  var income=0, expense=0;
+  monthTxns.forEach(function(t){ if(t.type==='income') income+=t.amount; else expense+=t.amount; });
+  var savings = income - expense;
+  var savPct  = income > 0 ? Math.round((savings/income)*100) : 0;
+  var monthName = MONTHS[selectedMonth]+' '+selectedYear;
+
+  /* Grade */
+  var grade, gradeColor, gradeBg;
+  if (savPct >= 30)      { grade='💪 Excellent!';    gradeColor='#40D080'; gradeBg='rgba(64,208,128,.12)'; }
+  else if (savPct >= 20) { grade='🟢 Acha Kiya!';    gradeColor='#40D080'; gradeBg='rgba(64,208,128,.1)'; }
+  else if (savPct >= 10) { grade='🟡 Theek Hai';     gradeColor='var(--accent)'; gradeBg='rgba(240,192,64,.12)'; }
+  else if (income > 0)   { grade='🔴 Kharch Zyada';  gradeColor='var(--red)'; gradeBg='rgba(240,80,96,.1)'; }
+  else                   { grade='📊 Data Add Karo'; gradeColor='var(--muted)'; gradeBg='rgba(112,112,160,.1)'; }
+
+  /* Top category */
+  var catMap = {};
+  monthTxns.filter(function(t){ return t.type==='expense'; }).forEach(function(t){ catMap[t.category]=(catMap[t.category]||0)+t.amount; });
+  var cats = Object.keys(catMap).map(function(k){ return{cat:k,amt:catMap[k]}; }).sort(function(a,b){ return b.amt-a.amt; });
+  var topCat = cats[0] || null;
+
+  /* Worst day (highest single-day spend) */
+  var dayMap = {};
+  monthTxns.filter(function(t){ return t.type==='expense'; }).forEach(function(t){
+    var d = t.date ? t.date.slice(0,10) : '';
+    if (d) dayMap[d] = (dayMap[d]||0) + t.amount;
+  });
+  var worstDay = null, worstAmt = 0;
+  Object.keys(dayMap).forEach(function(d){ if(dayMap[d]>worstAmt){ worstAmt=dayMap[d]; worstDay=d; } });
+
+  /* Udhar */
+  var lena=0,dena=0;
+  ulist.filter(function(u){ return !u.settled; }).forEach(function(u){ if(u.type==='lena') lena+=u.remainingAmount; else dena+=u.remainingAmount; });
+
+  /* Transaction count */
+  var incCount = monthTxns.filter(function(t){ return t.type==='income'; }).length;
+  var expCount = monthTxns.filter(function(t){ return t.type==='expense'; }).length;
+
+  /* Days in month stats */
+  var daysInMonth = new Date(selectedYear, selectedMonth+1, 0).getDate();
+  var avgDailyExp = expCount > 0 ? Math.round(expense / daysInMonth) : 0;
+
+  /* Build HTML */
+  document.getElementById('rptTitle').textContent = '📋 '+monthName+' Report';
+
+  var h = '<div class="rpt-hero">'
+    + '<div class="rpt-month">'+monthName+'</div>'
+    + '<div class="rpt-grade-pill" style="background:'+gradeBg+';color:'+gradeColor+'">'+grade+'</div>'
+    + '</div>';
+
+  /* 3 big stats */
+  h += '<div class="rpt-stats3">';
+  h += rptStat('💰','Income',formatCurrency(income),'var(--green)');
+  h += rptStat('💸','Kharch',formatCurrency(expense),'var(--red)');
+  h += rptStat('🏦','Bachat',formatCurrency(Math.abs(savings)),savings>=0?'var(--accent)':'var(--red)');
+  h += '</div>';
+
+  /* Highlights */
+  h += '<div class="rpt-section-title">✨ Mahine ke Highlights</div>';
+
+  if (topCat) {
+    h += rptRow(getCatIcon(topCat.cat), 'Top Kharch Category', topCat.cat, formatCurrency(topCat.amt), 'var(--red)');
+  }
+  if (worstDay) {
+    var wdDisplay = new Date(worstDay+'T12:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+    h += rptRow('📅', 'Worst Day', wdDisplay, formatCurrency(worstAmt), 'var(--red)');
+  }
+  if (avgDailyExp > 0) {
+    h += rptRow('📊', 'Daily Average Kharch', 'Per din', formatCurrency(avgDailyExp), 'var(--accent)');
+  }
+  h += rptRow('🔢', 'Total Transactions', incCount+' income • '+expCount+' expense', (incCount+expCount)+' entries', 'var(--muted)');
+
+  /* Savings rate bar */
+  if (income > 0) {
+    var barW = Math.max(0,Math.min(100,savPct));
+    var barColor = savPct>=20?'var(--green)':savPct>=10?'var(--accent)':'var(--red)';
+    h += '<div class="rpt-section-title">📈 Saving Rate</div>';
+    h += '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 13px">';
+    h += '<div style="display:flex;justify-content:space-between;margin-bottom:7px"><span style="font-size:12px;color:var(--muted)">0%</span><span style="font-family:var(--font-head);font-size:14px;font-weight:800;color:'+barColor+'">'+savPct+'% saved</span><span style="font-size:12px;color:var(--muted)">100%</span></div>';
+    h += '<div style="height:8px;background:var(--border);border-radius:100px;overflow:hidden"><div style="height:100%;width:'+barW+'%;background:'+barColor+';border-radius:100px;transition:width .8s"></div></div>';
+    h += '</div>';
+  }
+
+  /* Udhar section */
+  if (lena > 0 || dena > 0) {
+    h += '<div class="rpt-section-title">🤝 Udhar Status</div>';
+    if (lena > 0) h += rptRow('💰','Lena Hai',''+ulist.filter(function(u){return !u.settled&&u.type==='lena';}).length+' log',formatCurrency(lena),'var(--green)');
+    if (dena > 0) h += rptRow('🙏','Dena Hai',''+ulist.filter(function(u){return !u.settled&&u.type==='dena';}).length+' log',formatCurrency(dena),'var(--red)');
+  }
+
+  /* Budget section */
+  if (budgets.length > 0) {
+    h += '<div class="rpt-section-title">🎯 Budget Performance</div>';
+    budgets.slice(0,4).forEach(function(b){
+      var spent = monthTxns.filter(function(t){ return t.type==='expense'&&t.category===b.category; }).reduce(function(s,t){ return s+t.amount; },0);
+      var pct = b.limit>0 ? Math.round((spent/b.limit)*100) : 0;
+      var col = pct>=100?'var(--red)':pct>=80?'var(--orange)':'var(--green)';
+      h += rptRow(getCatIcon(b.category), b.category, formatCurrency(spent)+' / '+formatCurrency(b.limit), pct+'%', col);
+    });
+  }
+
+  /* Top 3 spending categories mini list */
+  if (cats.length > 1) {
+    h += '<div class="rpt-section-title">💸 Top Expenses</div>';
+    cats.slice(0,5).forEach(function(c,i){
+      var medals=['🥇','🥈','🥉','4️⃣','5️⃣'];
+      h += rptRow(medals[i], c.cat, getCatIcon(c.cat)+' '+c.cat, formatCurrency(c.amt), 'var(--red)');
+    });
+  }
+
+  /* WhatsApp share button */
+  h += '<button class="rpt-wa-btn" onclick="shareMonthlyReportWA()">💬 WhatsApp pe Share Karo</button>';
+
+  document.getElementById('rptBody').innerHTML = h;
+}
+
+function rptStat(icon, label, val, color) {
+  return '<div class="rpt-stat">'
+    +'<div class="rst-icon">'+icon+'</div>'
+    +'<div class="rst-label">'+label+'</div>'
+    +'<div class="rst-value" style="color:'+color+'">'+val+'</div>'
+    +'</div>';
+}
+
+function rptRow(icon, label, sub, val, valColor) {
+  return '<div class="rpt-row">'
+    +'<div class="rpt-row-left"><div class="rpt-row-icon">'+icon+'</div>'
+    +'<div><div class="rpt-row-label">'+escapeHtml(label)+'</div>'
+    +(sub?'<div class="rpt-row-sub">'+escapeHtml(sub)+'</div>':'')+'</div></div>'
+    +'<div class="rpt-row-val" style="color:'+valColor+'">'+val+'</div>'
+    +'</div>';
+}
+
+function shareMonthlyReportWA() {
+  var all = getData('pb_transactions');
+  var ulist = getData('pb_udhar');
+  var monthTxns = all.filter(function(t){
+    var d=new Date(t.date); return d.getMonth()===selectedMonth&&d.getFullYear()===selectedYear;
+  });
+  var income=0, expense=0;
+  monthTxns.forEach(function(t){ if(t.type==='income') income+=t.amount; else expense+=t.amount; });
+  var savings=income-expense, savPct=income>0?Math.round((savings/income)*100):0;
+
+  /* Top cat */
+  var catMap={};
+  monthTxns.filter(function(t){ return t.type==='expense'; }).forEach(function(t){ catMap[t.category]=(catMap[t.category]||0)+t.amount; });
+  var topCat=Object.keys(catMap).map(function(k){return{cat:k,amt:catMap[k]};}).sort(function(a,b){return b.amt-a.amt;})[0];
+
+  /* Worst day */
+  var dayMap={};
+  monthTxns.filter(function(t){ return t.type==='expense'; }).forEach(function(t){ var d=t.date?t.date.slice(0,10):''; if(d)dayMap[d]=(dayMap[d]||0)+t.amount; });
+  var worstDay=null,worstAmt=0;
+  Object.keys(dayMap).forEach(function(d){ if(dayMap[d]>worstAmt){worstAmt=dayMap[d];worstDay=d;} });
+  var wdDisplay = worstDay ? new Date(worstDay+'T12:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : null;
+
+  var streak = parseInt(localStorage.getItem(STREAK_KEY)||'0',10);
+
+  var lines = [
+    '📋 *'+MONTHS[selectedMonth]+' '+selectedYear+' Monthly Report* – PaisaBook',
+    '',
+    '💰 Income:  *'+formatCurrency(income)+'*',
+    '💸 Expenses: *'+formatCurrency(expense)+'*',
+    '🏦 Savings: *'+formatCurrency(savings)+'* ('+savPct+'%)',
+  ];
+  if (topCat)    lines.push('🏆 Top Kharch: *'+topCat.cat+'* ('+formatCurrency(topCat.amt)+')');
+  if (wdDisplay) lines.push('📅 Worst Day: *'+wdDisplay+'* ('+formatCurrency(worstAmt)+')');
+
+  var lena=0,dena=0;
+  ulist.filter(function(u){return !u.settled;}).forEach(function(u){ if(u.type==='lena')lena+=u.remainingAmount; else dena+=u.remainingAmount; });
+  if(lena>0) lines.push('💰 Lena Hai: *'+formatCurrency(lena)+'*');
+  if(dena>0) lines.push('🙏 Dena Hai: *'+formatCurrency(dena)+'*');
+  if(streak>=2) lines.push('🔥 Streak: *'+streak+' days* tracking!');
+  lines.push('', '_Made with PaisaBook 📱_', '_Apna Paisa, Apna Hisaab_');
+
+  window.open('https://wa.me/?text='+encodeURIComponent(lines.join('\n')),'_blank');
+}
+
+/* Close report overlay on backdrop tap */
+document.addEventListener('DOMContentLoaded',function(){
+  var ov = document.getElementById('report-overlay');
+  if (ov) ov.addEventListener('click', function(e){ if(e.target===ov) hideMonthlyReport(); });
+});
+
+/* ══════════════════════════════════════════
+   PHASE 2 – FINANCIAL HEALTH SCORE 🏥
+══════════════════════════════════════════ */
+function computeHealthScore() {
+  var all    = getData('pb_transactions');
+  var ulist  = getData('pb_udhar');
+  var emis   = getData('pb_emis');
+  var curTxns = all.filter(function(t){
+    var d=new Date(t.date); return d.getMonth()===selectedMonth&&d.getFullYear()===selectedYear;
+  });
+  var income=0, expense=0;
+  curTxns.forEach(function(t){ if(t.type==='income') income+=t.amount; else expense+=t.amount; });
+  var savPct = income>0 ? Math.round(((income-expense)/income)*100) : null;
+
+  /* — Savings Score (0–40) — */
+  var savingsScore=0;
+  if(income===0){ savingsScore=0; }
+  else if(savPct>=30){ savingsScore=40; }
+  else if(savPct>=20){ savingsScore=30; }
+  else if(savPct>=10){ savingsScore=20; }
+  else if(savPct>=0) { savingsScore=10; }
+  else               { savingsScore=0; }
+  var savingsColor = savingsScore>=30?'var(--green)':savingsScore>=20?'var(--accent)':savingsScore>=10?'var(--orange)':'var(--red)';
+
+  /* — EMI Score (0–30) — */
+  var totalEmi = emis.reduce(function(s,e){return s+e.amount;},0);
+  var emiPct   = income>0 ? Math.round((totalEmi/income)*100) : (totalEmi>0?100:0);
+  var emiScore=0;
+  if(totalEmi===0)    { emiScore=30; }
+  else if(emiPct<20)  { emiScore=30; }
+  else if(emiPct<30)  { emiScore=22; }
+  else if(emiPct<50)  { emiScore=12; }
+  else                { emiScore=0; }
+  var emiColor = emiScore>=25?'var(--green)':emiScore>=15?'var(--accent)':emiScore>=8?'var(--orange)':'var(--red)';
+
+  /* — Udhar Score (0–30) — */
+  var dena=0, lena=0;
+  ulist.filter(function(u){return !u.settled;}).forEach(function(u){
+    if(u.type==='dena') dena+=u.remainingAmount; else lena+=u.remainingAmount;
+  });
+  var udharScore=0;
+  var denaPct = income>0 ? Math.round((dena/income)*100) : (dena>0?100:0);
+  if(dena===0)          { udharScore=30; }
+  else if(denaPct<10)   { udharScore=22; }
+  else if(denaPct<25)   { udharScore=12; }
+  else                  { udharScore=4; }
+  /* Bonus: having "lena" is neutral-positive */
+  if(lena>0&&dena===0) udharScore=Math.min(30,udharScore+3);
+  var udharColor = udharScore>=25?'var(--green)':udharScore>=15?'var(--accent)':udharScore>=8?'var(--orange)':'var(--red)';
+
+  var total = savingsScore + emiScore + udharScore;
+  var grade, color;
+  if(total>=80)      { grade='💚 Excellent!';    color='var(--green)'; }
+  else if(total>=65) { grade='🟢 Good';          color='var(--green)'; }
+  else if(total>=45) { grade='🟡 Average';       color='var(--accent)'; }
+  else if(total>=25) { grade='🔴 Needs Work';    color='var(--orange)'; }
+  else               { grade='⚫ Critical';      color='var(--red)'; }
+
+  if(income===0){ grade='📊 Data Chahiye'; color='var(--muted)'; }
+
+  return { total:total, grade:grade, color:color,
+           savingsScore:savingsScore, emiScore:emiScore, udharScore:udharScore,
+           savingsColor:savingsColor, emiColor:emiColor, udharColor:udharColor };
+}
+
+function renderHealthScore() {
+  var s = computeHealthScore();
+  var card = document.getElementById('fhsCard');
+  var pill = document.getElementById('fhsPill');
+  var bar  = document.getElementById('fhsBar');
+  var tip  = document.getElementById('fhsTip');
+  if (!card) return;
+
+  /* Top accent bar color */
+  card.style.setProperty('--fhs-top-color', s.color);
+  card.style.cssText = card.style.cssText; /* trigger repaint */
+
+  /* Inject ::before color via a temporary inline style element */
+  var styleId = 'fhs-before-style';
+  var existing = document.getElementById(styleId);
+  if (existing) existing.remove();
+  var st = document.createElement('style');
+  st.id = styleId;
+  st.textContent = '#fhsCard::before{background:linear-gradient(90deg,'+s.color+','+s.emiColor+','+s.savingsColor+')}';
+  document.head.appendChild(st);
+
+  if (pill) { pill.textContent = s.total+' / 100'; pill.style.background='rgba(0,0,0,.15)'; pill.style.color=s.color; pill.style.border='1.5px solid '+s.color+'44'; }
+  if (bar)  { bar.style.width=s.total+'%'; bar.style.background=s.color; }
+
+  var sm = document.getElementById('fhm-savings');
+  var em = document.getElementById('fhm-emi');
+  var um = document.getElementById('fhm-udhar');
+  if(sm){ sm.textContent=s.savingsScore+'/40'; sm.style.color=s.savingsColor; }
+  if(em){ em.textContent=s.emiScore+'/30';     em.style.color=s.emiColor; }
+  if(um){ um.textContent=s.udharScore+'/30';   um.style.color=s.udharColor; }
+
+  var tips={};
+  tips['💚 Excellent!']  = '🎉 Zabardast financial health! SIP/investments start karo.';
+  tips['🟢 Good']        = '👍 Acha chal raha hai – savings aur badha sakte ho!';
+  tips['🟡 Average']     = '⚡ EMI ya savings pe dhyan do – improvement possible hai.';
+  tips['🔴 Needs Work']  = '⚠️ Expenses review karo aur debt settle karo.';
+  tips['⚫ Critical']    = '🆘 Immediate action lo – budget banao aur udhar settle karo.';
+  tips['📊 Data Chahiye']= '📝 Is mahine ka income aur expenses add karo accurate score ke liye.';
+  if(tip) tip.textContent = tips[s.grade] || 'Score improve karne ke liye income add karo.';
+}
+
+/* ══════════════════════════════════════════
+   PHASE 2 – SUBSCRIPTION TRACKER 📺
+══════════════════════════════════════════ */
+var subFormOpen = false;
+
+var SUB_CAT_ICONS = {
+  'Entertainment':'🎬','Music':'🎵','News':'📰','Fitness':'💪',
+  'Software':'💻','Cloud':'☁️','Education':'📚','Other':'📦'
+};
+
+function getCycleLabel(cycle){
+  return cycle==='monthly'?'Monthly':cycle==='yearly'?'Yearly':cycle==='quarterly'?'Quarterly':'Monthly';
+}
+
+function getMonthlyEquivalent(sub){
+  if(sub.billingCycle==='monthly')   return sub.amount;
+  if(sub.billingCycle==='yearly')    return Math.round(sub.amount/12);
+  if(sub.billingCycle==='quarterly') return Math.round(sub.amount/3);
+  return sub.amount;
+}
+
+function getDaysUntilBilling(dateStr){
+  if(!dateStr) return null;
+  var next=new Date(dateStr+'T12:00:00');
+  var today=new Date(); today.setHours(0,0,0,0);
+  return Math.ceil((next-today)/864e5);
+}
+
+function toggleSubForm(){
+  subFormOpen=!subFormOpen;
+  document.getElementById('subFormWrap').classList.toggle('open',subFormOpen);
+  document.getElementById('subAddIcon').textContent=subFormOpen?'✕':'➕';
+  if(!subFormOpen){
+    document.getElementById('gf-sub-name').value='';
+    document.getElementById('gf-sub-amount').value='';
+    document.getElementById('gf-sub-date').value='';
+    document.getElementById('gf-sub-cycle').value='monthly';
+    document.getElementById('gf-sub-cat').value='Entertainment';
+  }
+}
+
+function saveSubscription(){
+  var name     = document.getElementById('gf-sub-name').value.trim();
+  var amount   = parseFloat(document.getElementById('gf-sub-amount').value);
+  var cycle    = document.getElementById('gf-sub-cycle').value;
+  var date     = document.getElementById('gf-sub-date').value;
+  var category = document.getElementById('gf-sub-cat').value;
+
+  if(!name)           { showToast('Service naam daalo!','error'); return; }
+  if(!amount||amount<=0){ showToast('Valid amount daalo!','error'); return; }
+  if(!date)           { showToast('Next billing date daalo!','error'); return; }
+
+  var subs = getData('pb_subscriptions');
+  subs.push({ id:generateId(), name:name, amount:amount, billingCycle:cycle,
+               nextBillingDate:date, category:category, createdAt:getLocalISODate() });
+  saveData('pb_subscriptions', subs);
+  showToast('📺 '+name+' subscription add hua!','success');
+  subFormOpen=true; toggleSubForm();
+  renderSubscriptionSection();
+}
+
+function deleteSubscription(id){
+  saveData('pb_subscriptions', getData('pb_subscriptions').filter(function(s){return s.id!==id;}));
+  showToast('Subscription delete hua','success');
+  renderSubscriptionSection();
+}
+
+function renderSubscriptionSection(){
+  var subs   = getData('pb_subscriptions');
+  var txns   = getData('pb_transactions').filter(function(t){
+    var d=new Date(t.date); return d.getMonth()===selectedMonth&&d.getFullYear()===selectedYear&&t.type==='income';
+  });
+  var monthInc = txns.reduce(function(s,t){return s+t.amount;},0);
+  var monthlyTotal = subs.reduce(function(s,sub){return s+getMonthlyEquivalent(sub);},0);
+
+  /* Health badge */
+  var subPct = monthInc>0 ? Math.round((monthlyTotal/monthInc)*100) : (monthlyTotal>0?100:0);
+  var hIcon,hTitle,hSub,hBadge,hColor;
+  if(!subs.length){
+    hIcon='📺'; hTitle='Koi Subscription Nahi'; hSub='Subscriptions add karo track karne ke liye'; hBadge='–'; hColor='var(--muted)';
+  } else if(monthInc===0){
+    hIcon='📊'; hTitle='Income Data Nahi'; hSub='Is mahine income add karo accurate % dekhne ke liye'; hBadge='–'; hColor='var(--muted)';
+  } else if(subPct<5){
+    hIcon='✅'; hTitle='Subscription Load Low'; hSub='Income ka sirf '+subPct+'% – bilkul theek hai!'; hBadge='Healthy ✅'; hColor='var(--green)';
+  } else if(subPct<12){
+    hIcon='🟡'; hTitle='Subscription Load OK'; hSub='Income ka '+subPct+'% – watch karte raho'; hBadge='OK 🟡'; hColor='var(--accent)';
+  } else {
+    hIcon='🔴'; hTitle='Subscriptions Bahut Hain!'; hSub='Income ka '+subPct+'% – review karo konsa band karna hai'; hBadge='High 🔴'; hColor='var(--red)';
+  }
+
+  document.getElementById('subHealthIcon').textContent = hIcon;
+  document.getElementById('subHealthTitle').textContent = hTitle;
+  document.getElementById('subHealthSub').textContent   = hSub;
+  var badge = document.getElementById('subHealthBadge');
+  badge.textContent = hBadge;
+  badge.style.cssText = 'background:'+hColor+'22;color:'+hColor+';border:1.5px solid '+hColor+'44';
+
+  /* Monthly total strip */
+  var strip = document.getElementById('subTotalStrip');
+  var totalEl = document.getElementById('subMonthlyTotal');
+  if(subs.length&&strip&&totalEl){
+    strip.style.display='flex';
+    totalEl.textContent=formatCurrency(monthlyTotal)+'/month';
+    if(monthInc>0) totalEl.textContent+='\u00A0\u00A0('+subPct+'% of income)';
+  } else if(strip){
+    strip.style.display='none';
+  }
+
+  var container = document.getElementById('subCards');
+  container.innerHTML='';
+
+  if(!subs.length){
+    container.innerHTML='<div class="goals-empty"><div class="goals-empty-icon">📺</div><div class="goals-empty-text">Koi subscription nahi<br>➕ Add Karo se add karo</div></div>';
+    return;
+  }
+
+  /* Sort: soonest billing date first */
+  var sorted = subs.slice().sort(function(a,b){
+    var da=getDaysUntilBilling(a.nextBillingDate)||9999;
+    var db=getDaysUntilBilling(b.nextBillingDate)||9999;
+    return da-db;
+  });
+
+  sorted.forEach(function(sub,idx){
+    var daysLeft = getDaysUntilBilling(sub.nextBillingDate);
+    var dueClass='', dueText='';
+    if(daysLeft===null){ dueClass='sub-due-ok'; dueText='No date'; }
+    else if(daysLeft<=3){ dueClass='sub-due-soon'; dueText='⚠️ '+daysLeft+'d left!'; }
+    else if(daysLeft<=7){ dueClass='sub-due-near'; dueText='📅 '+daysLeft+' din'; }
+    else{ dueClass='sub-due-ok'; dueText='✓ '+daysLeft+' din'; }
+
+    var monthly = getMonthlyEquivalent(sub);
+    var isYearly = sub.billingCycle==='yearly';
+    var isQuarterly = sub.billingCycle==='quarterly';
+    var monthlyNote = (isYearly||isQuarterly) ? '~'+formatCurrency(monthly)+'/mo' : '';
+
+    var card = document.createElement('div');
+    card.className='sub-card';
+    card.style.animationDelay=(idx*.06)+'s';
+    if(daysLeft!==null&&daysLeft<=3) card.style.borderLeftColor='var(--red)';
+    else if(daysLeft!==null&&daysLeft<=7) card.style.borderLeftColor='var(--accent)';
+
+    card.innerHTML=
+      '<div class="sub-card-icon">'+(SUB_CAT_ICONS[sub.category]||'📦')+'</div>'
+      +'<div class="sub-card-info">'
+        +'<div class="sub-card-name">'+escapeHtml(sub.name)+'</div>'
+        +'<div class="sub-card-meta">'
+          +'<span class="sub-card-cycle">'+getCycleLabel(sub.billingCycle)+'</span>'
+          +'<span class="sub-card-due '+dueClass+'">'+dueText+'</span>'
+        +'</div>'
+      +'</div>'
+      +'<div class="sub-card-right">'
+        +'<div class="sub-card-amount">'+formatCurrency(sub.amount)+'</div>'
+        +(monthlyNote?'<div class="sub-card-monthly">'+monthlyNote+'</div>':'')
+      +'</div>'
+      +'<button class="sub-del-btn" onclick="deleteSubscription(\''+sub.id+'\')">🗑</button>';
+
+    container.appendChild(card);
+  });
 }
 </script>
 </body>
