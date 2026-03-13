@@ -130,9 +130,21 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 .section-title{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.2px}
 .section-count{font-size:11px;color:var(--muted);background:var(--card);border:1px solid var(--border);padding:3px 9px;border-radius:100px;font-weight:600}
 .txn-list{display:flex;flex-direction:column;gap:8px}
-.txn-item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;transition:border-color .2s,transform .15s;cursor:default;animation:txnIn .35s ease both}
-@keyframes txnIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.txn-item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;transition:border-color .2s,transform .15s;cursor:default;animation:txnIn .35s ease both;position:relative}
 .txn-item:hover{border-color:rgba(112,112,160,.4)}
+.txn-del-btn{width:28px;height:28px;border-radius:50%;border:none;background:transparent;color:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;flex-shrink:0;opacity:0;transform:scale(.7)}
+.txn-item:hover .txn-del-btn{color:var(--muted);opacity:1;transform:scale(1)}
+.txn-item:active .txn-del-btn{color:var(--red);opacity:1}
+.txn-del-btn:hover{color:var(--red)!important;background:rgba(240,80,96,.1);border-radius:50%}
+/* Touch devices – always show delete button */
+@media(hover:none){.txn-del-btn{opacity:.45;transform:scale(1);color:var(--muted)}}
+@keyframes txnIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+/* Transaction Search */
+.txn-search-wrap{position:relative;margin-bottom:10px}
+.txn-search-input{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-lg);color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:500;padding:9px 14px 9px 38px;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none}
+.txn-search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(240,192,64,.07)}
+.txn-search-input::placeholder{color:var(--muted);opacity:.6}
+.txn-search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;opacity:.5}
 .txn-icon-wrap{width:40px;height:40px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
 .txn-icon-wrap.income-bg{background:rgba(64,208,128,.12)} .txn-icon-wrap.expense-bg{background:rgba(240,80,96,.10)}
 .txn-info{flex:1;min-width:0}
@@ -337,11 +349,11 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5) sepia(1)
 ═══════════════════════════════════════ */
 
 /* Sub-page nav within More */
-.more-tabs{display:flex;gap:6px;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-.more-tabs::-webkit-scrollbar{display:none}
-.more-tab-btn{padding:8px 16px;border-radius:100px;font-family:var(--font-head);font-size:12px;font-weight:700;border:1.5px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .2s;letter-spacing:.2px}
+.more-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:18px}
+.more-tab-btn{padding:9px 6px;border-radius:var(--radius-md);font-family:var(--font-head);font-size:11px;font-weight:700;border:1.5px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;white-space:normal;text-align:center;transition:all .2s;letter-spacing:.1px;line-height:1.3;display:flex;flex-direction:column;align-items:center;gap:2px}
+.more-tab-btn .mtb-emoji{font-size:16px;line-height:1}
 .more-tab-btn.active{border-color:var(--accent);background:rgba(240,192,64,.12);color:var(--accent);box-shadow:0 0 0 2px rgba(240,192,64,.08)}
-.more-tab-btn:active{transform:scale(.95)}
+.more-tab-btn:active{transform:scale(.93)}
 .more-panel{display:none}.more-panel.active{display:block}
 
 /* Section header */
@@ -462,10 +474,15 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5) sepia(1)
 /* ═══════════════════════════════════════
    LIGHT THEME
 ═══════════════════════════════════════ */
-body.light{--bg:#F0F0F6;--surface:#FFFFFF;--card:#FFFFFF;--border:#DCDCE8;--muted:#8080A0;--text:#18182E}
-body.light #header,body.light #nav{box-shadow:0 1px 12px rgba(0,0,30,.08)}
-body.light .summary-card,body.light .chart-card,body.light .udhar-card,body.light .budget-card,body.light .emi-card,body.light .festive-card,body.light .settings-card,body.light .insight-card{box-shadow:0 2px 12px rgba(0,0,30,.06)}
-body.light #splash{background:#F0F0F6}
+body.light{--bg:#F2F2F8;--surface:#FFFFFF;--card:#FFFFFF;--border:#DCDCE8;--muted:#8080A0;--text:#18182E;--shadow-card:0 2px 16px rgba(0,0,30,.08)}
+body.light #header{background:#fff;box-shadow:0 1px 16px rgba(0,0,30,.08);border-bottom-color:#E8E8F0}
+body.light #nav{background:#fff;box-shadow:0 -1px 16px rgba(0,0,30,.08);border-top-color:#E8E8F0}
+body.light .summary-card,body.light .chart-card,body.light .udhar-card,body.light .budget-card,body.light .emi-card,body.light .festive-card,body.light .settings-card,body.light .insight-card,body.light .snapshot-card,body.light .fhs-card,body.light .rec-card,body.light .sub-card{box-shadow:0 2px 14px rgba(0,0,30,.07)}
+body.light #splash{background:#F2F2F8}
+body.light .txn-item{box-shadow:0 1px 8px rgba(0,0,30,.05)}
+body.light .more-tab-btn{background:#F8F8FC;box-shadow:0 1px 4px rgba(0,0,30,.06)}
+body.light .udhar-sum-card{box-shadow:0 2px 10px rgba(0,0,30,.06)}
+body.light .add-amount-block{box-shadow:0 2px 12px rgba(0,0,30,.06)}
 
 /* ═══════════════════════════════════════
    PWA INSTALL BANNER
@@ -623,6 +640,144 @@ body.light .rpt-hero,.body.light .rpt-stat{background:#fff}
 .fhs-tip{font-size:11.5px;color:var(--muted);margin-top:9px;line-height:1.5;font-style:italic}
 body.light .fhm{background:#F4F4F8}
 body.light .fhs-card{background:var(--card)}
+
+/* ═══════════════════════════════════════
+   PHASE 3 – QUICK ADD WIDGET ⚡
+═══════════════════════════════════════ */
+#quick-fab{position:fixed;bottom:calc(var(--nav-h) + 14px);left:50%;transform:translateX(-50%);z-index:300;display:flex;align-items:center;gap:7px;padding:11px 22px 11px 18px;background:linear-gradient(135deg,#F0C040 0%,#F07020 100%);border-radius:100px;border:none;cursor:pointer;font-family:var(--font-head);font-size:13px;font-weight:800;color:#0A0A0F;letter-spacing:.3px;box-shadow:0 4px 28px rgba(240,192,64,.5),0 2px 8px rgba(0,0,0,.25);transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,opacity .3s;white-space:nowrap;-webkit-tap-highlight-color:transparent;user-select:none}
+#quick-fab:active{transform:translateX(-50%) scale(.9)}
+#quick-fab.hidden{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(12px)}
+.qfab-icon{font-size:16px}
+
+#quick-overlay{position:fixed;inset:0;z-index:9200;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .25s;padding-bottom:env(safe-area-inset-bottom,0px)}
+#quick-overlay.show{opacity:1;pointer-events:auto}
+.quick-sheet{background:var(--surface);border-radius:var(--radius-xl) var(--radius-xl) 0 0;width:100%;max-width:430px;transform:translateY(100%);transition:transform .38s cubic-bezier(.34,1.2,.64,1);overflow:hidden}
+#quick-overlay.show .quick-sheet{transform:translateY(0)}
+.qs-handle{width:36px;height:4px;border-radius:100px;background:var(--border);margin:10px auto 0}
+.qs-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 10px}
+.qs-title{font-family:var(--font-head);font-size:16px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px;letter-spacing:-.2px}
+.qs-close{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s}
+.qs-close:hover{border-color:var(--muted)}
+.qs-amount-row{display:flex;align-items:center;justify-content:center;gap:4px;padding:2px 18px 14px;border-bottom:1px solid var(--border)}
+.qs-symbol{font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--accent);opacity:.45;line-height:1;margin-top:4px}
+#qaAmountInput{font-family:var(--font-head);font-size:48px;font-weight:800;color:var(--accent);background:transparent;border:none;outline:none;width:220px;text-align:center;caret-color:var(--accent);letter-spacing:-2px;line-height:1}
+#qaAmountInput::placeholder{color:rgba(240,192,64,.18)}
+.qs-section-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:12px 18px 8px;display:flex;align-items:center;justify-content:space-between}
+.qs-section-label span{font-size:11px;font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0;opacity:.7}
+.qs-cats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:0 16px 12px}
+.qa-cat-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px 9px;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all .15s cubic-bezier(.34,1.56,.64,1);-webkit-tap-highlight-color:transparent}
+.qa-cat-btn:active{transform:scale(.88)}
+.qa-cat-btn.qa-selected{border-color:var(--red);background:rgba(240,80,96,.1);box-shadow:0 0 0 2px rgba(240,80,96,.1)}
+.qa-cat-icon{font-size:21px;line-height:1}
+.qa-cat-label{font-size:9.5px;font-weight:700;color:var(--muted);text-align:center;letter-spacing:.1px;line-height:1.2}
+.qa-cat-btn.qa-selected .qa-cat-label{color:var(--red)}
+.qs-note-row{padding:0 16px 12px}
+.qs-note-input{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-md);color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:500;padding:10px 14px;outline:none;transition:border-color .2s}
+.qs-note-input:focus{border-color:rgba(240,80,96,.3)}
+.qs-note-input::placeholder{color:var(--muted);opacity:.55}
+.qs-footer{padding:4px 16px 18px}
+.qs-save-btn{width:100%;padding:15px;border:none;border-radius:var(--radius-xl);background:linear-gradient(135deg,var(--red),#C02040);color:#fff;font-family:var(--font-head);font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 20px rgba(240,80,96,.3);transition:transform .15s,box-shadow .2s;letter-spacing:.3px}
+.qs-save-btn:hover{box-shadow:0 6px 28px rgba(240,80,96,.4)}
+.qs-save-btn:active{transform:scale(.97)}
+body.light .quick-sheet{background:#F0F0F6}
+body.light .qa-cat-btn{background:#fff}
+
+/* ═══════════════════════════════════════
+   PHASE 3 – RECURRING REMINDERS 🔔
+═══════════════════════════════════════ */
+.recurring-banners{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.rec-reminder-item{display:flex;align-items:center;gap:10px;background:rgba(240,144,64,.08);border:1px solid rgba(240,144,64,.28);border-radius:var(--radius-md);padding:10px 13px;cursor:default;animation:bannerSlide .4s cubic-bezier(.34,1.2,.64,1) both}
+.rec-reminder-item.overdue{background:rgba(240,80,96,.08);border-color:rgba(240,80,96,.28)}
+.rec-reminder-icon{font-size:18px;flex-shrink:0;animation:wiggle 3s ease-in-out infinite}
+.rec-reminder-text{flex:1;min-width:0}
+.rec-reminder-name{font-size:13px;font-weight:600;color:var(--orange);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-reminder-item.overdue .rec-reminder-name{color:var(--red)}
+.rec-reminder-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.rec-reminder-badge{font-family:var(--font-head);font-size:11px;font-weight:800;padding:3px 9px;border-radius:100px;background:rgba(240,144,64,.15);color:var(--orange);flex-shrink:0}
+.rec-reminder-item.overdue .rec-reminder-badge{background:rgba(240,80,96,.15);color:var(--red)}
+.rec-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:13px 14px;margin-bottom:9px;display:flex;align-items:center;gap:11px;animation:cardIn .3s ease both;position:relative;overflow:hidden}
+.rec-card-accent{position:absolute;top:0;left:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.rec-card-icon{width:40px;height:40px;border-radius:var(--radius-md);background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.rec-card-info{flex:1;min-width:0}
+.rec-card-name{font-family:var(--font-head);font-size:13.5px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.2px}
+.rec-card-sub{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap}
+.rec-card-day{font-size:11px;color:var(--muted);font-weight:500}
+.rec-card-status{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:100px}
+.rec-status-soon{background:rgba(240,80,96,.1);color:var(--red)}
+.rec-status-near{background:rgba(240,192,64,.1);color:var(--accent)}
+.rec-status-ok{background:rgba(64,208,128,.1);color:var(--green)}
+.rec-card-amount{font-family:var(--font-head);font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.3px;flex-shrink:0}
+.rec-del-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;margin-left:4px;flex-shrink:0}
+.rec-del-btn:hover{border-color:var(--red);color:var(--red);background:rgba(240,80,96,.08)}
+.rec-summary-strip{background:rgba(240,144,64,.06);border:1px solid rgba(240,144,64,.18);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.rec-summary-label{font-size:12px;color:var(--muted);font-weight:600}
+.rec-summary-val{font-family:var(--font-head);font-size:14px;font-weight:800;color:var(--orange)}
+
+/* ═══════════════════════════════════════
+   PHASE 3 – BUDGET FORECAST ENHANCED
+═══════════════════════════════════════ */
+.bc-forecast-row{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.bc-forecast-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:100px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.bfc-on-track{background:rgba(64,208,128,.1);border:1px solid rgba(64,208,128,.2);color:var(--green)}
+.bfc-at-risk{background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.2);color:var(--accent)}
+.bfc-overshoot{background:rgba(240,80,96,.1);border:1px solid rgba(240,80,96,.2);color:var(--red)}
+.bfc-allow{background:rgba(112,112,160,.1);border:1px solid rgba(112,112,160,.2);color:var(--muted)}
+
+/* ═══════════════════════════════════════
+   V1.5 POLISH ADDITIONS
+═══════════════════════════════════════ */
+/* Home screen section divider */
+.section-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:14px 0 16px}
+
+/* Transaction list "show more" button */
+.txn-show-more{width:100%;padding:11px;border:1.5px dashed var(--border);border-radius:var(--radius-md);background:transparent;color:var(--muted);font-family:var(--font-head);font-size:12px;font-weight:700;cursor:pointer;margin-top:8px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.txn-show-more:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Improved snapshot card grid on very small screens */
+@media(max-width:360px){
+  .snapshot-grid{grid-template-columns:repeat(2,1fr)}
+  .summary-grid{grid-template-columns:1fr 1fr}
+  .more-tabs{grid-template-columns:repeat(2,1fr)}
+}
+
+/* FHS Card collapsible */
+.fhs-card.collapsed .fhs-metrics,.fhs-card.collapsed .fhs-bar-wrap,.fhs-card.collapsed .fhs-tip{display:none}
+.fhs-collapse-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;padding:2px 6px;border-radius:6px;transition:all .2s;margin-left:4px}
+.fhs-collapse-btn:hover{color:var(--accent);background:rgba(240,192,64,.1)}
+
+/* Swipe hint on transactions */
+.txn-item{-webkit-touch-callout:none;-webkit-user-select:none}
+
+/* Better number input look */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;appearance:none}
+input[type=number]{-moz-appearance:textfield}
+
+/* Toast improvement */
+#toast{font-size:13px}
+
+/* Recurring banner font tweak */
+.rec-reminder-name{font-size:12.5px}
+
+/* Quick fab touch improvement */
+#quick-fab{touch-action:manipulation}
+
+/* Smooth height transitions for forms */
+.goals-form-wrap,.udhar-form-wrap{overflow:hidden}
+
+/* Home screen visual breathing room */
+#screen-home{padding-top:14px}
+
+/* Settings section card hover */
+.settings-card{cursor:default;transition:border-color .2s,box-shadow .2s}
+.settings-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.25)}
+
+/* Stat number pulse on update */
+@keyframes numPop{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+.num-pop{animation:numPop .3s ease}
+
+/* Active state for more tab (stronger) */
+.more-tab-btn.active{transform:scale(.97);box-shadow:0 0 0 2px rgba(240,192,64,.15),0 4px 12px rgba(240,192,64,.15)}
 </style>
 </head>
 
@@ -688,9 +843,12 @@ body.light .fhs-card{background:var(--card)}
 
   <!-- 🏥 Financial Health Score Card -->
   <div class="fhs-card" id="fhsCard">
-    <div class="fhs-header">
+    <div class="fhs-header" onclick="toggleFhsCard()" style="cursor:pointer">
       <div class="fhs-title">🏥 Financial Health</div>
-      <div class="fhs-score-pill" id="fhsPill" style="background:rgba(112,112,160,.15);color:var(--muted)">– / 100</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="fhs-score-pill" id="fhsPill" style="background:rgba(112,112,160,.15);color:var(--muted)">– / 100</div>
+        <button class="fhs-collapse-btn" id="fhsCollapseBtn">▾</button>
+      </div>
     </div>
     <div class="fhs-metrics">
       <div class="fhm"><span class="fhm-icon">💰</span><span class="fhm-label">Savings</span><span class="fhm-score" id="fhm-savings" style="color:var(--muted)">–</span></div>
@@ -709,6 +867,9 @@ body.light .fhs-card{background:var(--card)}
     </div>
     <span class="banner-arrow">›</span>
   </div>
+
+  <!-- 🔔 Recurring Reminders -->
+  <div class="recurring-banners" id="recurringBanners" style="display:none"></div>
 
   <!-- Backup Reminder Banner -->
   <div id="backup-banner">
@@ -730,7 +891,14 @@ body.light .fhs-card{background:var(--card)}
   </div>
   <div class="section-header">
     <div class="section-title">Recent Transactions</div>
-    <div class="section-count" id="txn-count">0 entries</div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <div class="section-count" id="txn-count">0 entries</div>
+      <button onclick="showMonthlyReport()" style="padding:3px 9px;border:1.5px solid rgba(240,192,64,.25);border-radius:100px;background:rgba(240,192,64,.08);color:var(--accent);font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font-head);letter-spacing:.2px">📋 Report</button>
+    </div>
+  </div>
+  <div class="txn-search-wrap">
+    <span class="txn-search-icon">🔍</span>
+    <input type="text" id="txnSearchInput" class="txn-search-input" placeholder="Search transactions..." autocomplete="off" oninput="filterTransactions(this.value)">
   </div>
   <div class="txn-list" id="txn-list"></div>
 </div>
@@ -864,11 +1032,12 @@ body.light .fhs-card{background:var(--card)}
 
   <!-- Sub-tabs -->
   <div class="more-tabs">
-    <button class="more-tab-btn active" data-mpanel="budget"   onclick="setMoreTab('budget')">🎯 Budget Goals</button>
-    <button class="more-tab-btn" data-mpanel="emi"     onclick="setMoreTab('emi')">📱 EMI Tracker</button>
-    <button class="more-tab-btn" data-mpanel="subs"    onclick="setMoreTab('subs')">📺 Subscriptions</button>
-    <button class="more-tab-btn" data-mpanel="festive" onclick="setMoreTab('festive')">🪔 Festive Goals</button>
-    <button class="more-tab-btn" data-mpanel="settings" onclick="setMoreTab('settings')">⚙️ Settings</button>
+    <button class="more-tab-btn active" data-mpanel="budget"    onclick="setMoreTab('budget')"><span class="mtb-emoji">🎯</span>Budget</button>
+    <button class="more-tab-btn" data-mpanel="emi"      onclick="setMoreTab('emi')"><span class="mtb-emoji">📱</span>EMI</button>
+    <button class="more-tab-btn" data-mpanel="subs"     onclick="setMoreTab('subs')"><span class="mtb-emoji">📺</span>Subs</button>
+    <button class="more-tab-btn" data-mpanel="recurring" onclick="setMoreTab('recurring')"><span class="mtb-emoji">🔔</span>Recurring</button>
+    <button class="more-tab-btn" data-mpanel="festive"  onclick="setMoreTab('festive')"><span class="mtb-emoji">🪔</span>Festive</button>
+    <button class="more-tab-btn" data-mpanel="settings" onclick="setMoreTab('settings')"><span class="mtb-emoji">⚙️</span>Settings</button>
   </div>
 
   <!-- ── PANEL 1: BUDGET GOALS ── -->
@@ -1018,7 +1187,68 @@ body.light .fhs-card{background:var(--card)}
     <div id="subCards"></div>
   </div>
 
-  <!-- ── PANEL 4: FESTIVE GOALS ── -->
+  <!-- ── PANEL 4: RECURRING REMINDERS ── -->
+  <div class="more-panel" id="mpanel-recurring">
+
+    <div class="goals-section-header">
+      <div class="goals-section-title">🔔 Monthly Recurring</div>
+      <button class="goals-add-btn" id="recurringAddToggle" onclick="toggleRecurringForm()"><span id="recurringAddIcon">➕</span> Add Karo</button>
+    </div>
+
+    <!-- Add Recurring Form -->
+    <div class="goals-form-wrap" id="recurringFormWrap">
+      <div class="gf-row">
+        <div class="gf-group">
+          <div class="gf-label">📝 Expense Naam</div>
+          <input type="text" id="gf-rec-name" class="gf-input" placeholder="e.g. Rent, Bijli Bill" maxlength="40" autocomplete="off">
+        </div>
+      </div>
+      <div class="gf-row">
+        <div class="gf-group">
+          <div class="gf-label">₹ Amount</div>
+          <input type="number" id="gf-rec-amount" class="gf-input" placeholder="0" min="1" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="gf-group">
+          <div class="gf-label">📅 Due Day (1–31)</div>
+          <input type="number" id="gf-rec-day" class="gf-input" placeholder="e.g. 5" min="1" max="31" inputmode="numeric" autocomplete="off">
+        </div>
+      </div>
+      <div class="gf-row">
+        <div class="gf-group">
+          <div class="gf-label">📂 Category</div>
+          <select id="gf-rec-cat" class="gf-input">
+            <option value="Ghar">Ghar 🏠</option>
+            <option value="Bills">Bills ⚡</option>
+            <option value="EMI">EMI 🏦</option>
+            <option value="Transport">Transport 🛵</option>
+            <option value="Health">Health 💊</option>
+            <option value="Education">Education 📚</option>
+            <option value="Entertainment">Entertainment 🎬</option>
+            <option value="Other">Other 📦</option>
+          </select>
+        </div>
+        <div class="gf-group">
+          <div class="gf-label">💳 Payment</div>
+          <select id="gf-rec-pay" class="gf-input">
+            <option value="UPI">UPI 📱</option>
+            <option value="Cash">Cash 💵</option>
+            <option value="Bank">Bank 🏦</option>
+            <option value="Card">Card 💳</option>
+          </select>
+        </div>
+      </div>
+      <button class="gf-save-btn" onclick="saveRecurring()">🔔 Recurring Add Karo</button>
+    </div>
+
+    <div id="recSummaryStrip" style="display:none" class="rec-summary-strip">
+      <span class="rec-summary-label">📅 Is mahine due</span>
+      <span class="rec-summary-val" id="recMonthlyTotal">₹0</span>
+    </div>
+
+    <div id="recurringCards"></div>
+  </div>
+
+  <!-- ── PANEL 5: FESTIVE GOALS ── -->
   <div class="more-panel" id="mpanel-festive">
 
     <div class="goals-section-header">
@@ -1171,7 +1401,7 @@ body.light .fhs-card{background:var(--card)}
     <div class="settings-footer">
       <div class="settings-footer-logo">Paisa<span>Book</span></div>
       Apna Paisa, Apna Hisaab<br>
-      <span style="opacity:.45">v1.0 · Made with ❤️ in India 🇮🇳</span>
+      <span style="opacity:.45">v1.5 · Made with ❤️ in India 🇮🇳</span>
     </div>
 
   </div>
@@ -1220,6 +1450,37 @@ body.light .fhs-card{background:var(--card)}
 <div id="toast"></div>
 </div><!-- #app -->
 
+<!-- ⚡ QUICK ADD FAB -->
+<button id="quick-fab" onclick="toggleQuickAdd()" aria-label="Quick Add Expense">
+  <span class="qfab-icon">⚡</span> Quick Add
+</button>
+
+<!-- ⚡ QUICK ADD SHEET -->
+<div id="quick-overlay">
+  <div class="quick-sheet">
+    <div class="qs-handle"></div>
+    <div class="qs-header">
+      <div class="qs-title">⚡ Quick Expense Add</div>
+      <button class="qs-close" onclick="toggleQuickAdd()">✕</button>
+    </div>
+    <div class="qs-amount-row">
+      <span class="qs-symbol">₹</span>
+      <input type="number" id="qaAmountInput" inputmode="decimal" placeholder="0" min="0" step="any" autocomplete="off">
+    </div>
+    <div class="qs-section-label">📂 Category <span>Tap karo</span></div>
+    <div class="qs-cats" id="qaCatGrid"></div>
+    <div class="qs-note-row">
+      <input type="text" id="qaNoteInput" class="qs-note-input" placeholder="📝 Note (optional)..." maxlength="60" autocomplete="off">
+    </div>
+    <div class="qs-footer">
+      <button class="qs-save-btn" onclick="saveQuickAdd()">
+        <span id="qaSaveBtnIcon">💸</span>
+        <span id="qaSaveBtnText">Expense Save Karo</span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ████ MONTHLY REPORT MODAL ████ -->
 <div id="report-overlay">
   <div class="report-sheet">
@@ -1238,7 +1499,7 @@ body.light .fhs-card{background:var(--card)}
    DATA LAYER
 ══════════════════════════════════════════ */
 function initStorage(){
-  ['pb_transactions','pb_udhar','pb_budgets','pb_festivals','pb_emis','pb_categories','pb_subscriptions'].forEach(function(k){if(!localStorage.getItem(k))localStorage.setItem(k,'[]');});
+  ['pb_transactions','pb_udhar','pb_budgets','pb_festivals','pb_emis','pb_categories','pb_subscriptions','pb_recurring'].forEach(function(k){if(!localStorage.getItem(k))localStorage.setItem(k,'[]');});
   if(!localStorage.getItem('pb_settings'))localStorage.setItem('pb_settings',JSON.stringify({theme:'dark',currency:'INR'}));
   /* backup timestamp – null means never backed up */
   if(!localStorage.getItem('pb_last_backup'))localStorage.setItem('pb_last_backup','null');
@@ -1253,6 +1514,7 @@ function getDaysBetween(a,b){return Math.floor(Math.abs(new Date(b)-new Date(a))
 function getDaysPending(iso){return getDaysBetween(iso,new Date().toISOString());}
 function escapeHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 var chartInstances={};
+var _currentMonthTxns = [];
 function destroyChart(id){if(chartInstances[id]){chartInstances[id].destroy();chartInstances[id]=null;}}
 /* ✅ Fix #8: Timezone-aware ISO date — India +5:30 ke liye accurate */
 function getLocalISODate(){var d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString();}
@@ -1640,7 +1902,17 @@ function saveTransaction(){
   document.getElementById('addAmountInput').value='';document.getElementById('addNoteInput').value='';document.getElementById('addDateInput').value=getTodayISO();selectedCat='';renderCatGrid();updateAmountHint();
 }
 function getTodayISO(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function initAddScreen(){document.getElementById('addDateInput').value=getTodayISO();document.getElementById('addAmountInput').addEventListener('input',updateAmountHint);renderCatGrid();renderPayGrid();}
+function initAddScreen(){
+  document.getElementById('addDateInput').value=getTodayISO();
+  var amtInp = document.getElementById('addAmountInput');
+  amtInp.addEventListener('input', function(){
+    /* Cap at 10 crore to prevent layout break */
+    if(parseFloat(this.value) > 99999999) this.value = 99999999;
+    updateAmountHint();
+  });
+  renderCatGrid();
+  renderPayGrid();
+}
 
 /* ══════════════════════════════════════════
    SAMPLE DATA  (multi-month for 6M charts)
@@ -1821,6 +2093,83 @@ function closePayInline(id){payInlineOpenId=null;renderUdharCards();}
 function refreshUdhar(){renderUdharCards();}
 
 /* ══════════════════════════════════════════
+   TRANSACTION RENDER + DELETE + SEARCH
+══════════════════════════════════════════ */
+var _showAllTxns = false;
+function renderTxnList(txns) {
+  var listEl = document.getElementById('txn-list');
+  listEl.innerHTML = '';
+  if (!txns.length) {
+    listEl.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💸</div><div class="empty-state-text">Koi transaction nahi –<br>pehla add karo! 👆</div><div class="empty-state-hint">Add tab se shuru karo</div></div>';
+    return;
+  }
+  var LIMIT = 8;
+  var toShow = (_showAllTxns || txns.length <= LIMIT) ? txns : txns.slice(0, LIMIT);
+  toShow.forEach(function(t, i) {
+    var icon = getCatIcon(t.category);
+    var isInc = t.type === 'income';
+    var item = document.createElement('div');
+    item.className = 'txn-item';
+    item.style.animationDelay = (Math.min(i, 8) * 0.05) + 's';
+    item.innerHTML =
+      '<div class="txn-icon-wrap ' + (isInc ? 'income-bg' : 'expense-bg') + '">' + icon + '</div>' +
+      '<div class="txn-info">' +
+        '<div class="txn-name">' + escapeHtml(t.note || t.category) + '</div>' +
+        '<div class="txn-meta">' +
+          '<span class="txn-cat">' + escapeHtml(t.category) + '</span>' +
+          '<span class="txn-date">' + formatDateShort(t.date) + '</span>' +
+          (t.paymentMethod ? '<span class="txn-cat" style="opacity:.55">' + escapeHtml(t.paymentMethod) + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="txn-amount ' + (isInc ? 'income' : 'expense') + '">' + (isInc ? '+' : '−') + formatCurrency(t.amount) + '</div>' +
+      '<button class="txn-del-btn" onclick="deleteTransaction(\'' + t.id + '\',event)" title="Delete">🗑</button>';
+    listEl.appendChild(item);
+  });
+  /* Show more / less button */
+  if (txns.length > LIMIT) {
+    var rem = txns.length - LIMIT;
+    var moreBtn = document.createElement('button');
+    moreBtn.className = 'txn-show-more';
+    moreBtn.innerHTML = _showAllTxns
+      ? '▲ Kam dikhao'
+      : '▼ ' + rem + ' aur transactions dikhao';
+    moreBtn.onclick = function() {
+      _showAllTxns = !_showAllTxns;
+      renderTxnList(txns);
+    };
+    listEl.appendChild(moreBtn);
+  }
+}
+
+function deleteTransaction(id, e) {
+  if (e) e.stopPropagation();
+  var list = getData('pb_transactions');
+  var txn = list.find(function(t){ return t.id === id; });
+  if (!txn) return;
+  /* Confirm for larger amounts */
+  if (txn.amount > 500) {
+    if (!confirm('Delete ' + formatCurrency(txn.amount) + ' – ' + (txn.note || txn.category) + '?')) return;
+  }
+  saveData('pb_transactions', list.filter(function(t){ return t.id !== id; }));
+  showToast('🗑 Transaction delete hua!', 'success');
+  refreshHome();
+  refreshStats();
+}
+
+function filterTransactions(query) {
+  if (!query.trim()) { renderTxnList(_currentMonthTxns); return; }
+  var q = query.toLowerCase();
+  var filtered = _currentMonthTxns.filter(function(t) {
+    return (t.note||'').toLowerCase().includes(q) ||
+           (t.category||'').toLowerCase().includes(q) ||
+           (t.paymentMethod||'').toLowerCase().includes(q) ||
+           String(t.amount).includes(q);
+  });
+  renderTxnList(filtered);
+  document.getElementById('txn-count').textContent = filtered.length + ' results';
+}
+
+/* ══════════════════════════════════════════
    refreshHome()
 ══════════════════════════════════════════ */
 function refreshHome(){
@@ -1841,11 +2190,14 @@ function refreshHome(){
   else if(pct<10){se.textContent='🔴';sp.style.color='var(--red)';spl.textContent='Kharcha zyada!';spl.style.background='rgba(240,80,96,.15)';spl.style.color='var(--red)';}
   else if(pct<20){se.textContent='🟡';sp.style.color='var(--accent)';spl.textContent='Theek hai';spl.style.background='rgba(240,192,64,.15)';spl.style.color='var(--accent)';}
   else{se.textContent='🟢';sp.style.color='var(--green)';spl.textContent='Zabardast! 🎉';spl.style.background='rgba(64,208,128,.15)';spl.style.color='var(--green)';}
-  var sorted=filtered.slice().sort(function(a,b){return new Date(b.date)-new Date(a.date);}),recent=sorted.slice(0,5);
+  var sorted=filtered.slice().sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  /* Store sorted txns globally for search */
+  _currentMonthTxns = sorted;
+  _showAllTxns = false; /* reset on month change */
   document.getElementById('txn-count').textContent=filtered.length+(filtered.length===1?' entry':' entries');
-  var listEl=document.getElementById('txn-list');listEl.innerHTML='';
-  if(!recent.length){listEl.innerHTML='<div class="empty-state"><div class="empty-state-icon">💸</div><div class="empty-state-text">Koi transaction nahi –<br>pehla add karo! 👆</div><div class="empty-state-hint">Add tab se shuru karo</div></div>';}
-  else{recent.forEach(function(t,i){var icon=getCatIcon(t.category),isInc=t.type==='income',item=document.createElement('div');item.className='txn-item';item.style.animationDelay=(i*.06)+'s';item.innerHTML='<div class="txn-icon-wrap '+(isInc?'income-bg':'expense-bg')+'">'+icon+'</div><div class="txn-info"><div class="txn-name">'+escapeHtml(t.note||t.category)+'</div><div class="txn-meta"><span class="txn-cat">'+escapeHtml(t.category)+'</span><span class="txn-date">'+formatDateShort(t.date)+'</span></div></div><div class="txn-amount '+(isInc?'income':'expense')+'">'+(isInc?'+':'−')+formatCurrency(t.amount)+'</div>';listEl.appendChild(item);});}
+  /* Clear search input on month change */
+  var si=document.getElementById('txnSearchInput'); if(si) si.value='';
+  renderTxnList(sorted);
   var overdue=udharList.filter(function(u){return !u.settled&&getDaysPending(u.date)>=30;}),banner=document.getElementById('udharBanner');
   if(overdue.length){document.getElementById('bannerTitle').textContent=overdue.length+(overdue.length===1?' udhar':' udhar entries')+' mein 30+ din ho gaye!';banner.classList.add('visible');}
   else{banner.classList.remove('visible');}
@@ -1854,6 +2206,7 @@ function refreshHome(){
   renderSnapshot();
   renderStreakBadge();
   renderHealthScore();
+  renderRecurringBanners();
 }
 
 /* ══════════════════════════════════════════
@@ -1870,6 +2223,9 @@ function switchTab(name){
   document.getElementById('nav').style.setProperty('--indicator-x',NAV_POS[name]||'3%');
   document.getElementById('main').scrollTop=0;
   currentTab=name;
+  /* FAB: hide on Add screen (has its own save), show everywhere else */
+  var fab=document.getElementById('quick-fab');
+  if(fab) fab.classList.toggle('hidden', name==='add');
   /* ✅ Fix #10: Persist last tab */
   try{localStorage.setItem('pb_last_tab',name);}catch(e){}
   if(name==='udhar')  refreshUdhar();
@@ -1910,7 +2266,7 @@ window.onload=function(){
   /* ✅ Fix #4: localStorage size warning (>4MB) */
   checkStorageSize();
   removeSplash();
-  console.log('[PaisaBook] v1.3 ready ✓ – Phase 2: Subscriptions + Health Score + Smart Insights ✓');
+  console.log('[PaisaBook] v1.5 ready ✓ – Transaction Edit/Delete + Search + More Grid + Polish ✓');
 };
 
 /* ══════════════════════════════════════════
@@ -1931,10 +2287,11 @@ function setMoreTab(tab) {
   document.querySelectorAll('.more-panel').forEach(function(p){ p.classList.remove('active'); });
   var panel = document.getElementById('mpanel-' + tab);
   if (panel) panel.classList.add('active');
-  if (tab === 'budget')  renderBudgetCards();
-  if (tab === 'emi')     renderEmiSection();
-  if (tab === 'subs')    renderSubscriptionSection();
-  if (tab === 'festive') renderFestiveCards();
+  if (tab === 'budget')    renderBudgetCards();
+  if (tab === 'emi')       renderEmiSection();
+  if (tab === 'subs')      renderSubscriptionSection();
+  if (tab === 'recurring') renderRecurringSection();
+  if (tab === 'festive')   renderFestiveCards();
 }
 
 /* ── Shared progress bar renderer ── */
@@ -2035,8 +2392,35 @@ function renderBudgetCards() {
       warnHTML = '<div style="font-size:11px;color:var(--red);font-weight:600;margin-top:4px;">🔴 Budget khatam ho gaya!</div>';
     }
 
+    /* ── Phase 3: Forecast chips ── */
+    var daysLeft = daysInMonth - dayOfMonth;
+    var budgetLeft = b.limit - spent;
+    var dailyAllowance = (daysLeft > 0 && budgetLeft > 0) ? Math.round(budgetLeft / daysLeft) : 0;
+
+    var forecastChipHTML = '';
+    var isCurMonth = selectedMonth === today.getMonth() && selectedYear === today.getFullYear();
+    if (isCurMonth && spent > 0) {
+      var forecastClass, forecastText;
+      if (pct >= 100) {
+        forecastClass='bfc-overshoot'; forecastText='🚨 Budget Cross!';
+      } else if (predicted > b.limit) {
+        var overBy = Math.round(((predicted - b.limit) / b.limit) * 100);
+        forecastClass='bfc-overshoot'; forecastText='⚠️ Projected +'+overBy+'% over';
+      } else if (predicted > b.limit * 0.85) {
+        forecastClass='bfc-at-risk'; forecastText='📊 At Risk';
+      } else {
+        forecastClass='bfc-on-track'; forecastText='✅ On Track';
+      }
+
+      forecastChipHTML = '<div class="bc-forecast-row">'
+        + '<span class="bc-forecast-chip '+forecastClass+'">'+forecastText+'</span>'
+        + (dailyAllowance > 0
+            ? '<span class="bc-forecast-chip bfc-allow">📅 '+formatCurrency(dailyAllowance)+'/din left</span>'
+            : '')
+        + '</div>';
+    }
+
     card.innerHTML =
-      '<style>#bc-' + b.id + '::before{background:' + status.color + '}</style>' +
       '<div class="bc-top">' +
         '<div class="bc-left">' +
           '<div class="bc-icon">' + getCatIcon(b.category) + '</div>' +
@@ -2056,19 +2440,16 @@ function renderBudgetCards() {
         (predText ? '<div class="bc-prediction">' + escapeHtml(predText) + '</div>' : '<div class="bc-prediction"></div>') +
         '<button class="bc-del-btn" onclick="deleteBudget(\'' + b.id + '\')">🗑</button>' +
       '</div>' +
+      (forecastChipHTML || '') +
       warnHTML;
 
-    /* Fix the ::before dynamic color */
+    /* Apply top accent line via div (no ::before hack needed) */
     card.id = 'bc-' + b.id;
-    card.style.setProperty('border-top-color', status.color);
-    /* Apply accent line manually */
-    card.addEventListener('mouseenter', function(){});
-
     container.appendChild(card);
 
-    /* Force ::before via inline pseudo-element workaround: use a div */
+    /* Top accent line – clean div approach, no memory leak */
     var topLine = document.createElement('div');
-    topLine.style.cssText = 'position:absolute;top:0;left:0;right:0;height:2px;background:' + status.color + ';border-radius:20px 20px 0 0';
+    topLine.style.cssText = 'position:absolute;top:0;left:0;right:0;height:2.5px;background:' + status.color + ';border-radius:14px 14px 0 0;box-shadow:0 0 8px ' + status.color + '55';
     card.style.position = 'relative';
     card.insertBefore(topLine, card.firstChild);
   });
@@ -2438,7 +2819,7 @@ function checkStorageSize() {
 
 function confirmReset() {
   hideResetConfirm();
-  ['pb_transactions','pb_udhar','pb_budgets','pb_festivals','pb_emis','pb_settings','pb_categories','pb_last_backup','pb_subscriptions'].forEach(function(k){
+  ['pb_transactions','pb_udhar','pb_budgets','pb_festivals','pb_emis','pb_settings','pb_categories','pb_last_backup','pb_subscriptions','pb_recurring'].forEach(function(k){
     localStorage.removeItem(k);
   });
   initStorage();
@@ -2580,6 +2961,7 @@ function buildBackupPayload() {
       festivals:    getData('pb_festivals'),
       emis:         getData('pb_emis'),
       subscriptions:getData('pb_subscriptions'),
+      recurring:    getData('pb_recurring'),
       categories:   getData('pb_categories'),
       settings: (function(){ try{return JSON.parse(localStorage.getItem('pb_settings'))||{};}catch(e){return{};} })()
     },
@@ -2961,6 +3343,7 @@ function restoreFromBackup(input) {
     if (p.data.festivals)    saveData('pb_festivals',    p.data.festivals);
     if (p.data.emis)         saveData('pb_emis',         p.data.emis);
     if (p.data.subscriptions)saveData('pb_subscriptions',p.data.subscriptions);
+    if (p.data.recurring)    saveData('pb_recurring',    p.data.recurring);
     if (p.data.categories)   saveData('pb_categories',   p.data.categories);
     refreshHome();
     refreshUdhar();
@@ -3385,11 +3768,272 @@ function shareMonthlyReportWA() {
 document.addEventListener('DOMContentLoaded',function(){
   var ov = document.getElementById('report-overlay');
   if (ov) ov.addEventListener('click', function(e){ if(e.target===ov) hideMonthlyReport(); });
+  var qov = document.getElementById('quick-overlay');
+  if (qov) qov.addEventListener('click', function(e){ if(e.target===qov) toggleQuickAdd(false); });
+  /* Init Quick Add FAB state */
+  renderQACatGrid();
 });
+
+/* ══════════════════════════════════════════
+   PHASE 3 – QUICK ADD WIDGET ⚡
+══════════════════════════════════════════ */
+var _qaOpen = false;
+var _qaSelectedCat = 'Khaana';
+
+var QA_CATS = [
+  {icon:'🏠',label:'Ghar'},   {icon:'🛵',label:'Transport'},
+  {icon:'🍔',label:'Khaana'}, {icon:'🎬',label:'Entertainment'},
+  {icon:'💊',label:'Health'},  {icon:'📚',label:'Education'},
+  {icon:'⚡',label:'Bills'},   {icon:'📦',label:'Other'}
+];
+
+function renderQACatGrid() {
+  var grid = document.getElementById('qaCatGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  QA_CATS.forEach(function(c) {
+    var btn = document.createElement('button');
+    btn.className = 'qa-cat-btn' + (_qaSelectedCat === c.label ? ' qa-selected' : '');
+    btn.innerHTML = '<span class="qa-cat-icon">'+c.icon+'</span><span class="qa-cat-label">'+c.label+'</span>';
+    btn.addEventListener('click', function() {
+      _qaSelectedCat = c.label;
+      renderQACatGrid();
+    });
+    grid.appendChild(btn);
+  });
+}
+
+function toggleQuickAdd(forceClose) {
+  _qaOpen = forceClose === false ? false : !_qaOpen;
+  var ov = document.getElementById('quick-overlay');
+  if (!ov) return;
+  if (_qaOpen) {
+    ov.classList.add('show');
+    document.getElementById('main').style.overflow = 'hidden';
+    setTimeout(function() {
+      var inp = document.getElementById('qaAmountInput');
+      if (inp) inp.focus();
+    }, 400);
+  } else {
+    ov.classList.remove('show');
+    document.getElementById('main').style.overflow = '';
+    /* Reset fields */
+    var amtInp = document.getElementById('qaAmountInput');
+    var noteInp = document.getElementById('qaNoteInput');
+    if (amtInp) amtInp.value = '';
+    if (noteInp) noteInp.value = '';
+  }
+}
+
+function saveQuickAdd() {
+  var amt = parseFloat(document.getElementById('qaAmountInput').value);
+  var note = (document.getElementById('qaNoteInput').value || '').trim();
+  var btn = document.getElementById('qaSaveBtnIcon');
+  var btnTxt = document.getElementById('qaSaveBtnText');
+
+  if (!amt || amt <= 0) {
+    document.getElementById('qaAmountInput').focus();
+    /* Shake animation */
+    var row = document.querySelector('.qs-amount-row');
+    if (row) { row.style.animation='none'; row.offsetHeight; row.style.animation='shakeX .3s ease both'; }
+    return;
+  }
+
+  var txn = {
+    id: generateId(),
+    type: 'expense',
+    amount: amt,
+    category: _qaSelectedCat,
+    paymentMethod: 'UPI',
+    note: note || _qaSelectedCat,
+    date: new Date(getTodayISO()+'T12:00:00').toISOString(),
+    createdAt: getLocalISODate()
+  };
+
+  var list = getData('pb_transactions');
+  list.push(txn);
+  if (!saveData('pb_transactions', list)) { showToast('Save nahi hua!', 'error'); return; }
+
+  /* Success animation */
+  if (btn) btn.textContent = '✅';
+  if (btnTxt) btnTxt.textContent = 'Saved! '+formatCurrency(amt);
+
+  showToast('⚡ '+formatCurrency(amt)+' '+_qaSelectedCat+' – quick add done!', 'success');
+  updateStreakOnEntry();
+  refreshHome();
+  refreshStats();
+
+  setTimeout(function() {
+    toggleQuickAdd(false);
+    if (btn) btn.textContent = '💸';
+    if (btnTxt) btnTxt.textContent = 'Expense Save Karo';
+  }, 900);
+}
+
+/* Shake keyframe injection */
+(function(){
+  var s = document.createElement('style');
+  s.textContent = '@keyframes shakeX{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}';
+  document.head.appendChild(s);
+})();
+
+/* ══════════════════════════════════════════
+   PHASE 3 – RECURRING EXPENSE REMINDERS 🔔
+══════════════════════════════════════════ */
+var recurringFormOpen = false;
+
+function toggleRecurringForm() {
+  recurringFormOpen = !recurringFormOpen;
+  document.getElementById('recurringFormWrap').classList.toggle('open', recurringFormOpen);
+  document.getElementById('recurringAddIcon').textContent = recurringFormOpen ? '✕' : '➕';
+  if (!recurringFormOpen) {
+    ['gf-rec-name','gf-rec-amount','gf-rec-day'].forEach(function(id){ document.getElementById(id).value=''; });
+    document.getElementById('gf-rec-cat').value='Ghar';
+    document.getElementById('gf-rec-pay').value='UPI';
+  }
+}
+
+function saveRecurring() {
+  var name   = document.getElementById('gf-rec-name').value.trim();
+  var amount = parseFloat(document.getElementById('gf-rec-amount').value);
+  var day    = parseInt(document.getElementById('gf-rec-day').value);
+  var cat    = document.getElementById('gf-rec-cat').value;
+  var pay    = document.getElementById('gf-rec-pay').value;
+
+  if (!name)                    { showToast('Naam daalo!','error'); return; }
+  if (!amount || amount <= 0)   { showToast('Valid amount daalo!','error'); return; }
+  if (!day || day < 1 || day > 31) { showToast('Valid day daalo (1-31)!','error'); return; }
+
+  var recs = getData('pb_recurring');
+  recs.push({ id:generateId(), name:name, amount:amount, dayOfMonth:day,
+               category:cat, paymentMethod:pay, createdAt:getLocalISODate() });
+  saveData('pb_recurring', recs);
+  showToast('🔔 '+name+' reminder set hua! (har mahine '+day+'th ko)','success');
+  recurringFormOpen = true; toggleRecurringForm();
+  renderRecurringSection();
+  refreshHome(); /* refresh banners */
+}
+
+function deleteRecurring(id) {
+  saveData('pb_recurring', getData('pb_recurring').filter(function(r){return r.id!==id;}));
+  showToast('Reminder delete hua','success');
+  renderRecurringSection();
+  refreshHome();
+}
+
+function getRecurringStatus(dayOfMonth) {
+  var today = new Date().getDate();
+  var daysUntil = dayOfMonth - today;
+  if (daysUntil < 0) {
+    /* Check if it's this month already (overdue) */
+    var daysInCurMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+    daysUntil = (daysInCurMonth - today) + dayOfMonth; /* next month */
+    if (dayOfMonth < today) {
+      /* Overdue this month */
+      return { label: Math.abs(dayOfMonth - today)+'d overdue', cls: 'rec-status-soon', accentColor: 'var(--red)', isOverdue: true, daysUntil: dayOfMonth - today };
+    }
+  }
+  if (daysUntil === 0) return { label: 'Aaj due! ⚠️', cls: 'rec-status-soon', accentColor: 'var(--red)', isOverdue: false, daysUntil: 0 };
+  if (daysUntil <= 3)  return { label: daysUntil+'d mein due', cls: 'rec-status-soon', accentColor: 'var(--red)', isOverdue: false, daysUntil: daysUntil };
+  if (daysUntil <= 7)  return { label: daysUntil+' din mein', cls: 'rec-status-near', accentColor: 'var(--accent)', isOverdue: false, daysUntil: daysUntil };
+  return { label: daysUntil+' din baaki', cls: 'rec-status-ok', accentColor: 'var(--green)', isOverdue: false, daysUntil: daysUntil };
+}
+
+function renderRecurringBanners() {
+  var recs = getData('pb_recurring');
+  var container = document.getElementById('recurringBanners');
+  if (!container) return;
+  container.innerHTML = '';
+
+  var today = new Date().getDate();
+  var dueItems = recs.filter(function(r) {
+    var diff = r.dayOfMonth - today;
+    return diff >= -1 && diff <= 3; /* overdue (1 day) or due within 3 days */
+  });
+
+  if (!dueItems.length) { container.style.display = 'none'; return; }
+  container.style.display = 'flex';
+
+  dueItems.slice(0, 3).forEach(function(r, i) {
+    var st = getRecurringStatus(r.dayOfMonth);
+    var item = document.createElement('div');
+    item.className = 'rec-reminder-item' + (st.isOverdue || st.daysUntil <= 0 ? ' overdue' : '');
+    item.style.animationDelay = (i * 0.08) + 's';
+    item.innerHTML =
+      '<span class="rec-reminder-icon">🔔</span>'
+      +'<div class="rec-reminder-text">'
+        +'<div class="rec-reminder-name">'+escapeHtml(r.name)+'</div>'
+        +'<div class="rec-reminder-sub">'+getCatIcon(r.category)+' '+escapeHtml(r.category)+' • '+formatCurrency(r.amount)+'</div>'
+      +'</div>'
+      +'<span class="rec-reminder-badge">'+st.label+'</span>';
+    container.appendChild(item);
+  });
+}
+
+function renderRecurringSection() {
+  var recs = getData('pb_recurring');
+  var container = document.getElementById('recurringCards');
+  if (!container) return;
+
+  /* Summary strip */
+  var strip = document.getElementById('recSummaryStrip');
+  var totalEl = document.getElementById('recMonthlyTotal');
+  if (strip) strip.style.display = recs.length ? 'flex' : 'none';
+  if (totalEl && recs.length) {
+    var total = recs.reduce(function(s,r){return s+r.amount;},0);
+    totalEl.textContent = formatCurrency(total) + ' / month';
+  }
+
+  container.innerHTML = '';
+  if (!recs.length) {
+    container.innerHTML = '<div class="goals-empty"><div class="goals-empty-icon">🔔</div><div class="goals-empty-text">Koi recurring expense nahi<br>Rent, bijli, EMI – sab add karo<br><span style="font-size:11px;opacity:.6">Due dates pe reminder milega!</span></div></div>';
+    return;
+  }
+
+  /* Sort by day of month */
+  var sorted = recs.slice().sort(function(a,b){ return a.dayOfMonth - b.dayOfMonth; });
+
+  sorted.forEach(function(r, idx) {
+    var st = getRecurringStatus(r.dayOfMonth);
+    var card = document.createElement('div');
+    card.className = 'rec-card';
+    card.style.animationDelay = (idx * 0.06) + 's';
+
+    var accentDiv = document.createElement('div');
+    accentDiv.className = 'rec-card-accent';
+    accentDiv.style.background = st.accentColor;
+    card.appendChild(accentDiv);
+
+    var ordinal = r.dayOfMonth + (r.dayOfMonth===1?'st':r.dayOfMonth===2?'nd':r.dayOfMonth===3?'rd':'th');
+
+    card.innerHTML += 
+      '<div class="rec-card-icon">'+getCatIcon(r.category)+'</div>'
+      +'<div class="rec-card-info">'
+        +'<div class="rec-card-name">'+escapeHtml(r.name)+'</div>'
+        +'<div class="rec-card-sub">'
+          +'<span class="rec-card-day">📅 Har mahine '+ordinal+' ko</span>'
+          +'<span class="rec-card-status '+st.cls+'">'+st.label+'</span>'
+        +'</div>'
+      +'</div>'
+      +'<div class="rec-card-amount">'+formatCurrency(r.amount)+'</div>'
+      +'<button class="rec-del-btn" onclick="deleteRecurring(\''+r.id+'\')">🗑</button>';
+
+    container.appendChild(card);
+  });
+}
 
 /* ══════════════════════════════════════════
    PHASE 2 – FINANCIAL HEALTH SCORE 🏥
 ══════════════════════════════════════════ */
+var _fhsCollapsed = false;
+function toggleFhsCard() {
+  _fhsCollapsed = !_fhsCollapsed;
+  var card = document.getElementById('fhsCard');
+  var btn = document.getElementById('fhsCollapseBtn');
+  if (card) card.classList.toggle('collapsed', _fhsCollapsed);
+  if (btn) btn.textContent = _fhsCollapsed ? '▸' : '▾';
+}
+
 function computeHealthScore() {
   var all    = getData('pb_transactions');
   var ulist  = getData('pb_udhar');
