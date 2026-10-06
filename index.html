@@ -45,7 +45,7 @@
      = user ko "Update karo" ka banner dikhta hai.
      BADALNA ZAROORI HAI: har baar GitHub pe naya file daalo, to ye
      number bhi badhao (aur JS mein APP.version bhi — dono same rakho). -->
-<meta name="pb-version" content="2.2">
+<meta name="pb-version" content="2.3">
 <meta name="theme-color" content="#0A0A0F">
 <meta name="description" content="PaisaBook — offline budget, udhar aur bill tracker. Aapka data sirf aapke phone mein.">
 <meta name="mobile-web-app-capable" content="yes">
@@ -273,12 +273,17 @@ body.light input[type=date]::-webkit-calendar-picker-indicator{filter:none;opaci
   display:flex;align-items:center;padding:0 var(--s1);
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
+/* Nav ka gold indicator. Tabs ki ginti badal sakti hai (Simple Mode
+   mein ek tab chhup jaata hai), isliye chaudai aur jagah dono
+   --tab-n (kitne tab dikh rahe hain) se nikalte hain. */
 #nav::before{
-  content:'';position:absolute;top:0;height:2px;width:12%;
-  left:calc(var(--tab-i,0) * 20% + 4%);
+  content:'';position:absolute;top:0;height:2px;
+  width:calc(100% / var(--tab-n,5) * .5);
+  left:calc(var(--tab-i,0) * (100% / var(--tab-n,5)) + (100% / var(--tab-n,5)) * .25);
   background:var(--brand);border-radius:0 0 var(--r-sm) var(--r-sm);
-  transition:left var(--t-slow) var(--pop);
+  transition:left var(--t-slow) var(--pop),width var(--t) var(--ease);
 }
+.tab[hidden]{display:none}
 .tab{
   flex:1;min-height:52px;border-radius:var(--r-sm);color:var(--text-2);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
@@ -513,6 +518,68 @@ select.input{background-image:none}
 .form-panel.open{display:block}
 .form-panel .field-row{margin-bottom:var(--s3)}
 .form-panel .field-row:last-of-type{margin-bottom:var(--s4)}
+
+/* ── Help (?) ──
+   Har mushkil shabd ke saath. Jaan boojh kar halka rakha hai —
+   dikhe, par dhyan na khinche.
+
+   YE <span> HAI, <button> NAHI — aur ye zaroori hai.
+   HTML mein <button> ke andar <button> allowed nahi: browser bahar
+   wale button ko wahi band kar deta hai, jisse aage ka poora page
+   structure toot jaata hai. (Maine pehle button banaya tha aur
+   Financial Health card ke andar ye galti ho gayi thi — testing mein
+   pakdi.) <span> kahin bhi nest ho sakta hai, isliye ab ye (?)
+   kisi bhi button ke andar safe hai. */
+.help{
+  cursor:pointer;-webkit-user-select:none;user-select:none;
+  width:17px;height:17px;flex-shrink:0;margin-left:var(--s1);
+  border-radius:var(--r-full);border:1.5px solid var(--border-2);
+  background:transparent;color:var(--text-2);
+  font-size:10px;font-weight:800;line-height:1;
+  display:inline-flex;align-items:center;justify-content:center;
+  vertical-align:middle;transition:all var(--t-fast);
+}
+.help:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-bg)}
+.help:active{transform:scale(.85)}
+
+/* ── Onboarding (pehli baar ka intro) ── */
+#intro .sheet{max-height:94dvh}
+.intro-body{padding:var(--s5) var(--s4) var(--s4);text-align:center}
+.intro-ico{font-size:52px;line-height:1;margin-bottom:var(--s4);
+           animation:introPop .5s var(--pop) both}
+@keyframes introPop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.intro-title{font-family:var(--font-head);font-size:var(--fs-xl);font-weight:800;
+             letter-spacing:-.5px;margin-bottom:var(--s3);line-height:1.25}
+.intro-title b{color:var(--gold)}
+.intro-text{font-size:var(--fs-base);color:var(--text-2);line-height:1.7;
+            max-width:330px;margin:0 auto}
+.intro-text b{color:var(--text)}
+/* Intro ke andar ke chhote point */
+.intro-list{display:flex;flex-direction:column;gap:var(--s2);
+            margin:var(--s4) auto 0;max-width:330px;text-align:left}
+.intro-item{display:flex;align-items:flex-start;gap:var(--s3);
+            background:var(--card-2);border:1px solid var(--border);
+            border-radius:var(--r-md);padding:var(--s3)}
+.intro-item-ico{font-size:20px;line-height:1.2;flex-shrink:0}
+.intro-item-txt{font-size:var(--fs-md);line-height:1.5}
+.intro-item-txt b{display:block;margin-bottom:2px}
+/* Nakli SMS jo example mein dikhta hai */
+.intro-sms{
+  background:var(--card-2);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:var(--s3);margin:var(--s4) auto 0;
+  max-width:330px;text-align:left;font-size:var(--fs-sm);
+  color:var(--text-2);line-height:1.6;font-family:ui-monospace,monospace;
+}
+.intro-sms mark{background:var(--gold-bg);color:var(--gold);
+                padding:1px 4px;border-radius:4px;font-weight:700}
+.intro-arrow{text-align:center;font-size:18px;color:var(--text-3);margin:var(--s2) 0}
+/* Neeche ke dots + buttons */
+.intro-foot{padding:0 var(--s4) var(--s5)}
+.intro-dots{display:flex;gap:var(--s2);justify-content:center;margin-bottom:var(--s4)}
+.intro-dot{width:7px;height:7px;border-radius:var(--r-full);
+           background:var(--border-2);transition:all var(--t)}
+.intro-dot.on{background:var(--gold);width:20px}
+.intro-btns{display:flex;gap:var(--s2);align-items:center}
 
 /* ── List row (generic) ── */
 .row{
@@ -892,7 +959,7 @@ select.input{background-image:none}
       <div class="streak" id="streak" title="Lagataar entry karne ka streak">
         <span>🔥</span>
         <span class="streak-n num" id="streakN">1</span>
-        <span class="streak-l">din</span>
+        <span class="streak-l">din</span><span class="help" role="button" tabindex="0" data-help="streak" aria-label="Ye kya hai?">?</span>
       </div>
     </div>
 
@@ -902,7 +969,7 @@ select.input{background-image:none}
     <!-- Aaj ka hisaab -->
     <div id="snapshot" class="card card-top">
       <div class="snap-head">
-        <div class="chart-title">⚡ Aaj Ka Hisaab</div>
+        <div class="chart-title">⚡ Aaj Ka Hisaab<span class="help" role="button" tabindex="0" data-help="snapshot" aria-label="Ye kya hai?">?</span></div>
         <div class="t-mute num" style="font-size:var(--fs-xs)" id="snapTime"></div>
       </div>
       <div class="snap-grid">
@@ -927,7 +994,7 @@ select.input{background-image:none}
     <!-- Financial health -->
     <div id="health" class="card card-top">
       <button class="health-head" id="healthToggle" style="width:100%">
-        <div class="chart-title">🏥 Financial Health</div>
+        <div class="chart-title">🏥 Financial Health<span class="help" role="button" tabindex="0" data-help="health" aria-label="Ye kya hai?">?</span></div>
         <div style="display:flex;align-items:center;gap:var(--s2)">
           <span class="pill pill-br num" id="healthPill">– / 100</span>
           <span class="t-mute" id="healthChev">▾</span>
@@ -960,7 +1027,7 @@ select.input{background-image:none}
         <div class="sum-sub" id="sumSavSub">Is mahine bacha</div>
       </div>
       <div class="card card-top sum c-gold" id="sumPctCard">
-        <span class="sum-ico" id="sumPctIco">📊</span><div class="sum-lbl">Bachat %</div>
+        <span class="sum-ico" id="sumPctIco">📊</span><div class="sum-lbl">Bachat %<span class="help" role="button" tabindex="0" data-help="savingPct" aria-label="Ye kya hai?">?</span></div>
         <div class="sum-val num" id="sumPct">0%</div>
         <div style="margin-top:var(--s1)"><span class="pill c-mute" id="sumPctPill">Koi data nahi</span></div>
       </div>
@@ -1046,7 +1113,7 @@ select.input{background-image:none}
   <section id="s-udhar" class="screen">
     <div class="u-sum">
       <div class="card card-top sum c-green">
-        <span class="sum-ico">💰</span><div class="sum-lbl">Lena</div>
+        <span class="sum-ico">💰</span><div class="sum-lbl">Lena<span class="help" role="button" tabindex="0" data-help="udhar" aria-label="Ye kya hai?">?</span></div>
         <div class="sum-val num" id="uLena">₹0</div></div>
       <div class="card card-top sum c-red">
         <span class="sum-ico">🙏</span><div class="sum-lbl">Dena</div>
@@ -1173,7 +1240,7 @@ select.input{background-image:none}
     <!-- ── BUDGET ── -->
     <div class="panel active" id="p-budget">
       <div class="sec">
-        <div class="sec-title">🎯 Budget Limits</div>
+        <div class="sec-title">🎯 Budget Limits<span class="help" role="button" tabindex="0" data-help="budgetCarry" aria-label="Ye kya hai?">?</span></div>
         <button class="btn btn-soft c-mute" style="padding:var(--s2) var(--s3);font-size:var(--fs-xs)"
                 id="bFormToggle"><span id="bFormIco">➕</span> Add</button>
       </div>
@@ -1237,7 +1304,7 @@ select.input{background-image:none}
       </div>
 
       <div class="sec">
-        <div class="sec-title">🔔 Recurring</div>
+        <div class="sec-title">🔔 Recurring<span class="help" role="button" tabindex="0" data-help="recurring" aria-label="Ye kya hai?">?</span></div>
         <button class="btn btn-soft c-mute" style="padding:var(--s2) var(--s3);font-size:var(--fs-xs)"
                 id="rFormToggle"><span id="rFormIco">➕</span> Add</button>
       </div>
@@ -1263,7 +1330,7 @@ select.input{background-image:none}
       <div id="rList"></div>
 
       <div class="sec" style="margin-top:var(--s5)">
-        <div class="sec-title">📺 Subscriptions</div>
+        <div class="sec-title">📺 Subscriptions<span class="help" role="button" tabindex="0" data-help="subs" aria-label="Ye kya hai?">?</span></div>
         <button class="btn btn-soft c-mute" style="padding:var(--s2) var(--s3);font-size:var(--fs-xs)"
                 id="sFormToggle"><span id="sFormIco">➕</span> Add</button>
       </div>
@@ -1296,7 +1363,7 @@ select.input{background-image:none}
     <!-- ── FESTIVE ── -->
     <div class="panel" id="p-fest">
       <div class="sec">
-        <div class="sec-title">🪔 Festive Savings</div>
+        <div class="sec-title">🪔 Festive Savings<span class="help" role="button" tabindex="0" data-help="festive" aria-label="Ye kya hai?">?</span></div>
         <button class="btn btn-soft c-mute" style="padding:var(--s2) var(--s3);font-size:var(--fs-xs)"
                 id="fFormToggle"><span id="fFormIco">➕</span> Add</button>
       </div>
@@ -1357,7 +1424,7 @@ select.input{background-image:none}
       <div class="card set c-gold">
         <div class="set-ico">💾</div>
         <div class="set-body">
-          <div class="set-title">Backup</div>
+          <div class="set-title">Backup<span class="help" role="button" tabindex="0" data-help="backup" aria-label="Ye kya hai?">?</span></div>
           <div class="set-sub"><span class="dot" id="bkDot"></span><span id="bkTxt">Kabhi backup nahi hua</span></div>
         </div>
         <button class="btn btn-soft c-gold" id="btnBackup">Backup</button>
@@ -1365,6 +1432,24 @@ select.input{background-image:none}
 
       <div class="divider"></div>
       <div class="eyebrow" style="margin-bottom:var(--s3)">🎨 Preferences</div>
+
+      <button class="card set c-gold" id="btnSimple" style="width:100%;text-align:left">
+        <div class="set-ico">✨</div>
+        <div class="set-body">
+          <div class="set-title">Simple Mode<span class="help" role="button" tabindex="0" data-help="simple" aria-label="Ye kya hai?">?</span></div>
+          <div class="set-sub" id="simpleSub">—</div>
+        </div>
+        <div class="switch" id="simpleSwitch"><i></i></div>
+      </button>
+
+      <div class="card set c-info">
+        <div class="set-ico">👋</div>
+        <div class="set-body">
+          <div class="set-title">Intro dobara dekho</div>
+          <div class="set-sub">App kaise use karna hai — 3 screen mein</div>
+        </div>
+        <button class="btn btn-soft c-info" id="btnIntro">Dekho</button>
+      </div>
 
       <button class="card set c-gold" id="btnTheme" style="width:100%;text-align:left">
         <div class="set-ico" id="themeIco">🌙</div>
@@ -1429,7 +1514,7 @@ select.input{background-image:none}
       <div class="footer">
         <div class="footer-logo">Paisa<b>Book</b></div>
         Apna Paisa, Apna Hisaab<br>
-        <span style="opacity:.6" id="verTxt">v2.2</span>
+        <span style="opacity:.6" id="verTxt">v2.3</span>
       </div>
     </div>
   </section>
@@ -1483,12 +1568,43 @@ select.input{background-image:none}
   </div>
 </div>
 
+<!-- ══ SHEET: pehli baar ka intro ══
+     Sirf pehli baar dikhta hai. Settings se dobara dekh sakte ho. -->
+<div class="sheet-wrap" id="intro">
+  <div class="sheet">
+    <div class="intro-body" id="introBody"></div>
+    <div class="intro-foot">
+      <div class="intro-dots" id="introDots"></div>
+      <div class="intro-btns">
+        <button class="btn btn-soft c-mute" id="introSkip" style="flex:0 0 auto">Chhodo</button>
+        <button class="btn btn-lg btn-primary" id="introNext" style="flex:1">Aage →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SHEET: help (?) ══ -->
+<div class="sheet-wrap" id="helpSheet">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head">
+      <div class="sheet-title" id="helpTitle">Help</div>
+      <button class="btn-icon" id="helpClose" aria-label="Band karo">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div style="font-size:var(--fs-base);line-height:1.75" id="helpBody"></div>
+      <button class="btn btn-lg btn-block btn-soft c-mute" id="helpOk"
+              style="margin-top:var(--s5)">Samajh gaya</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ SHEET: SMS se add ══ -->
 <div class="sheet-wrap" id="smsSheet">
   <div class="sheet">
     <div class="sheet-grip"></div>
     <div class="sheet-head">
-      <div class="sheet-title">📩 Bank SMS se add</div>
+      <div class="sheet-title">📩 Bank SMS se add<span class="help" role="button" tabindex="0" data-help="sms" aria-label="Ye kya hai?">?</span></div>
       <button class="btn-icon" id="smsClose" aria-label="Band karo">✕</button>
     </div>
     <div class="sheet-body">
@@ -1637,6 +1753,113 @@ var FESTIVALS = [
 ];
 /* Add screen pe ek-tap amount shortcuts */
 var QUICK_AMOUNTS = [100,200,500,1000,2000,5000];
+
+/* ── SIMPLE MODE ──
+   App mein 9 panel hain. Naye banday ke liye ye bahut zyada hai.
+   Isliye shuru mein sirf zaroori cheezein dikhti hain, baaki chhupi
+   rehti hain. Settings se "Saare features" on kar sakte ho.
+   Yahan likha hai ki simple mode mein kya CHHUPTA hai. */
+var SIMPLE_HIDES = {
+  navTabs:   ['stats'],                  /* bottom nav se */
+  morePanels:['emi','bills','fest']      /* More ke andar se */
+};
+
+/* ── HELP ──
+   Har mushkil shabd ke saath ek chhota (?) button. Dabane par ek
+   line ka jawab. Isse naye banday ko kuch bhi "ye kya hai?" nahi
+   lagega. Naya help add karna ho? Bas yahan ek line jod do, aur
+   jahan dikhana hai wahan helpBtn('key') laga do. */
+var HELP = {
+  health:{ t:'🏥 Financial Health Score', b:
+    'Aapki bachat, EMI aur udhar — teeno milaa kar 100 mein ek number.<br><br>' +
+    '<b>Bachat 40</b> + <b>EMI 30</b> + <b>Udhar 30</b> = 100<br><br>' +
+    'Zyada number = behtar haalat. 80+ matlab zabardast, 45 se kam matlab dhyan dene ki zaroorat.<br><br>' +
+    '<span class="t-mute">Ye ek mota-mota andaaza hai — financial advice nahi.</span>' },
+
+  snapshot:{ t:'⚡ Aaj Ka Hisaab', b:
+    'Char cheezein ek nazar mein:<br><br>' +
+    '<b>Aaj</b> — aaj kitna kharch hua<br>' +
+    '<b>Mahina</b> — is poore mahine ka kharch<br>' +
+    '<b>Budget</b> — budget mein kitna bacha hai<br>' +
+    '<b>Bachat</b> — income ka kitna % bach raha hai<br><br>' +
+    'Neeche ek line hoti hai — wo sabse kaam ki baat batati hai.' },
+
+  savingPct:{ t:'📊 Bachat %', b:
+    'Income ka kitna hissa bach raha hai.<br><br>' +
+    '<b class="t-green">20% se zyada</b> — zabardast<br>' +
+    '<b class="t-gold">10-20%</b> — theek hai<br>' +
+    '<b class="t-red">10% se kam</b> — kharch zyada ho raha hai<br><br>' +
+    'Hisaab: (Income − Kharch) ÷ Income' },
+
+  streak:{ t:'🔥 Streak', b:
+    'Lagataar kitne din aapne entry ki.<br><br>' +
+    'Ek din chhoot gaya to 0 se shuru. 2 din se dikhna shuru hota hai.<br><br>' +
+    'Ye sirf aadat banane ke liye hai — paison ka koi hisaab nahi.' },
+
+  budgetCarry:{ t:'🎯 Budget kaise chalta hai', b:
+    'Kisi category ki mahine ki limit set kar do — jaise Khaana ₹6,000.<br><br>' +
+    '<b>Ek baar set karo, bas.</b> Agle mahine wahi limit apne aap chalti rahegi. ' +
+    'Har mahine dobara set nahi karna.<br><br>' +
+    'Badalna ho? Jis mahine mein ho us mahine naya set kar do — us mahine se aage wahi chalega.' },
+
+  forecast:{ t:'📊 Forecast chips', b:
+    'Abhi tak jis rate se kharch ho raha hai, usse andaaza lagate hain ki mahine ke end tak kitna hoga.<br><br>' +
+    '<b class="t-green">On track</b> — budget ke andar rahoge<br>' +
+    '<b class="t-gold">At risk</b> — kareeb pahunch jaoge<br>' +
+    '<b class="t-red">Projected over</b> — budget cross ho jayega<br><br>' +
+    '<b>₹X/din left</b> — mahine ke baaki dinon mein roz itna kharch kar sakte ho.' },
+
+  udhar:{ t:'🤝 Lena / Dena', b:
+    '<b class="t-green">Lena Hai</b> — aapne kisi ko paisa diya tha, aapko wapas milna hai<br><br>' +
+    '<b class="t-red">Dena Hai</b> — aapne kisi se liya tha, aapko wapas dena hai<br><br>' +
+    'Thoda-thoda chukaane par "Payment" se jod sakte ho. Poora ho gaya to apne aap settle ho jaata hai.<br><br>' +
+    '<b>Phone number zaroor daalo</b> — tabhi WhatsApp par yaad dila paoge.' },
+
+  sms:{ t:'📩 Bank SMS se add', b:
+    'Bank ke SMS mein sab likha hota hai — amount, dukaan ka naam, date.<br><br>' +
+    'Aapko bas SMS copy karke paste karna hai. App usme se sab nikaal leta hai.<br><br>' +
+    '<b>Kai SMS ek saath</b> bhi chalenge — beech mein ek khaali line chhod do.<br><br>' +
+    'Category dukaan ke naam se andaaza lagayi jaati hai. Galat ho to badal do — ' +
+    '<b>app agli baar yaad rakhega</b>.' },
+
+  emiHealth:{ t:'📱 EMI Load', b:
+    'Aapki income ka kitna hissa EMI mein jaa raha hai.<br><br>' +
+    '<b class="t-green">30% se kam</b> — healthy<br>' +
+    '<b class="t-gold">30-50%</b> — thoda zyada<br>' +
+    '<b class="t-red">50% se zyada</b> — khatre ki baat<br><br>' +
+    'Sahi number dikhe iske liye is mahine ki income add karna zaroori hai.' },
+
+  recurring:{ t:'🔔 Recurring bills', b:
+    'Wo kharche jo <b>har mahine</b> aate hain — rent, bijli, pani.<br><br>' +
+    'Ek baar daal do, due date se pehle app khud yaad dila dega.<br><br>' +
+    '<b>"✓ Pay ho gaya"</b> dabane par do kaam ek saath hote hain: expense entry ban jaati hai, ' +
+    'aur wo bill is mahine ke liye chup ho jaata hai.' },
+
+  subs:{ t:'📺 Subscriptions', b:
+    'Netflix, Spotify, Prime — jo apne aap kat-te rehte hain.<br><br>' +
+    'Yearly ya quarterly wale ka "per mahina" barabar bhi dikhta hai, taaki ' +
+    'sahi tulna ho sake.<br><br>' +
+    'Billing date nikal jaane par app khud agli date par set kar deta hai.' },
+
+  festive:{ t:'🪔 Festive goal', b:
+    'Diwali, shaadi, trip — koi target rakho aur date daalo.<br><br>' +
+    'App bata dega ki <b>roz kitna bachana</b> padega.<br><br>' +
+    'Bachat ka hisaab: goal banane ke baad se <b>income minus kharch</b>. ' +
+    'Sirf income nahi — asli bachat.' },
+
+  backup:{ t:'💾 Backup kyun zaroori hai', b:
+    'Aapka saara hisaab <b>sirf is browser mein</b> hai — kisi server par nahi.<br><br>' +
+    'Matlab: phone kho gaya, browser ka data saaf kar diya, ya naya phone liya — to hisaab chala jayega.<br><br>' +
+    '<b>Mahine mein ek baar</b> Backup dabao. File download hogi — usko WhatsApp par khud ko bhej do ' +
+    'ya Google Drive mein rakh do. Naye phone par Restore se sab wapas.' },
+
+  simple:{ t:'✨ Simple Mode', b:
+    'App mein bahut saare features hain. Shuru mein sab dikhane se confusion hoti hai.<br><br>' +
+    'Simple Mode mein sirf <b>zaroori cheezein</b> dikhti hain — kharcha, udhar aur budget.<br><br>' +
+    'EMI, Bills, Subscriptions, Festive goals aur Stats chhupe rehte hain. ' +
+    'Jab zaroorat lage, yahi switch on kar do — sab wapas aa jayenge.<br><br>' +
+    '<span class="t-mute">Chhupane se data nahi jaata — sirf dikhna band hota hai.</span>' }
+};
 
 /* ── MERCHANT → CATEGORY ──
    Bank ke SMS mein dukaan ka naam likha hota hai. Ye list us naam
@@ -2026,7 +2249,8 @@ var S = {
   /* misc */
   editId:null, theme:'dark', healthFolded:false,
   undo:null,           /* { label, revert() } */
-  newVersion:null      /* server pe naya version mila to uska number */
+  newVersion:null,     /* server pe naya version mila to uska number */
+  simple:true          /* naye banday ke liye simple mode ON (settings se badalta hai) */
 };
 /* Chart.js ke instances — dobara banane se pehle purana destroy karna padta hai */
 var charts = {};
@@ -3716,7 +3940,8 @@ function setMoreTab(tab){
   else if(tab === 'emi')   renderEmis();
   else if(tab === 'bills'){ renderRecurring(); renderSubs(); renderBillsTotal(); }
   else if(tab === 'fest')  renderFestive();
-  else if(tab === 'set')  { renderBackupStatus(); renderStorage(); renderTheme(); renderVersionCard(); }
+  else if(tab === 'set')  { renderBackupStatus(); renderStorage(); renderTheme();
+                            renderVersionCard(); renderSimpleCard(); }
 }
 /* Ek form panel kholna/band karna + icon badalna */
 function toggleForm(panelId, icoId, onOpen, onClose){
@@ -4818,6 +5043,147 @@ function shareReportWA(){
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   12c · HELP · SIMPLE MODE · ONBOARDING
+   ───────────────────────────────────────────────────────────────
+   Teen cheezein jo app ko "sabko samajh aaye" banati hain:
+     1. HELP      — har mushkil shabd ke saath ek (?) button
+     2. SIMPLE    — shuru mein sirf zaroori features dikhte hain
+     3. ONBOARDING— pehli baar kholne par 3 screen ka intro
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── 1. HELP ──
+   (?) button HTML mein hi likhe hain (data-help="key").
+   Ek hi listener saare buttons sambhal leta hai — har button ke
+   liye alag code nahi. */
+function openHelp(key){
+  var h = HELP[key];
+  if(!h) return;
+  $('helpTitle').textContent = h.t;
+  $('helpBody').innerHTML    = h.b;
+  openSheet('helpSheet');
+}
+
+/* ── 2. SIMPLE MODE ──
+   Features chhupaye jaate hain, delete nahi hote. Data waise ka
+   waisa rehta hai — switch on karte hi sab wapas dikh jaata hai. */
+function applySimpleMode(){
+  var on = S.simple;
+
+  /* Bottom nav ke tabs */
+  $$('#nav .tab').forEach(function(b){
+    var name = b.getAttribute('data-s');
+    b.hidden = on && SIMPLE_HIDES.navTabs.indexOf(name) > -1;
+  });
+  /* More ke andar ke tabs */
+  $$('#moreTabs .mtab').forEach(function(b){
+    var name = b.getAttribute('data-p');
+    b.hidden = on && SIMPLE_HIDES.morePanels.indexOf(name) > -1;
+  });
+
+  /* Agar jis screen par ho wahi chhup gayi, to Home par le aao */
+  if(on && SIMPLE_HIDES.navTabs.indexOf(S.screen) > -1) go('home');
+  if(on && SIMPLE_HIDES.morePanels.indexOf(S.moreTab) > -1) setMoreTab('budget');
+
+  /* More-tabs ka grid ab kam columns ka — jitne dikh rahe hain utne */
+  var visible = $$('#moreTabs .mtab').filter(function(b){ return !b.hidden; }).length;
+  $('moreTabs').style.gridTemplateColumns = 'repeat(' + Math.min(visible, 5) + ',1fr)';
+
+  positionNavIndicator();
+  renderSimpleCard();
+}
+function toggleSimple(){
+  S.simple = !S.simple;
+  var st = readObj(K.settings, {}); st.simple = S.simple; writeObj(K.settings, st);
+  applySimpleMode();
+  toast(S.simple ? '✨ Simple mode on — sirf zaroori cheezein'
+                 : '🎛️ Saare features wapas aa gaye', 'ok');
+}
+function renderSimpleCard(){
+  var sw = $('simpleSwitch'), sub = $('simpleSub');
+  if(!sw || !sub) return;
+  sw.classList.toggle('on', S.simple);
+  sub.textContent = S.simple
+    ? 'Sirf kharcha, udhar aur budget dikh rahe hain'
+    : 'Saare features dikh rahe hain (EMI, Bills, Festive, Stats)';
+}
+
+/* ── 3. ONBOARDING ──
+   Teen screen. Har screen ek hi baat kehti hai — zyada thoosne se
+   banda padhta hi nahi. Aakhri screen seedha Add par le jaati hai,
+   taaki pehla kharcha turant add ho jaaye. */
+var INTRO = [
+  { ico:'👋',
+    title:'Namaste! Main <b>PaisaBook</b> hoon',
+    text:'Aapka kharcha aur udhar — dono yaad rakhne ke liye.',
+    list:[
+      { i:'💸', t:'Kharcha', d:'Kahan kitna gaya, ek nazar mein' },
+      { i:'🤝', t:'Udhar',   d:'Kisse lena hai, kisko dena hai' },
+      { i:'🔒', t:'Private', d:'Data sirf aapke phone mein — koi server nahi' }
+    ]},
+  { ico:'📩',
+    title:'Sabse <b>tez</b> tareeka',
+    text:'Bank ka SMS copy karke paste kar do. Baaki app kar lega.',
+    sms:'Rs.<mark>347.00</mark> debited from A/c XX1234 on <mark>08-Sep</mark> to <mark>SWIGGY</mark> via UPI',
+    after:'App isme se amount, date aur dukaan nikaal kar ' +
+          '<b>category khud chun leta hai</b> — Khaana 🍔<br><br>' +
+          'Galat ho to badal do, <b>agli baar yaad rakhega</b>.' },
+  { ico:'🎉',
+    title:'Bas, <b>ho gaya</b>',
+    text:'Chalo pehla kharcha add karte hain. 10 second lagega.',
+    list:[
+      { i:'1️⃣', t:'Amount daalo', d:'Ya neeche ke ₹100/₹500 shortcut dabao' },
+      { i:'2️⃣', t:'Category tap karo', d:'Khaana, Transport, Ghar…' },
+      { i:'3️⃣', t:'Save', d:'Date aur payment pehle se bhare hain' }
+    ],
+    cta:'Chalo shuru karein 🚀' }
+];
+var introStep = 0;
+
+function startIntro(){
+  introStep = 0;
+  renderIntro();
+  openSheet('intro');
+}
+function renderIntro(){
+  var s = INTRO[introStep];
+  var h = '<div class="intro-ico">' + s.ico + '</div>' +
+          '<div class="intro-title">' + s.title + '</div>' +
+          '<div class="intro-text">' + s.text + '</div>';
+
+  if(s.list){
+    h += '<div class="intro-list">' + s.list.map(function(x){
+      return '<div class="intro-item"><span class="intro-item-ico">' + x.i + '</span>' +
+             '<span class="intro-item-txt"><b>' + esc(x.t) + '</b>' + esc(x.d) + '</span></div>';
+    }).join('') + '</div>';
+  }
+  if(s.sms){
+    h += '<div class="intro-sms">' + s.sms + '</div>' +
+         '<div class="intro-arrow">↓</div>' +
+         '<div class="intro-text">' + s.after + '</div>';
+  }
+  $('introBody').innerHTML = h;
+
+  /* Dots */
+  $('introDots').innerHTML = INTRO.map(function(_, i){
+    return '<span class="intro-dot' + (i === introStep ? ' on' : '') + '"></span>';
+  }).join('');
+
+  var last = introStep === INTRO.length - 1;
+  $('introNext').textContent = last ? (s.cta || 'Shuru karein') : 'Aage →';
+  $('introSkip').textContent = last ? 'Baad mein' : 'Chhodo';
+}
+function introNext(){
+  if(introStep < INTRO.length - 1){ introStep++; renderIntro(); return; }
+  finishIntro(true);
+}
+/* goToAdd = aakhri screen se aaye ho to seedha Add par le jao */
+function finishIntro(goToAdd){
+  closeSheet('intro');
+  var st = readObj(K.settings, {}); st.onboarded = true; writeObj(K.settings, st);
+  if(goToAdd) setTimeout(function(){ go('add'); }, 350);
+}
+
+/* ═══════════════════════════════════════════════════════════════
    13 · NAVIGATION · EVENTS · INIT
    ═══════════════════════════════════════════════════════════════ */
 
@@ -4831,7 +5197,7 @@ function go(name){
   $$('#nav .tab').forEach(function(b){
     b.classList.toggle('active', b.getAttribute('data-s') === name);
   });
-  $('nav').style.setProperty('--tab-i', TAB_ORDER.indexOf(name));
+  positionNavIndicator();
   $('main').scrollTop = 0;
   try{ localStorage.setItem(K.tab, name); }catch(e){}
 
@@ -4839,6 +5205,21 @@ function go(name){
   else if(name === 'stats') setStatsTab(S.statTab);
   else if(name === 'more')  setMoreTab(S.moreTab);
   else if(name === 'add')   setTimeout(function(){ $('amtIn').focus(); }, 250);
+}
+
+/* Gold indicator ko sahi tab ke neeche rakho.
+   Chhupe hue tabs ko ginti mein nahi lete — isliye Simple Mode
+   mein bhi indicator theek jagah baithta hai. */
+function positionNavIndicator(){
+  var vis = $$('#nav .tab').filter(function(b){ return !b.hidden; });
+  var nav = $('nav');
+  nav.style.setProperty('--tab-n', vis.length || 5);
+  for(var i = 0; i < vis.length; i++){
+    if(vis[i].getAttribute('data-s') === S.screen){
+      nav.style.setProperty('--tab-i', i);
+      return;
+    }
+  }
 }
 
 /* Mahina badalna — limits ke andar */
@@ -4950,6 +5331,40 @@ function wireEvents(){
   $('fFormToggle').addEventListener('click', function(){ toggleForm('fForm','fFormIco'); });
   $('fSave').addEventListener('click', saveFestive);
 
+  /* Help (?) — ek hi listener saare (?) buttons sambhalta hai.
+     Delegation: click poore document pe sunte hain, phir dekhte
+     hain ki kis element pe hua. Isse naye (?) add karne par koi
+     naya code nahi likhna padta. */
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest ? e.target.closest('[data-help]') : null;
+    if(!btn) return;
+    e.stopPropagation();
+    e.preventDefault();
+    openHelp(btn.getAttribute('data-help'));
+  }, true);
+  /* (?) ab <span> hai, isliye keyboard wale Enter/Space khud
+     handle karne padte hain (button ye apne aap karta hai) */
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    var btn = e.target.closest ? e.target.closest('[data-help]') : null;
+    if(!btn) return;
+    e.preventDefault();
+    openHelp(btn.getAttribute('data-help'));
+  });
+  $('helpClose').addEventListener('click', function(){ closeSheet('helpSheet'); });
+  $('helpOk').addEventListener('click', function(){ closeSheet('helpSheet'); });
+
+  /* Intro */
+  $('introNext').addEventListener('click', introNext);
+  $('introSkip').addEventListener('click', function(){ finishIntro(false); });
+  $('btnIntro').addEventListener('click', startIntro);
+
+  /* Simple mode */
+  $('btnSimple').addEventListener('click', function(e){
+    if(e.target.closest('[data-help]')) return;    /* (?) dabaya to toggle mat karo */
+    toggleSimple();
+  });
+
   /* Settings */
   $('btnWa').addEventListener('click', shareWhatsApp);
   $('btnReport2').addEventListener('click', showReport);
@@ -4976,7 +5391,7 @@ function wireEvents(){
   });
 
   /* Sheet ke bahar tap → band. Aur Escape se bhi band. */
-  var SHEETS = ['editSheet','reportSheet','confirmSheet','smsSheet'];
+  var SHEETS = ['editSheet','reportSheet','confirmSheet','smsSheet','helpSheet'];
   SHEETS.forEach(function(id){
     $(id).addEventListener('click', function(e){ if(e.target === this) closeSheet(id); });
   });
@@ -5040,6 +5455,9 @@ function init(){
 function bootUI(){
   var settings = readObj(K.settings, {});
   applyTheme(settings.theme === 'light' ? 'light' : 'dark');   /* 2. theme */
+  /* Simple mode: naye banday ke liye default ON. Purane user ne
+     jo chuna tha wahi chalega. */
+  S.simple = (settings.simple === undefined) ? true : !!settings.simple;
 
   if(hasCharts()){                               /* charts optional hain */
     Chart.defaults.font.family = "'DM Sans',system-ui,sans-serif";
@@ -5058,6 +5476,7 @@ function bootUI(){
   initAdd();
   renderHome();
   setMoreTab(S.moreTab);
+  applySimpleMode();                             /* 6b. kaunse features dikhenge */
 
   /* 7. pichhli baar jis tab pe the, wahi kholo */
   var last = localStorage.getItem(K.tab);
@@ -5069,6 +5488,11 @@ function bootUI(){
 
   /* 8. Splash hataa do (CSS animation 1.6s mein khatam ho jaati hai) */
   setTimeout(function(){ var s = $('splash'); if(s) s.remove(); }, 1700);
+
+  /* 8b. Pehli baar aaye ho? Intro dikhao — splash ke turant baad. */
+  if(!settings.onboarded){
+    setTimeout(startIntro, 1900);
+  }
 
   /* 9. Naya version aaya kya — 5 second baad ek baar, phir har 30 minute.
         Aur jab user app par wapas aaye (tab switch karke), tab bhi. */
