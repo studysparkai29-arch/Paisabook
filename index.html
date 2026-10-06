@@ -45,7 +45,7 @@
      = user ko "Update karo" ka banner dikhta hai.
      BADALNA ZAROORI HAI: har baar GitHub pe naya file daalo, to ye
      number bhi badhao (aur JS mein APP.version bhi — dono same rakho). -->
-<meta name="pb-version" content="2.4">
+<meta name="pb-version" content="2.5">
 <meta name="theme-color" content="#0A0A0F">
 <meta name="description" content="PaisaBook — offline budget, udhar aur bill tracker. Aapka data sirf aapke phone mein.">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1599,7 +1599,7 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
       <div class="footer">
         <div class="footer-logo">Paisa<b>Book</b></div>
         Apna Paisa, Apna Hisaab<br>
-        <span style="opacity:.6" id="verTxt">v2.4</span>
+        <span style="opacity:.6" id="verTxt">v2.5</span>
       </div>
     </div>
   </section>
@@ -2530,16 +2530,32 @@ function splitSMS(text){
     .filter(function(s){ return s.length > 12; });
 }
 
-/* Amount nikaalo. Sabse bada number nahi — wo jo "Rs" ke saath ho.
+/* Amount nikaalo. Sabse bada number nahi — wo jo kharch/jama hua hai.
    Balance waala number chhodna hai (warna wo amount ban jayega). */
 function parseAmount(sms){
-  /* Pehle "Avl Bal", "Balance", "Bal:" waale hisse hata do */
-  var clean = sms.replace(/(?:avl\.?\s*bal|available\s*bal|balance|bal)[^\d]{0,12}[\d,]+(?:\.\d{1,2})?/gi, ' ');
-  var m = clean.match(/(?:rs\.?|inr|₹)\s*([\d,]+(?:\.\d{1,2})?)/i)      /* Rs.347.00 */
-       || clean.match(/([\d,]+(?:\.\d{1,2})?)\s*(?:rs\.?|inr|rupees)/i); /* 347 INR */
-  if(!m) return null;
-  var n = parseFloat(m[1].replace(/,/g,''));
-  return (isNaN(n) || n <= 0) ? null : n;
+  /* Pehle balance waale hisse hata do — har bank alag likhta hai:
+     "Avl Bal", "Avbl Bal", "Total Bal", "Bal INR 13187.61" */
+  var clean = sms.replace(
+    /(?:avl|avbl|available|total|closing|a\/c)?\.?\s*bal(?:ance)?[^\d]{0,14}[\d,]+(?:\.\d{1,2})?/gi, ' ');
+
+  /* Teen tareeke se dhoondhte hain — jo pehle mile wahi lete hain */
+  var pats = [
+    /(?:rs\.?|inr|₹)\s*([\d,]+(?:\.\d{1,2})?)/i,                 /* Rs.347.00 · INR 80.00 */
+    /([\d,]+(?:\.\d{1,2})?)\s*(?:rs\.?|inr|rupees)\b/i,          /* 347 INR */
+    /* SBI jaise banks "Rs" likhte hi nahi:
+       "A/C X1234 debited by 150.0 on date 05Oct25"
+       Ye line us format ke liye hai — India mein bahut common hai. */
+    /\b(?:debited|credited|withdrawn|deposited|sent|paid|spent|transferred|received)\s+(?:by|for|with|of|:)?\s*([\d,]+(?:\.\d{1,2})?)/i,
+    /\bamount\s+of\s+(?:rs\.?|inr|₹)?\s*([\d,]+(?:\.\d{1,2})?)/i  /* "An amount of 500.00" */
+  ];
+  for(var i = 0; i < pats.length; i++){
+    var m = clean.match(pats[i]);
+    if(m){
+      var n = parseFloat(m[1].replace(/,/g,''));
+      if(!isNaN(n) && n > 0) return n;
+    }
+  }
+  return null;
 }
 
 /* Paisa gaya ya aaya?
@@ -2615,8 +2631,22 @@ function parseMerchant(sms){
   m = s.match(/(?:info|remarks?|narration|desc)\s*[:\-]\s*(?:upi\/)?([^,.;\n]{3,40})/i);
   if(m) return tidy(m[1]);
 
-  /* 3. "to SWIGGY" · "at DMART" · "towards AIRTEL" · "by SALARY CREDIT" */
-  m = s.match(/\b(?:to|at|towards|for|by|trf to|paid to)\s+((?:[A-Z][A-Za-z0-9&'.\-]*\s?){1,5})/);
+  /* 3. "to SWIGGY" · "at DMART" · "trf to saty narayan ju"
+     ── YAHAN EK ZAROORI BADLAV ──
+     Pehle ye sirf BADE akshar wale naam pakadta tha ([A-Z] se shuru).
+     Par India mein UPI se kisi BANDE ko paisa bhejo to bank aksar
+     chhote akshar mein likhta hai:
+       "...to saty narayan ju thru UPI:4674139..."
+     Us SMS mein naam nikalta hi nahi tha. Ab chhote akshar bhi
+     chalte hain — aur naam wahan tak lete hain jahan bank ka apna
+     shabd (thru, via, on, ref, Bal...) shuru hota hai. */
+  var STOP = 'thru|through|via|on|dt|date|ref|refno|rrn|upi|neft|imps|rtgs|nach|' +
+             'bal|avl|avbl|total|not|fwd|call|sms|block|info|txn|trf|from|' +
+             'a\\/c|ac|acct|account|your|is|was|and|if';
+  m = s.match(new RegExp(
+    '\\b(?:trf\\s+to|paid\\s+to|sent\\s+to|to|at|towards|for|by)\\s+' +   /* "to " */
+    '([A-Za-z][A-Za-z0-9&\'.\\- ]{1,40}?)' +                              /* naam */
+    '(?=\\s*(?:\\b(?:' + STOP + ')\\b|[.,;:]|\\d|$))', 'i'));             /* kahan rukna hai */
   if(m) return tidy(m[1]);
 
   /* 4. Ulta pattern — "SWIGGY credited" · "AMAZON debited" */
@@ -3384,7 +3414,14 @@ function renderSmsRows(){
           '<div class="row-ico">' + catIcon(r.category) + '</div>' +
           '<div style="min-width:0">' +
             '<div class="gcard-name">' + esc(r.merchant || (isInc ? 'Income' : 'Kharch')) + '</div>' +
-            '<div class="gcard-note">' + fmtShort(r.date) + ' · ' + esc(r.payment) +
+            '<div class="gcard-note">' +
+              /* Agar SMS purana hai (doosre mahine ka) to date ko
+                 gold mein dikhate hain — warna banda save karke
+                 Home par dhoondhta rehta hai ki entry gayi kahan. */
+              (monthOf(r.date).m !== S.month || monthOf(r.date).y !== S.year
+                ? '<b class="t-gold">📅 ' + fmtDate(r.date) + '</b>'
+                : fmtShort(r.date)) +
+              ' · ' + esc(r.payment) +
               (r.learned ? ' · <span class="t-green">aapki choice yaad thi ✓</span>' : '') +
             '</div>' +
           '</div>' +
@@ -3445,12 +3482,37 @@ function saveSmsRows(){
   bumpStreak();
   var n = added.length;
   closeSheet('smsSheet');
-  toast('📩 ' + n + (n === 1 ? ' entry' : ' entries') + ' add ho gayi', 'ok', function(){
+
+  /* ── MAHINA JUMP ──
+     Bank ka SMS purana ho sakta hai. 25 August ka SMS paste kiya,
+     par app October dikha raha hai — to entry August mein jaati hai
+     aur screen par KUCH NAHI dikhta. Bande ko lagta hai save hua hi
+     nahi. Isliye: agar entry current view se alag mahine ki hai, to
+     app khud us mahine par chala jaata hai. */
+  var months = {};
+  smsRows.forEach(function(r){ var d = monthOf(r.date); months[d.y + '-' + d.m] = d; });
+  var keys = Object.keys(months);
+  var jumped = null;
+  if(keys.length && !months[S.year + '-' + S.month]){
+    /* Sabse naye mahine par jao */
+    var best = null;
+    keys.forEach(function(k){
+      var d = months[k];
+      if(!best || monthIndex(d.m,d.y) > monthIndex(best.m,best.y)) best = d;
+    });
+    S.month = best.m; S.year = best.y;
+    renderMonthLabel();
+    jumped = MONTHS[best.m] + ' ' + best.y;
+  }
+
+  toast('📩 ' + n + (n === 1 ? ' entry' : ' entries') + ' add ho gayi' +
+        (jumped ? ' — ' + jumped + ' mein' : ''), 'ok', function(){
     write(K.txn, read(K.txn).filter(function(t){ return added.indexOf(t.id) === -1; }));
     toast('↩ Wapas hataa diya','ok');
     refreshAll();
   });
   smsRows = [];
+  go('home');                /* entry turant dikhe */
   refreshAll();
 }
 
