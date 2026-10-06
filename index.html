@@ -45,7 +45,7 @@
      = user ko "Update karo" ka banner dikhta hai.
      BADALNA ZAROORI HAI: har baar GitHub pe naya file daalo, to ye
      number bhi badhao (aur JS mein APP.version bhi — dono same rakho). -->
-<meta name="pb-version" content="3.0">
+<meta name="pb-version" content="3.1">
 <meta name="theme-color" content="#0A0A0F">
 <meta name="description" content="PaisaBook — offline budget, udhar aur bill tracker. Aapka data sirf aapke phone mein.">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1110,7 +1110,7 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
   <!-- ══ SPLASH ══ -->
   <div id="splash">
     <div class="splash-ring"><span class="splash-r">₹</span></div>
-    <div class="splash-name">Paisa<b>Book</b></div>
+    <div class="splash-name" data-notr>Paisa<b>Book</b></div>
     <div class="splash-tag">Apna Paisa, Apna Hisaab</div>
   </div>
 
@@ -1118,7 +1118,7 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
   <header id="header">
     <div class="logo">
       <div class="logo-mark">₹</div>
-      <div class="logo-text">Paisa<b>Book</b></div>
+      <div class="logo-text" data-notr>Paisa<b>Book</b></div>
     </div>
     <div class="month-nav">
       <button id="mPrev" aria-label="Pichhla mahina">&#8249;</button>
@@ -1194,6 +1194,36 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
       <div class="snap-tip" id="snapTip">
         <span id="snapTipIco">💡</span><span id="snapTipTxt"></span>
       </div>
+    </div>
+
+    <!-- ── MAHINE KE END TAK ──
+         App ka sabse kaam ka number. Do pakki baatein aur ek
+         anuman — anuman par "~" lagta hai taaki koi use pakka
+         na samjhe. -->
+    <div id="fcast" class="card card-top" style="display:none">
+      <button class="health-head" id="fcastHead">
+        <div class="chart-title">🔮 Mahine ke end tak<span class="help" role="button" tabindex="0" data-help="forecast" aria-label="Ye kya hai?">?</span></div>
+        <span class="pill pill-br num" id="fcastPill">–</span>
+        <span class="u-chev" id="fcastChev">⌄</span>
+      </button>
+      <div class="snap-grid" style="margin-top:var(--s3)">
+        <div class="snap-cell"><span class="snap-ico">💸</span>
+          <span class="snap-lbl">Ab tak</span>
+          <span class="snap-val num t-red" id="fcSpent">₹0</span></div>
+        <div class="snap-cell"><span class="snap-ico">📌</span>
+          <span class="snap-lbl">Pakka aana</span>
+          <span class="snap-val num t-orange" id="fcUp">₹0</span></div>
+        <div class="snap-cell"><span class="snap-ico">🔮</span>
+          <span class="snap-lbl">End tak</span>
+          <span class="snap-val num t-gold" id="fcTotal">₹0</span></div>
+        <div class="snap-cell"><span class="snap-ico">🏦</span>
+          <span class="snap-lbl">Bachega</span>
+          <span class="snap-val num t-mute" id="fcLeft">–</span></div>
+      </div>
+      <div class="snap-tip show" id="fcastTip" style="margin-top:var(--s3)">
+        <span id="fcastTipIco">💡</span><span id="fcastTipTxt"></span>
+      </div>
+      <div id="fcastList" style="display:none;margin-top:var(--s3)"></div>
     </div>
 
     <!-- Financial health -->
@@ -1844,6 +1874,16 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
       <div class="divider"></div>
       <div class="eyebrow" style="margin-bottom:var(--s3)">🎨 Preferences</div>
 
+      <!-- Bhasha — teen vikalp, ek tap -->
+      <div class="card set c-info" style="align-items:flex-start">
+        <div class="set-ico">🌐</div>
+        <div class="set-body">
+          <div class="set-title">Bhasha / Language<span class="help" role="button" tabindex="0" data-help="lang" aria-label="Ye kya hai?">?</span></div>
+          <div class="set-sub" id="langSub">—</div>
+          <div class="row-scroll" id="langPicks" style="margin-top:var(--s2)"></div>
+        </div>
+      </div>
+
       <!-- ── CLOUD BACKUP ──
            Login ZAROORI NAHI. Ye upari cheez hai — na karo to app
            bilkul waisa hi chalta hai.
@@ -2398,6 +2438,27 @@ var HELP = {
     '<span class="t-mute">App aapka UPI ID sirf aapke phone mein rakhta hai. ' +
     'Paisa kabhi app ke through nahi jaata — aapka apna UPI app hi kholta hai.</span>' },
 
+  forecast:{ t:'🔮 Mahine ke end tak', b:
+    'Do cheezein pakki hain aur ek anuman hai:<br><br>' +
+    '<b>Ab tak</b> — jo kharch ho chuka. Pakka.<br>' +
+    '<b>Pakka aana</b> — jo bill, EMI aur committee ki kisht abhi baaki hai. ' +
+    'Ye bhi pakka, kyunki aap khud daal chuke ho.<br>' +
+    '<b>End tak</b> — ab tak ka + aane wala + aapki roz ki raftaar se bache ' +
+    'dino ka. Ispe <b>~</b> ka nishaan hai, kyunki ye andaaza hai.<br><br>' +
+    'Card par tap karo to poori list khul jaati hai — kaunsa kharcha baaki hai.<br><br>' +
+    '<span class="t-mute">Mahine ke pehle 2 din raftaar ka koi matlab nahi hota, ' +
+    'isliye tab sirf pakke kharch gine jaate hain.</span>' },
+
+  lang:{ t:'🌐 Bhasha', b:
+    '<b>Hinglish</b> — jaise abhi hai. Roman akshar, Hindi shabd.<br>' +
+    '<b>English</b> — poora English. Un logon ke liye jinko Hindi nahi aati.<br>' +
+    '<b>हिंदी</b> — Devanagari mein. Bade-buzurgon ke liye Roman padhna ' +
+    'mushkil hota hai, unke liye ye sabse aasaan hai.<br><br>' +
+    'Tap karte hi poora app badal jaata hai — reload nahi karna padta, ' +
+    'aur <b>aapka data kahin nahi jaata</b>.<br><br>' +
+    '<span class="t-mute">Hindi mein EMI, UPI, SMS jaise shabd angrezi mein hi ' +
+    'rahenge — kyonki asli zindagi mein log aise hi bolte hain.</span>' },
+
   cloud:{ t:'☁️ Cloud Backup', b:
     'Login karoge to aapka saara hisaab cloud mein bhi save hota rahega. ' +
     'Naya phone liya? Wahi email-password se login karo — sab wapas aa jaayega.<br><br>' +
@@ -2666,6 +2727,1314 @@ var LIMIT = {
   cloudTimeoutMs: 20000
 };
 var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* ═══════════════════════════════════════════════════════════════
+   1b · BHASHA (English · हिंदी · Hinglish)
+   ───────────────────────────────────────────────────────────────
+   EK BADA FAISLA: dictionary ki "key" koi banaya hua naam nahi
+   hai — key WAHI HINGLISH VAAKYA hai jo app mein likha hai.
+
+   Isse teen fayde mile:
+     1. Hinglish ke liye dictionary chahiye hi nahi — wo seedha
+        apna aap hai. Aadha kaam wahin khatam.
+     2. Jo string translate hona reh gaya, wo TOOTA hua nahi
+        dikhta — wo Hinglish mein dikh jaata hai. "missing_key_42"
+        jaisa kuch kabhi screen par nahi aayega.
+     3. Purane 426 test bina chhede chalte rehte hain, kyunki
+        default bhasha mein har string jaisi ki taisi lautti hai.
+
+   Hindi mein kuch shabd jaan-boojh kar angrezi mein hain — EMI,
+   UPI, SMS, budget. Inko "ईएमआई" likhna technically theek hai par
+   koi asli aadmi aise nahi bolta. Localisation ka matlab shabd
+   badalna nahi, samajh aana hai.
+   ═══════════════════════════════════════════════════════════════ */
+var LANGS = [
+  { id:'hin', name:'Hinglish', sub:'Roman — jaise abhi hai' },
+  { id:'en',  name:'English',  sub:'Full English' },
+  { id:'hi',  name:'हिंदी',    sub:'Devanagari mein' }
+];
+/* STR.hin ki zaroorat nahi — Hinglish khud key hai */
+var STR = {
+  en:{
+ "+ dabao": "press +",
+ "10 digit ka valid number daalo": "Enter a valid 10-digit number",
+ "4 digit — jo yaad rahe": "4 digits — one you'll remember",
+ "<b class=\"t-green\">Lena Hai</b> — aapne kisi ko paisa diya tha, aapko wapas milna hai<br><br><b class=\"t-red\">Dena Hai</b> — aapne kisi se liya tha, aapko wapas dena hai<br><br>Thoda-thoda chukaane par \"Payment\" se jod sakte ho. Poora ho gaya to apne aap settle ho jaata hai.<br><br><b>Phone number zaroor daalo</b> — tabhi WhatsApp par yaad dila paoge.": "<b class=\"t-green\">To Get</b> — you lent money to someone and it's coming back<br><br><b class=\"t-red\">To Give</b> — you borrowed and owe it back<br><br>If it's repaid in parts, add each one with \"Payment\". Once it's fully paid it settles on its own.<br><br><b>Do add the phone number</b> — only then can you send a WhatsApp reminder.",
+ "<b>Hinglish</b> — jaise abhi hai. Roman akshar, Hindi shabd.<br><b>English</b> — poora English. Un logon ke liye jinko Hindi nahi aati.<br><b>हिंदी</b> — Devanagari mein. Bade-buzurgon ke liye Roman padhna mushkil hota hai, unke liye ye sabse aasaan hai.<br><br>Tap karte hi poora app badal jaata hai — reload nahi karna padta, aur <b>aapka data kahin nahi jaata</b>.<br><br><span class=\"t-mute\">Hindi mein EMI, UPI, SMS jaise shabd angrezi mein hi rahenge — kyonki asli zindagi mein log aise hi bolte hain.</span>": "<b>Hinglish</b> — as it is now. Roman letters, Hindi words.<br><b>English</b> — full English. For people who don't read Hindi.<br><b>हिंदी</b> — in Devanagari. Older people often find Roman hard to read; this is easiest for them.<br><br>One tap changes the whole app — no reload needed, and <b>your data doesn't move anywhere</b>.<br><br><span class=\"t-mute\">In Hindi, words like EMI, UPI and SMS stay in English — because that's how people actually say them.</span>",
+ "Aaj": "Today",
+ "Aaj backup hua ✓": "Backed up today ✓",
+ "Aaj due!": "Due today!",
+ "Aaj ka kharch average se {n}x zyada hai.": "Today's spend is {n}x the average.",
+ "Aaj koi kharch nahi — zero-spend day! 🙌": "No spending today — zero-spend day! 🙌",
+ "Aapka saara hisaab <b>sirf is browser mein</b> hai — kisi server par nahi.<br><br>Matlab: phone kho gaya, browser ka data saaf kar diya, ya naya phone liya — to hisaab chala jayega.<br><br><b>Mahine mein ek baar</b> Backup dabao. File download hogi — usko WhatsApp par khud ko bhej do ya Google Drive mein rakh do. Naye phone par Restore se sab wapas.": "All your records live <b>only in this browser</b> — not on any server.<br><br>Which means: lose the phone, clear browser data, or switch phones, and the records are gone.<br><br>Tap Backup <b>once a month</b>. A file downloads — send it to yourself on WhatsApp or keep it in Google Drive. On a new phone, Restore brings it all back.",
+ "Aapki bachat, EMI aur udhar — teeno milaa kar 100 mein ek number.<br><br><b>Bachat 40</b> + <b>EMI 30</b> + <b>Udhar 30</b> = 100<br><br>Zyada number = behtar haalat. 80+ matlab zabardast, 45 se kam matlab dhyan dene ki zaroorat.<br><br><span class=\"t-mute\">Ye ek mota-mota andaaza hai — financial advice nahi.</span>": "Your savings, EMIs and lending — all three rolled into one number out of 100.<br><br><b>Savings 40</b> + <b>EMI 30</b> + <b>Lending 30</b> = 100<br><br>Higher is better. 80+ is excellent, below 45 needs attention.<br><br><span class=\"t-mute\">This is a rough guide — not financial advice.</span>",
+ "Aapki income ka kitna hissa EMI mein jaa raha hai.<br><br><b class=\"t-green\">30% se kam</b> — healthy<br><b class=\"t-gold\">30-50%</b> — thoda zyada<br><b class=\"t-red\">50% se zyada</b> — khatre ki baat<br><br>Sahi number dikhe iske liye is mahine ki income add karna zaroori hai.": "What share of your income goes into EMIs.<br><br><b class=\"t-green\">Under 30%</b> — healthy<br><b class=\"t-gold\">30-50%</b> — a bit high<br><b class=\"t-red\">Over 50%</b> — risky<br><br>Add this month's income for the number to be right.",
+ "Aaya ya diya?": "Received or given?",
+ "Ab tak": "So far",
+ "Ab tak kul {x} jama kiya": "{x} put in so far",
+ "Abhi tak koi backup nahi hua": "No backup taken yet",
+ "Active lena vs dena": "Active to-get vs to-give",
+ "Add": "Add",
+ "Add karo": "Add",
+ "Agla mahina": "Next month",
+ "Aisa likho: naam@bank": "Write it like: name@bank",
+ "Amount": "Amount",
+ "Amount likho, category tap karo, + dabao": "Type the amount, tap a category, press +",
+ "Apna 4 digit ka PIN": "Your 4-digit PIN",
+ "Apna PIN daalo": "Enter your PIN",
+ "Apna Paisa, Apna Hisaab": "Your Money, Your Record",
+ "App Lock": "App Lock",
+ "App Version": "App Version",
+ "App ka feel dekhne ke liye nakli data bharo": "Fill fake data to see how it feels",
+ "App kaise use karna hai — 3 screen mein": "How to use the app — in 3 screens",
+ "App kholte hi 4 digit ka PIN poochega. Ghar mein phone bhai, bachchon aur doston ke haath jaata hai — unse hisaab chhupa rehta hai.<br><br><b>Saaf baat:</b> ye <b>ghar walon se</b> hai, hacker se nahi. Aapka data isi phone ke browser mein hai. Jo aadmi computer ka jaankaar hai wo nikaal sakta hai. Hum jhootha bharosa nahi denge.<br><br>PIN khud kabhi save nahi hota — usko ghuma kar ek pehchaan banti hai, bas wahi rakhi jaati hai. Isliye <b>PIN bhool gaye to wapas nahi aa sakta</b>. Lock chalu karne se pehle <b>ek backup zaroor le lo</b>.<br><br><span class=\"t-mute\">2 minute se zyada app band rahe to wapas aane par dobara PIN poochega.</span>": "The app asks for a 4-digit PIN as soon as it opens. At home the phone passes through the hands of siblings, children and friends — this keeps your records away from them.<br><br><b>Plainly:</b> this is protection <b>from family</b>, not from a hacker. Your data sits in this phone's browser. Someone who knows computers can get it out. We won't give you false confidence.<br><br>The PIN itself is never saved — it's scrambled into a fingerprint and only that is kept. So <b>if you forget the PIN, it cannot be recovered</b>. Before turning the lock on, <b>do take a backup</b>.<br><br><span class=\"t-mute\">If the app stays closed for more than 2 minutes, it asks for the PIN again when you come back.</span>",
+ "App mein bahut saare features hain. Shuru mein sab dikhane se confusion hoti hai.<br><br>Simple Mode mein sirf <b>zaroori cheezein</b> dikhti hain — kharcha, udhar aur budget.<br><br>EMI, Bills, Subscriptions, Festive goals aur Stats chhupe rehte hain. Jab zaroorat lage, yahi switch on kar do — sab wapas aa jayenge.<br><br><span class=\"t-mute\">Chhupane se data nahi jaata — sirf dikhna band hota hai.</span>": "The app has a lot of features. Showing them all at the start is confusing.<br><br>In Simple Mode only the <b>essentials</b> show — spending, lending and budget.<br><br>EMI, Bills, Subscriptions, Festive goals and Stats stay hidden. Turn this switch on whenever you need them and they all come back.<br><br><span class=\"t-mute\">Hiding doesn't delete anything — it only stops showing it.</span>",
+ "Baaki": "Left",
+ "Baaki mahine daalo": "Enter remaining months",
+ "Baaki, total se zyada nahi ho sakta": "Remaining can't exceed total",
+ "Bachat": "Saved",
+ "Bachat %": "Saved %",
+ "Bachat ka trend 📊": "Savings trend 📊",
+ "Bachat kaise count hoti hai": "How savings are counted",
+ "Bachega": "Will be left",
+ "Backup": "Backup",
+ "Backup fail hua — dobara try karo": "Backup failed — try again",
+ "Backup ki .html ya .json file chuno": "Pick the backup .html or .json file",
+ "Backup se Restore": "Restore from Backup",
+ "Badlo": "Change",
+ "Band": "Off",
+ "Band karo": "Close",
+ "Band — koi bhi app khol sakta hai": "Off — anyone can open the app",
+ "Bank": "Bank",
+ "Bank ke SMS mein sab likha hota hai — amount, dukaan ka naam, date.<br><br>Aapko bas SMS copy karke paste karna hai. App usme se sab nikaal leta hai.<br><br><b>Kai SMS ek saath</b> bhi chalenge — beech mein ek khaali line chhod do.<br><br>Category dukaan ke naam se andaaza lagayi jaati hai. Galat ho to badal do — <b>app agli baar yaad rakhega</b>.": "A bank SMS already has everything — amount, shop name, date.<br><br>You just copy the SMS and paste it. The app pulls the rest out.<br><br><b>Several SMS at once</b> work too — leave a blank line between them.<br><br>The category is guessed from the shop name. If it's wrong, change it — <b>the app will remember next time</b>.",
+ "Bas, <b>ho gaya</b>": "That's <b>it</b>",
+ "Bharo": "Fill",
+ "Bhasha / Language": "Language",
+ "Bhasha badal gayi": "Language changed",
+ "Bills": "Bills",
+ "Budget": "Budget",
+ "Budget apne aap aage badhta hai": "Budget carries forward on its own",
+ "Budget hataa diya": "Budget removed",
+ "Budget {p}% use — sirf {x} bacha hai.": "Budget {p}% used — only {x} left.",
+ "Budget {x} se cross ho gaya!": "Budget crossed by {x}!",
+ "Business": "Business",
+ "Byaaj": "Interest",
+ "CSV Export": "CSV Export",
+ "Camera se kheencho ya gallery se chuno": "Shoot with camera or pick from gallery",
+ "Camera ya gallery se": "From camera or gallery",
+ "Card": "Card",
+ "Cash": "Cash",
+ "Category chuno": "Pick a category",
+ "Category-wise spending": "Category-wise spending",
+ "Caution": "Caution",
+ "Chai": "Tea",
+ "Chalu — app kholte hi PIN poochega": "On — asks for a PIN when the app opens",
+ "Char cheezein ek nazar mein:<br><br><b>Aaj</b> — aaj kitna kharch hua<br><b>Mahina</b> — is poore mahine ka kharch<br><b>Budget</b> — budget mein kitna bacha hai<br><b>Bachat</b> — income ka kitna % bach raha hai<br><br>Neeche ek line hoti hai — wo sabse kaam ki baat batati hai.": "Four things at a glance:<br><br><b>Today</b> — spent today<br><b>Month</b> — spent this whole month<br><b>Budget</b> — how much budget is left<br><b>Saved</b> — what % of income you're keeping<br><br>The line below tells you the one thing that matters most.",
+ "Check": "Check",
+ "Check kar raha hoon…": "Checking…",
+ "Check nahi ho paaya — internet dekho": "Could not check — check your internet",
+ "Chhodo": "Skip",
+ "Clear": "Clear",
+ "Cloud Backup": "Cloud Backup",
+ "Cloud mein doosra hisaab hai": "There's different data in the cloud",
+ "Committee": "Committee",
+ "Committee delete hui": "Committee deleted",
+ "Committee delete?": "Delete committee?",
+ "Committee mein har aadmi ka ek number hota hai — kaunse mahine usko paisa milega.<br><br>Agar aapka <b>pehle</b> mahine mein hai to <b>1</b> likho, doosre mein to <b>2</b>, aur aise hi.<br><br>Abhi pata na ho to <b>khaali chhod do</b> — baad mein add kar sakte ho. Baaki sab hisaab phir bhi chalta rahega.": "In a committee everyone has a turn number — which month they get the pot.<br><br>If yours is in the <b>first</b> month write <b>1</b>, second month <b>2</b>, and so on.<br><br>Don't know yet? <b>Leave it blank</b> — you can add it later. Everything else still works.",
+ "Committee ya BC chalti ho to yahan rakho": "If you're in a committee or BC, keep it here",
+ "Daan": "Donation",
+ "Danger": "Danger",
+ "Dark mode chalu hai": "Dark mode is on",
+ "Data bada ho raha hai (": "Data is getting large (",
+ "Data safe karo — tap karke backup lo": "Keep your data safe — tap to back up",
+ "Date aur payment pehle se bhare hain — sirf amount aur category chahiye": "Date and payment are pre-filled — just amount and category",
+ "Date chuno": "Pick a date",
+ "Date nahi": "No date",
+ "Dekho": "View",
+ "Demo Data": "Demo Data",
+ "Demo data?": "Load demo data?",
+ "Dena": "To give",
+ "Dena Hai": "To Give",
+ "Devanagari mein": "In Devanagari",
+ "Din 1 se 31 ke beech daalo": "Enter a day between 1 and 31",
+ "Diwali, shaadi, trip — koi target rakho aur date daalo.<br><br>App bata dega ki <b>roz kitna bachana</b> padega.<br><br>Bachat ka hisaab: goal banane ke baad se <b>income minus kharch</b>. Sirf income nahi — asli bachat.": "Diwali, a wedding, a trip — set a target and a date.<br><br>The app works out <b>how much to save each day</b>.<br><br>Savings are counted as <b>income minus spending</b> from the day you set the goal. Not just income — real savings.",
+ "Diwali, shaadi, trip — target set karo": "Diwali, wedding, trip — set a target",
+ "Do cheezein pakki hain aur ek anuman hai:<br><br><b>Ab tak</b> — jo kharch ho chuka. Pakka.<br><b>Pakka aana</b> — jo bill, EMI aur committee ki kisht abhi baaki hai. Ye bhi pakka, kyunki aap khud daal chuke ho.<br><b>End tak</b> — ab tak ka + aane wala + aapki roz ki raftaar se bache dino ka. Ispe <b>~</b> ka nishaan hai, kyunki ye andaaza hai.<br><br>Card par tap karo to poori list khul jaati hai — kaunsa kharcha baaki hai.<br><br><span class=\"t-mute\">Mahine ke pehle 2 din raftaar ka koi matlab nahi hota, isliye tab sirf pakke kharch gine jaate hain.</span>": "Two things are certain and one is an estimate:<br><br><b>So far</b> — what you've already spent. Certain.<br><b>Certain to come</b> — the bills, EMIs and committee instalments still due. Also certain, because you entered them yourself.<br><b>By month end</b> — spent so far + what's coming + the remaining days at your usual daily rate. This one carries a <b>~</b>, because it's an estimate.<br><br>Tap the card to open the full list — exactly what's still due.<br><br><span class=\"t-mute\">In the first 2 days of a month a daily rate means nothing, so only the certain spends are counted then.</span>",
+ "Dobara daalo": "Enter again",
+ "Dono PIN alag the — phir se": "The two PINs didn't match — try again",
+ "Doodh": "Milk",
+ "Doosra": "Other",
+ "Doosre shabd se try karo": "Try different words",
+ "Dost": "Friend",
+ "Due": "Due",
+ "Dukaan delete hui": "Shop deleted",
+ "Dukaan delete?": "Delete shop?",
+ "Dukaan ka naam daalo": "Enter the shop name",
+ "EMI": "EMI",
+ "EMI Load": "EMI Load",
+ "EMI add karo track karne ke liye": "Add an EMI to track it",
+ "EMI caution zone": "EMI caution zone",
+ "EMI danger zone": "EMI danger zone",
+ "EMI hataa diya": "EMI removed",
+ "EMI healthy hai": "EMI load is healthy",
+ "EMI ka naam daalo": "Enter the EMI name",
+ "Education": "Education",
+ "Ek baar set karo — agle mahine se khud carry ho jayega": "Set it once — it carries forward automatically",
+ "Ek-do mahine ka aur hisaab aane do — phir bataunga ki <b>kahan aapka kharch normal se zyada</b> ja raha hai": "Let one or two more months of records build up — then I'll tell you <b>where your spending runs above normal</b>",
+ "Email theek se likho": "Enter a valid email",
+ "Email ya password galat hai": "Email or password is wrong",
+ "End tak": "By month end",
+ "Entertainment": "Entertainment",
+ "Entries": "entries",
+ "Entry hataa di": "Entry removed",
+ "Example bhar diya — \"Padho\" dabao": "Example filled — tap \"Read\"",
+ "Excel / Google Sheets mein kholne ke liye": "To open in Excel / Google Sheets",
+ "Export": "Export",
+ "Family": "Family",
+ "Festival chuno": "Pick a festival",
+ "Festival ki date chuno": "Pick the festival date",
+ "Festive": "Festive",
+ "File padhi nahi ja saki": "Could not read the file",
+ "Freelance": "Freelance",
+ "Full English": "Full English",
+ "Function chuno": "Pick a function",
+ "Function delete hua": "Function deleted",
+ "Function delete?": "Delete function?",
+ "Galat PIN — phir se": "Wrong PIN — try again",
+ "Gaon": "Village",
+ "Ghar": "Home",
+ "Gift": "Gift",
+ "Gin raha hoon…": "Counting…",
+ "Goal banane ke baad ki asli bachat (income − kharch) hi ginti hai — poori income nahi": "Only real savings after the goal was set (income − spending) count — not all income",
+ "Goal hataa diya": "Goal removed",
+ "Haan, bhej diya": "Yes, sent",
+ "Haan, chuka diya": "Yes, paid off",
+ "Haan, delete karo": "Yes, delete",
+ "Haan, logout": "Yes, log out",
+ "Haan, mil gaya": "Yes, received",
+ "Haan, restore karo": "Yes, restore",
+ "Haan, sab mitaa do": "Yes, erase everything",
+ "Health": "Health",
+ "Healthy": "Healthy",
+ "Home": "Home",
+ "Hotel": "Restaurant",
+ "Income": "Income",
+ "Income Save Karo": "Save Income",
+ "Income data nahi": "No income data",
+ "Income ka kitna hissa bach raha hai.<br><br><b class=\"t-green\">20% se zyada</b> — zabardast<br><b class=\"t-gold\">10-20%</b> — theek hai<br><b class=\"t-red\">10% se kam</b> — kharch zyada ho raha hai<br><br>Hisaab: (Income − Kharch) ÷ Income": "What share of your income you're keeping.<br><br><b class=\"t-green\">Over 20%</b> — excellent<br><b class=\"t-gold\">10-20%</b> — okay<br><b class=\"t-red\">Under 10%</b> — spending is high<br><br>Formula: (Income − Spending) ÷ Income",
+ "Income ka sirf {p}% — badhiya!": "Only {p}% of income — great!",
+ "Income ka {p}% — bahut zyada!": "{p}% of income — far too high!",
+ "Income ka {p}% — thoda zyada hai": "{p}% of income — a bit high",
+ "Income vs Kharch 💰💸": "Income vs Spending 💰💸",
+ "Intezaar": "Waiting",
+ "Intro dobara dekho": "Watch the intro again",
+ "Investment": "Investment",
+ "Is email ka account pehle se hai — Login dabao": "An account with this email already exists — tap Login",
+ "Is mahine bacha": "Saved this month",
+ "Is mahine income add karo sahi % ke liye": "Add this month's income for a correct %",
+ "Is mahine ka {x} dena hai": "{x} to pay this month",
+ "Is mahine ki kisht pehle hi di hui hai": "This month's instalment is already paid",
+ "Is mahine koi entry nahi": "No entries this month",
+ "Is mahine sab clear": "All clear this month",
+ "Is mahine set kiya": "Set this month",
+ "Is mahine {x} dena hai": "{x} to pay this month",
+ "Is phone mein contact list support nahi": "This phone does not support contact picking",
+ "Is raftaar se {x} zyada ho jaayega. {d} din bache hain.": "At this rate you'll overshoot by {x}. {d} days left.",
+ "Is rate pe {x} kharch hoga — income se zyada!": "At this rate you'll spend {x} — more than your income!",
+ "Is text mein amount nahi mila — poora SMS paste karo": "No amount found in this text — paste the full SMS",
+ "Isi account mein aapka hisaab jaata hai": "Your records go into this account",
+ "Kabhi backup nahi hua": "Never backed up",
+ "Kam se kam 2 log": "At least 2 people",
+ "Khaana": "Food",
+ "Kharch": "Spent",
+ "Kharch Save Karo": "Save Spend",
+ "Kharch kahan gaya? 💸": "Where did the money go? 💸",
+ "Kharch normal hai": "Spending is normal",
+ "Kharche ke saath bill ki tasveer lagao. Teen jagah kaam aati hai:<br><br>• <b>Warranty</b> — 2 saal baad bill kaun dhoondega<br>• <b>Return</b> — dukaan bill maangti hai<br>• <b>\"Ye ₹4,000 kahan gaye the?\"</b> — photo dekh lo, yaad aa jaayega<br><br>Photo save hone se pehle app khud usko <b>chhota</b> kar deta hai — bill saaf padhta rahega par jagah 4 MB ki jagah ~150 KB lagegi.<br><br>Kitni jagah lagi hai, ye <b>Settings › Storage</b> mein dikhta hai. Backup mein photos bhi jaati hain — isliye backup file badi ho jaati hai.": "Attach a photo of the bill to the expense. It helps in three places:<br><br>• <b>Warranty</b> — who's going to find the bill two years later<br>• <b>Returns</b> — the shop asks for the bill<br>• <b>\"Where did that ₹4,000 go?\"</b> — look at the photo and it comes back to you<br><br>Before saving, the app <b>shrinks</b> the photo itself — the bill stays readable but takes about 150 KB instead of 4 MB.<br><br>How much space photos use shows in <b>Settings › Storage</b>. Backups include photos too — which is why the backup file gets bigger.",
+ "Khata": "Khata",
+ "Kholne ke liye tap karo ›": "Tap to open ›",
+ "Kirana": "Grocery",
+ "Kirane, doodhwale, panwale ke paas ek copy hoti hai jisme aapka udhar likha rehta hai. <b>Wo copy unke paas hai, aapke paas nahi.</b> Mahine ke end mein jo number wo bolte hain, wahi maanna padta hai.<br><br>Ab aapki apni copy: jo liya wo <b>🛒 Liya</b>, jo paisa diya wo <b>💵 Paisa diya</b>. App khud baaki nikaal dega.<br><br><b>Ek baat dhyan se:</b> saamaan lene par kharcha nahi ginaa jaata, <b>paisa dene par</b> ginaa jaata hai. Ghar ka hisaab aise hi chalta hai — warna ek hi cheez do baar gin jaati.<br><br>Dukaandaar se hisaab na mile to <b>\"💬 Khata bhejo\"</b> — poori list WhatsApp pe chali jaayegi. Jhagda wahin khatam.": "The grocer, the milkman, the paan shop — each keeps a register with your credit in it. <b>That register is with them, not with you.</b> Whatever number they say at month end, you have to accept.<br><br>Now you have your own copy: what you took is <b>🛒 Took</b>, money you paid is <b>💵 Paid</b>. The app works out the balance.<br><br><b>One thing to note:</b> taking goods is not counted as spending — <b>paying money</b> is. That's how household accounts actually work — otherwise the same thing gets counted twice.<br><br>If the shopkeeper's numbers don't match, tap <b>\"💬 Send khata\"</b> — the whole list goes over WhatsApp. Argument settled right there.",
+ "Kiraya": "Rent received",
+ "Kisht ka amount daalo": "Enter the instalment amount",
+ "Kisht ka record hataa diya": "Instalment record removed",
+ "Kisi bhi entry pe tap karo — badal sakte ho": "Tap any entry to edit it",
+ "Kisi category ki mahine ki limit set kar do — jaise Khaana ₹6,000.<br><br><b>Ek baar set karo, bas.</b> Agle mahine wahi limit apne aap chalti rahegi. Har mahine dobara set nahi karna.<br><br>Badalna ho? Jis mahine mein ho us mahine naya set kar do — us mahine se aage wahi chalega.": "Set a monthly limit for a category — say Food ₹6,000.<br><br><b>Set it once, that's all.</b> The same limit carries into next month on its own. No need to set it again every month.<br><br>Want to change it? Set a new one in whichever month you're in — it applies from that month onward.",
+ "Kiska naam": "Whose name",
+ "Kiska udhar?": "Whose lending?",
+ "Kisne kitna shagun diya, kisko kitna diya.\n              Agli baar app khud bata dega ki pichhli baar kya hua tha.": "Who gave how much, and who you gave to.\n              Next time the app will tell you what happened last time.",
+ "Kitne paise": "How much",
+ "Kitne paise?": "How much?",
+ "Koi EMI nahi": "No EMIs",
+ "Koi budget set nahi": "No budget set",
+ "Koi category aapke apne average se khaas zyada nahi gayi — <b class=\"t-green\">sab control mein</b>": "No category went much above your own average — <b class=\"t-green\">all under control</b>",
+ "Koi committee nahi": "No committees",
+ "Koi data nahi": "No data",
+ "Koi dena baaki nahi": "Nothing to give",
+ "Koi dukaan nahi": "No shops",
+ "Koi entry nahi": "No entries",
+ "Koi festive goal nahi": "No festive goal",
+ "Koi function nahi": "No functions",
+ "Koi lena baaki nahi": "Nothing to get",
+ "Koi pakka kharcha baaki nahi": "No fixed spends left",
+ "Koi recurring bill nahi": "No recurring bills",
+ "Koi settled udhar nahi": "No settled lending",
+ "Koi subscription nahi": "No subscriptions",
+ "Kuch baaki nahi hai": "Nothing is pending",
+ "Kuch likhna ho to…": "Add a note…",
+ "Kuch nahi mila": "Nothing found",
+ "Lagataar entry karne ka streak": "Your daily entry streak",
+ "Lagataar kitne din aapne entry ki.<br><br>Ek din chhoot gaya to 0 se shuru. 2 din se dikhna shuru hota hai.<br><br>Ye sirf aadat banane ke liye hai — paison ka koi hisaab nahi.": "How many days in a row you've made an entry.<br><br>Miss a day and it starts from 0. It shows up from day 2.<br><br>This is only for building the habit — it has nothing to do with your money.",
+ "Lena": "To get",
+ "Lena Hai": "To Get",
+ "Light mode chalu hai": "Light mode is on",
+ "Local file — update check website pe hi chalta hai": "Local file — update check only works on the website",
+ "Login": "Login",
+ "Login karo to hisaab cloud mein safe rahega": "Log in and your records stay safe in the cloud",
+ "Login karoge to aapka saara hisaab cloud mein bhi save hota rahega. Naya phone liya? Wahi email-password se login karo — sab wapas aa jaayega.<br><br><b>Login zaroori NAHI hai.</b> Na karo to app bilkul aise hi chalta hai jaise abhi chalta hai — saara data aapke phone mein. Ye sirf upar se mili hui suraksha hai.<br><br><b>Kab jaata hai:</b> kuch badalne ke ~8 second baad apne aap. Net na ho to ruk jaata hai aur net aate hi chala jaata hai.<br><br><b>Kuch chup-chaap nahi mitega:</b> agar cloud wali copy aapke phone se alag nikli, to app poochega ki kaunsi rakhni hai. Khud faisla nahi karega.<br><br><b>Photos</b> default band hain — wo jagah bahut khaati hain. Chahiye to upar wala switch chalu kar do.<br><br><span class=\"t-mute\">Ek baat: free cloud account hafte bhar bilkul use na ho to so jaata hai. Roz app use karoge to kabhi nahi hoga.</span>": "Log in and all your records keep saving to the cloud as well. New phone? Log in with the same email and password — everything comes back.<br><br><b>Login is NOT required.</b> Skip it and the app works exactly as it does now — all data on your phone. This is only an extra layer of safety.<br><br><b>When it goes up:</b> about 8 seconds after you change something, on its own. No internet? It waits, and goes up the moment you're back online.<br><br><b>Nothing disappears quietly:</b> if the cloud copy differs from your phone's, the app asks which one to keep. It never decides for you.<br><br><b>Photos</b> are off by default — they eat a lot of space. Turn the switch on if you want them.<br><br><span class=\"t-mute\">One thing: a free cloud account goes to sleep if it isn't used for a whole week. Use the app daily and it never will.</span>",
+ "Login na karo to bhi app poora chalta hai — ye sirf backup ke liye hai": "The app works fully without login — this is only for backup",
+ "Logout": "Logout",
+ "Logout ho gaya — data is phone mein waisa hi hai": "Logged out — your data on this phone is untouched",
+ "Logout karein?": "Log out?",
+ "Maan lo <b>10 log</b> hain. Har mahine sab <b>₹5,000</b> daalte hain. Har mahine ek aadmi ko poore <b>₹50,000</b> mil jaate hain. 10 mahine mein sabka number aa jaata hai.<br><br>Copy pe do cheezein likhna sab bhool jaate hain — <b>kitni kisht di</b> aur <b>mera number kab aayega</b>. App dono khud rakhta hai.<br><br><b>\"✓ Is mahine ki kisht\"</b> dabao → record bhi ban jaata hai aur <b>Investment</b> ka kharcha bhi. Kyunki committee kharcha nahi, <b>zabardasti ki bachat</b> hai.<br><br>Number aane par <b>\"💰 Number aa gaya\"</b> dabao → wo paisa income mein jud jaata hai.": "Say there are <b>10 people</b>. Every month everyone puts in <b>₹5,000</b>. Each month one person gets the full <b>₹50,000</b>. In 10 months everyone's turn has come.<br><br>Two things everyone forgets to write in the register — <b>how many instalments you've paid</b> and <b>when your turn comes</b>. The app keeps both.<br><br>Tap <b>\"✓ This month's instalment\"</b> → it records the instalment and also creates an <b>Investment</b> expense. Because a committee isn't spending, it's <b>forced saving</b>.<br><br>When your turn comes, tap <b>\"💰 Got my turn\"</b> → that money is added as income.",
+ "Mahina": "Month",
+ "Mahina abhi shuru hua hai — sirf pakke kharch gine hain": "Month just started — only fixed spends counted",
+ "Mahina khatam hone wala hai": "Month is almost over",
+ "Mahine-dar-mahine": "Month by month",
+ "Medical": "Medical",
+ "Meri UPI ID": "My UPI ID",
+ "Mitao": "Erase",
+ "Monthly": "Monthly",
+ "Monthly Report": "Monthly Report",
+ "Monthly Summary": "Monthly Summary",
+ "More": "More",
+ "Naam aa gaya — number theek nahi laga, haath se daal do": "Got the name — number looked wrong, add it by hand",
+ "Naam daalna zaroori hai": "Name is required",
+ "Naam daalo": "Enter a name",
+ "Naam se dhoondo — pichhli baar kitna diya tha?": "Search by name — how much last time?",
+ "Naam, category ya amount se dhoondo…": "Search by name, category or amount…",
+ "Namaste 👋": "Hello 👋",
+ "Namaste! Main <b>PaisaBook</b> hoon": "Hello! I'm <b>PaisaBook</b>",
+ "Naya 4 digit ka PIN set karo": "Set a new 4-digit PIN",
+ "Naya PIN banao": "Create new PIN",
+ "Naya Udhar Add Karo": "Add New Lending",
+ "Naya account": "New account",
+ "Naya version aa gaya — v{v}": "New version available — v{v}",
+ "Neeche ➕ se pehla kharcha add karo": "Use ➕ below to add your first spend",
+ "Net": "Net",
+ "Net nahi hai — net aate hi apne aap chala jaayega": "No internet — it'll go up on its own once you're back online",
+ "Netflix, Spotify — jo bhi ho, add karo": "Netflix, Spotify — whatever you have",
+ "Netflix, Spotify, Prime — jo apne aap kat-te rehte hain.<br><br>Yearly ya quarterly wale ka \"per mahina\" barabar bhi dikhta hai, taaki sahi tulna ho sake.<br><br>Billing date nikal jaane par app khud agli date par set kar deta hai.": "Netflix, Spotify, Prime — the ones that keep deducting on their own.<br><br>For yearly or quarterly ones it also shows the \"per month\" equivalent, so you can compare fairly.<br><br>Once a billing date passes, the app moves it to the next one by itself.",
+ "Netflix, Spotify…": "Netflix, Spotify…",
+ "Next billing date chuno": "Pick the next billing date",
+ "Number aa gaya?": "Your turn came?",
+ "Number daalo ya neeche se chuno": "Type a number or pick below",
+ "Office": "Office",
+ "Other": "Other",
+ "Other Income": "Other Income",
+ "Overspent ⚠️": "Overspent ⚠️",
+ "PIN badlo": "Change PIN",
+ "PIN bhool gaye?": "Forgot your PIN?",
+ "PIN daalo": "Enter PIN",
+ "Paan": "Paan",
+ "Padosi": "Neighbour",
+ "Paisa bhej diya?": "Money sent?",
+ "Pakka aana": "Certain to come",
+ "Pakka karne ke liye wahi PIN": "The same PIN, to confirm",
+ "Pakka?": "Sure?",
+ "Password kam se kam 6 akshar": "Password must be at least 6 characters",
+ "Pehle SMS paste karo": "Paste the SMS first",
+ "Pehle amount daalo": "Enter an amount first",
+ "Pehle function kholo": "Open a function first",
+ "Pehle kuch transactions add karo": "Add some transactions first",
+ "Pehle purana PIN confirm karo": "Confirm your old PIN first",
+ "Pension": "Pension",
+ "Personal": "Personal",
+ "Phir bhi bharo": "Fill anyway",
+ "Photo dekho": "View photo",
+ "Photo hataa di": "Photo removed",
+ "Photo jodo": "Add photo",
+ "Photo jodo (marzi se)": "Add a photo (optional)",
+ "Photo lag gayi": "Photo attached",
+ "Photo nahi khul payi": "Could not open the photo",
+ "Photos bhi bhejo": "Send photos too",
+ "Pichhla mahina": "Previous month",
+ "Pichhle 6 mahine": "Last 6 months",
+ "Poora analysis — top category, worst day, highlights": "Full analysis — top category, worst day, highlights",
+ "Poora chukaya?": "Paid in full?",
+ "Poora form →": "Full form →",
+ "Quarterly": "Quarterly",
+ "Reason…": "Reason…",
+ "Refund": "Refund",
+ "Reminder hataa diya": "Reminder removed",
+ "Rent, Bijli bill…": "Rent, electricity bill…",
+ "Rent, bijli, EMI — add karo, due date pe yaad aa jayega": "Rent, power, EMI — add them and you'll be reminded on the due date",
+ "Report": "Report",
+ "Reset": "Reset",
+ "Restore": "Restore",
+ "Restore karein?": "Restore?",
+ "Rishtedaar": "Relative",
+ "Roman — jaise abhi hai": "Roman script, as it is now",
+ "Roz ka {r} chal raha hai. {d} din aur bache hain.": "Running at {r} a day. {d} days to go.",
+ "Roz-marra ka kharch ({d} din)": "Everyday spending ({d} days)",
+ "Saara data hamesha ke liye delete ho jayega": "All data will be gone forever",
+ "Saare features dikh rahe hain (EMI, Bills, Festive, Stats)": "All features are visible (EMI, Bills, Festive, Stats)",
+ "Saari entries hataa di": "All entries removed",
+ "Saari kisht ho chuki hain": "All instalments are done",
+ "Sab Data Reset": "Reset All Data",
+ "Sab kuch delete?": "Delete everything?",
+ "Sab mitaa do": "Erase everything",
+ "Sabse <b>tez</b> tareeka": "The <b>fastest</b> way",
+ "Sabse bada": "Biggest",
+ "Sabse purana udhar {d} din se": "Oldest credit is {d} days old",
+ "Sabzi": "Vegetables",
+ "Safe hai": "Safe",
+ "Salary": "Salary",
+ "Save nahi hua — storage full ho sakta hai": "Not saved — storage may be full",
+ "Service ka naam daalo": "Enter the service name",
+ "Settings": "Settings",
+ "Shaadi wali copy — ab phone mein": "The wedding register — now in your phone",
+ "Shagun": "Shagun",
+ "Shopping": "Shopping",
+ "Shubh Ratri 🌙": "Good night 🌙",
+ "Shubh Sham 🌆": "Good evening 🌆",
+ "Shuru ka mahina chuno": "Pick the starting month",
+ "Simple Mode": "Simple Mode",
+ "Stats": "Stats",
+ "Storage": "Storage",
+ "Subscription hataa diya": "Subscription removed",
+ "Suprabhat ☀️": "Good morning ☀️",
+ "TEZ": "FAST",
+ "Tap karke dekho": "Tap to view",
+ "Tap karke update karo (data safe rahega)": "Tap to update (your data stays safe)",
+ "Target amount daalo": "Enter a target amount",
+ "Tasveer nahi ban payi": "Could not make the image",
+ "Theek": "Fine",
+ "Theme": "Theme",
+ "Tight": "Tight",
+ "Total mahine": "Total months",
+ "Total mahine daalo": "Enter total months",
+ "Trading": "Trading",
+ "Transactions": "Transactions",
+ "Transport": "Transport",
+ "Travel": "Travel",
+ "Tulna ke liye data kam hai": "Not enough data to compare",
+ "UPI": "UPI",
+ "Udhar": "Lending",
+ "Udhar overview 🤝": "Lending overview 🤝",
+ "Valid amount daalo": "Enter a valid amount",
+ "Valid limit daalo": "Enter a valid limit",
+ "Wahi cheez jo PhonePe/GPay mein paisa bhejte waqt dikhti hai — jaise <b>9876543210@ybl</b> ya <b>rahul@okaxis</b>.<br><br><b>Dena Hai</b> mein daalo → ek tap mein unko paisa bhej sakte ho, number dhoondhne ki zaroorat nahi.<br><br><b>Lena Hai</b> mein aapki apni UPI ID kaam aati hai (Settings mein daalo) — yaad dilaane waale WhatsApp message mein paise bhejne ka link apne aap lag jaata hai. Saamne wale ko bas tap karna hai.<br><br><span class=\"t-mute\">App aapka UPI ID sirf aapke phone mein rakhta hai. Paisa kabhi app ke through nahi jaata — aapka apna UPI app hi kholta hai.</span>": "The same thing you see in PhonePe/GPay when sending money — like <b>9876543210@ybl</b> or <b>rahul@okaxis</b>.<br><br>Put it in <b>To Give</b> → you can send them money in one tap, no hunting for the number.<br><br>In <b>To Get</b>, your own UPI ID is what helps (add it in Settings) — the WhatsApp reminder then carries a pay link automatically. The other person just taps it.<br><br><span class=\"t-mute\">The app keeps your UPI ID only on your phone. Money never moves through the app — it only opens your own UPI app.</span>",
+ "Wapas hataa diya": "Removed again",
+ "WhatsApp": "WhatsApp",
+ "WhatsApp pe mahine ka hisaab bhejo": "Send the month's summary on WhatsApp",
+ "Wo kharche jo <b>har mahine</b> aate hain — rent, bijli, pani.<br><br>Ek baar daal do, due date se pehle app khud yaad dila dega.<br><br><b>\"✓ Pay ho gaya\"</b> dabane par do kaam ek saath hote hain: expense entry ban jaati hai, aur wo bill is mahine ke liye chup ho jaata hai.": "The spends that come <b>every month</b> — rent, power, water.<br><br>Add them once and the app reminds you before the due date.<br><br>Tapping <b>\"✓ Paid\"</b> does two things at once: it creates the expense entry, and the bill goes quiet for this month.",
+ "Yaad dilaate waqt message mein \"paisa bhejo\" ka link lag jaayega": "Reminders will carry a \"send money\" link",
+ "Yahan paste karo…\n\nRs.347.00 debited from A/c XX1234 on 08-Sep-26 to SWIGGY via UPI -HDFC Bank": "Paste here…\n\nRs.347.00 debited from A/c XX1234 on 08-Sep-26 to SWIGGY via UPI -HDFC Bank",
+ "Ye abhi aana baaki hai": "Still to come",
+ "Ye check sirf website pe kaam karta hai": "This check works only on the website",
+ "Ye kya hai?": "What is this?",
+ "Yearly": "Yearly",
+ "YouTube": "YouTube",
+ "Zyada": "Over",
+ "aapka@email.com": "you@email.com",
+ "category-wise kharch": "spending by category",
+ "dena hai": "to pay",
+ "din": "days",
+ "extra": "extra",
+ "income": "income",
+ "jaise Phone EMI": "e.g. Phone EMI",
+ "jaise: 9876543210@ybl": "e.g. 9876543210@ybl",
+ "jaise: Mohalle wali committee": "e.g. Neighbourhood committee",
+ "jaise: Rahul ki shaadi": "e.g. Rahul's wedding",
+ "jaise: Sharma Kirana": "e.g. Sharma Grocery",
+ "jaise: kapde bhi diye": "e.g. gave clothes too",
+ "kam se kam 6 akshar": "at least 6 characters",
+ "kharch": "spend",
+ "naam@okaxis": "name@okaxis",
+ "pata nahi": "not sure",
+ "per mahina": "per month",
+ "saaf hai": "all clear",
+ "{a}/{b} kisht di": "{a}/{b} paid",
+ "{a}/{b} mahine paid": "{a}/{b} months paid",
+ "{c} — normal se zyada": "{c} — above your normal",
+ "{d} din": "{d} days",
+ "{d} din baaki": "{d} days left",
+ "{d} din mein": "in {d} days",
+ "{d} din se backup nahi hua": "No backup for {d} days",
+ "{n} committee ki kisht baaki hai": "{n} committee instalment(s) due",
+ "{n} dukaan ka {x} baaki": "{x} pending at {n} shop(s)",
+ "{n} kisht baaki hai": "{n} instalment(s) due",
+ "{n} log": "{n} people",
+ "{n} mahine ke average se tulna": "compared with a {n}-month average",
+ "{n} udhar mein 30+ din ho gaye": "{n} lending(s) are 30+ days old",
+ "{p}% bachat — is mahine track pe ho!": "{p}% saved — you're on track this month!",
+ "{x} bacha": "{x} saved",
+ "{x} ka udhar baaki hai": "{x} of lending still pending",
+ "{x}/din left": "{x}/day left",
+ "{x}/mahina": "{x}/month",
+ "₹ / mahina": "₹ / month",
+ "₹ Amount": "₹ Amount",
+ "₹ Amount *": "₹ Amount *",
+ "₹ Har mahine ki kisht": "₹ Monthly instalment",
+ "₹ Limit / mahina": "₹ Limit / month",
+ "₹ Target": "₹ Target",
+ "← Wapas": "← Back",
+ "← Wapas ja kar dobara try karo": "← Go back and try again",
+ "↩ Wapas aa gaya": "↩ Brought back",
+ "↩ Wapas aa gayi": "↩ Brought back",
+ "↩ Wapas hataa diya": "↩ Removed again",
+ "☁️ Aapka hisaab cloud mein chala gaya": "☁️ Your records went up to the cloud",
+ "☁️ Abhi sync karo": "☁️ Sync now",
+ "☁️ Cloud": "☁️ Cloud",
+ "☁️ Cloud Backup": "☁️ Cloud Backup",
+ "☁️ Cloud mein save ho gaya": "☁️ Saved to cloud",
+ "☁️ Cloud wala hisaab lag gaya": "☁️ Applied the cloud copy",
+ "☕  Chai": "☕  Tea",
+ "♻️ Restore & Storage": "♻️ Restore & Storage",
+ "⚠️ Danger Zone": "⚠️ Danger Zone",
+ "⚠️ Kharch review karo aur udhar settle karo.": "⚠️ Review your spending and settle your lending.",
+ "⚡  Bills": "⚡  Bills",
+ "⚡ Aaj Ka Hisaab": "⚡ Today's Snapshot",
+ "⚡ EMI ya bachat par dhyan do — sudhaar ki jagah hai.": "⚡ Look at your EMIs or savings — there's room to improve.",
+ "⚡ Jaldi chuno": "⚡ Quick pick",
+ "⚡ Jaldi se likho": "⚡ Quick add",
+ "✅ Aap latest version pe ho (v": "✅ You're on the latest version (v",
+ "✅ Pay ho gaya": "✅ Paid",
+ "✅ Settled": "✅ Settled",
+ "✅ ho gaya — {d}": "✅ done — {d}",
+ "✅ {d} ko pay hua": "✅ paid on {d}",
+ "✈️  Travel": "✈️  Travel",
+ "✈️  Trip": "✈️  Trip",
+ "✏️ Entry badal di": "✏️ Entry updated",
+ "✓ Pay ho gaya": "✓ Paid",
+ "✨ Simple Mode": "✨ Simple Mode",
+ "➕ Add se apni EMI daalo": "Use ➕ to add your EMI",
+ "➕ Add se apni committee ya BC daalo": "Use ➕ to add your committee or BC",
+ "➕ Add se category ki limit set karo": "Use ➕ to set a category limit",
+ "➕ Add se kirana, doodh ya paan wale ka khata banao": "Use ➕ to add your grocer, milkman or paan shop",
+ "➕ Add se naam aur amount daalo": "Use ➕ to add a name and amount",
+ "➕ Add se shaadi, mundan ya koi bhi function banao": "Use ➕ to add a wedding, mundan or any function",
+ "➕ upar se naya add karo": "➕ add a new one above",
+ "🆘 Turant budget banao aur udhar chukao.": "🆘 Make a budget now and clear your debts.",
+ "🌐 Bhasha": "🌐 Language",
+ "🌙  Eid": "🌙  Eid",
+ "🌾  Gaon": "🌾  Village",
+ "🌾  Pongal": "🌾  Pongal",
+ "🍃  Paan": "🍃  Paan",
+ "🍔  Khaana": "🍔  Food",
+ "🍚  Anna Prashan": "🍚  Anna Prashan",
+ "🍽️  Hotel": "🍽️  Restaurant",
+ "🎂  Janamdin": "🎂  Birthday",
+ "🎄  Christmas": "🎄  Christmas",
+ "🎉  Doosra": "🎉  Other",
+ "🎉 Kaunsa function": "🎉 Which function",
+ "🎉 Naya version aa gaya — v": "🎉 New version available — v",
+ "🎉 Zabardast! Ab SIP / investment ki soch sakte ho.": "🎉 Excellent! You could start thinking about an SIP or investment.",
+ "🎨  Holi": "🎨  Holi",
+ "🎨 Preferences": "🎨 Preferences",
+ "🎬  Entertainment": "🎬  Entertainment",
+ "🎯 Budget Limits": "🎯 Budget Limits",
+ "🎯 Budget Set Karo": "🎯 Set Budget",
+ "🎯 Budget kaise chalta hai": "🎯 How budgets work",
+ "🏘️  Padosi": "🏘️  Neighbour",
+ "🏠  Ghar": "🏠  Home",
+ "🏠  Griha Pravesh": "🏠  Housewarming",
+ "🏥 Financial Health": "🏥 Financial Health",
+ "🏥 Financial Health Score": "🏥 Financial Health Score",
+ "🏦  Bank": "🏦  Bank",
+ "🏦  EMI": "🏦  EMI",
+ "🏪  Kirana": "🏪  Grocery",
+ "🏪 Dukaan Add Karo": "🏪 Add Shop",
+ "🏪 Dukaan ka khata": "🏪 Shop khata",
+ "🏪 Kis cheez ki": "🏪 What kind",
+ "🏪 Meri Dukaanein": "🏪 My Shops",
+ "🏪 Saari dukaanon ka baaki": "🏪 Total pending at all shops",
+ "🐘  Ganesh Chaturthi": "🐘  Ganesh Chaturthi",
+ "👍 Accha chal raha hai — bachat thodi aur badha sakte ho.": "👍 Going well — you could push savings a little higher.",
+ "👤  Doosra": "👤  Other",
+ "👤 Naam": "👤 Name",
+ "👤 Naam *": "👤 Name *",
+ "👥 Kitne log": "👥 How many people",
+ "👥 Rishta": "👥 Relation",
+ "👨‍👩‍👧  Family": "👨‍👩‍👧  Family",
+ "👨‍👩‍👧  Rishtedaar": "👨‍👩‍👧  Relative",
+ "👶  Mundan": "👶  Mundan",
+ "💇  Personal": "💇  Personal",
+ "💊  Health": "💊  Health",
+ "💊  Medical": "💊  Medical",
+ "💍  Shaadi": "💍  Wedding",
+ "💍 Aapke Function": "💍 Your Functions",
+ "💍 Entry Save Karo": "💍 Save Entry",
+ "💍 Function Banao": "💍 Create Function",
+ "💐  Sagai": "💐  Engagement",
+ "💡 Insights": "💡 Insights",
+ "💬 Register share karo": "💬 Share register",
+ "💰  Investment": "💰  Investment",
+ "💰 Income": "💰 Income",
+ "💰 Lena Hai": "💰 To Get",
+ "💰 Lena Hai — Save Karo": "💰 To Get — Save",
+ "💰 Udhar Save Karo": "💰 Save Lending",
+ "💳  Card": "💳  Card",
+ "💳 Payment": "💳 Payment",
+ "💵  Cash": "💵  Cash",
+ "💸 Kharch": "💸 Spend",
+ "💼  Office": "💼  Office",
+ "💾 Backup file download ho gayi — Drive mein rakh do": "💾 Backup file downloaded — keep it in Drive",
+ "💾 Backup kyun zaroori hai": "💾 Why backup matters",
+ "📂 Category": "📂 Category",
+ "📅 Date": "📅 Date",
+ "📅 Din (1–31)": "📅 Day (1–31)",
+ "📅 Festival date": "📅 Festival date",
+ "📅 Har mahine ka total": "📅 Monthly total",
+ "📅 Is Mahine": "📅 This Month",
+ "📅 Kab shuru hui": "📅 Started when",
+ "📅 Next billing": "📅 Next billing",
+ "📅 har mahine {d} ko": "📅 on the {d} every month",
+ "📅 {n} din baaki — {d}": "📅 {n} days left — {d}",
+ "📇 Contact list se uthao": "📇 Pick from contacts",
+ "📈 6 Mahine": "📈 6 Months",
+ "📊 Bachat %": "📊 Saved %",
+ "📊 Data chahiye — 📝 Is mahine ki income aur kharch add karo, sahi score dikhega.": "📊 Need data — 📝 add this month's income and spending to see a real score.",
+ "📋 Report": "📋 Report",
+ "📋 Sab": "📋 All",
+ "📚  Education": "📚  Education",
+ "📝 Committee ka naam": "📝 Committee name",
+ "📝 Dukaan ka naam": "📝 Shop name",
+ "📝 Is mahine ki income aur kharch add karo, sahi score dikhega.": "📝 Add this month's income and spending to see a real score.",
+ "📝 Kis liye? (marzi se)": "📝 What for? (optional)",
+ "📝 Kis liye? (marzi se) — jaise: chai, auto, sabzi": "📝 What for? (optional) — e.g. tea, auto, vegetables",
+ "📝 Kiska (naam)": "📝 Whose (name)",
+ "📝 Note (marzi se)": "📝 Note (optional)",
+ "📝 Service": "📝 Service",
+ "📤 Diya": "📤 Given",
+ "📤 Diya — Save Karo": "📤 Given — Save",
+ "📤 Share & Export": "📤 Share & Export",
+ "📥 Aaya": "📥 Received",
+ "📥 Aaya — Save Karo": "📥 Received — Save",
+ "📥 CSV download hua": "📥 CSV downloaded",
+ "📥 Tasveer download ho gayi — ab share kar do": "📥 Image downloaded — now share it",
+ "📦  Other": "📦  Other",
+ "📧 Email": "📧 Email",
+ "📩 Bank SMS se add": "📩 Add from bank SMS",
+ "📩 Bank SMS se add karo": "📩 Add from bank SMS",
+ "📱  UPI": "📱  UPI",
+ "📱 Active EMIs": "📱 Active EMIs",
+ "📱 EMI Add Karo": "📱 Add EMI",
+ "📱 EMI Load": "📱 EMI Load",
+ "📱 Phone (WhatsApp ke liye)": "📱 Phone (for WhatsApp)",
+ "📱 Phone (marzi se)": "📱 Phone (optional)",
+ "📱 Phone wala hisaab cloud mein chala gaya": "📱 Phone copy pushed to cloud",
+ "📲 UPI ID": "📲 UPI ID",
+ "📷 Bill ki photo": "📷 Bill photo",
+ "📺 Subscription Add Karo": "📺 Add Subscription",
+ "📺 Subscriptions": "📺 Subscriptions",
+ "🔄 Cycle": "🔄 Cycle",
+ "🔑 Password": "🔑 Password",
+ "🔒 App Lock": "🔒 App Lock",
+ "🔒 Suraksha": "🔒 Security",
+ "🔔 Recurring": "🔔 Recurring",
+ "🔔 Recurring bills": "🔔 Recurring bills",
+ "🔔 Reminder Set Karo": "🔔 Set Reminder",
+ "🔢 Mera number": "🔢 My turn number",
+ "🔥 Streak": "🔥 Streak",
+ "🔮 Mahine ke end tak": "🔮 By month end",
+ "🔵 Active": "🔵 Active",
+ "🕯️  Barsi": "🕯️  Barsi",
+ "🕺  Navratri": "🕺  Navratri",
+ "🗑️ Sab data reset ho gaya — fresh start": "🗑️ Everything reset — fresh start",
+ "🙏  Daan": "🙏  Donation",
+ "🙏  Tilak": "🙏  Tilak",
+ "🙏 Dena Hai": "🙏 To Give",
+ "🙏 Dena Hai — Save Karo": "🙏 To Give — Save",
+ "🛍️  Shopping": "🛍️  Shopping",
+ "🛒  Doosra": "🛒  Other",
+ "🛵  Transport": "🛵  Transport",
+ "🤝  Dost": "🤝  Friend",
+ "🤝 Committee / BC / Chit": "🤝 Committee / BC / Chit",
+ "🤝 Committee Add Karo": "🤝 Add Committee",
+ "🤝 Lena / Dena": "🤝 Lending / Borrowing",
+ "🤝 Meri Committee": "🤝 My Committee",
+ "🥛  Doodh": "🥛  Milk",
+ "🥬  Sabzi": "🥬  Vegetables",
+ "🧪 Demo data bhar diya — Reset se hata sakte ho": "🧪 Demo data loaded — remove it with Reset",
+ "🧶  Raksha Bandhan": "🧶  Raksha Bandhan",
+ "🪔  Diwali": "🪔  Diwali",
+ "🪔 Festival": "🪔 Festival",
+ "🪔 Festive Savings": "🪔 Festive Savings",
+ "🪔 Festive goal": "🪔 Festive goal",
+ "🪔 Goal Set Karo": "🪔 Set Goal"
+},
+  hi:{
+ "+ dabao": "+ दबाएँ",
+ "10 digit ka valid number daalo": "10 अंकों का सही नंबर डालें",
+ "4 digit — jo yaad rahe": "4 अंक — जो याद रहे",
+ "<b class=\"t-green\">Lena Hai</b> — aapne kisi ko paisa diya tha, aapko wapas milna hai<br><br><b class=\"t-red\">Dena Hai</b> — aapne kisi se liya tha, aapko wapas dena hai<br><br>Thoda-thoda chukaane par \"Payment\" se jod sakte ho. Poora ho gaya to apne aap settle ho jaata hai.<br><br><b>Phone number zaroor daalo</b> — tabhi WhatsApp par yaad dila paoge.": "<b class=\"t-green\">लेना है</b> — आपने किसी को पैसा दिया था, आपको वापस मिलना है<br><br><b class=\"t-red\">देना है</b> — आपने किसी से लिया था, आपको वापस देना है<br><br>थोड़ा-थोड़ा चुकाने पर \"Payment\" से जोड़ सकते हैं। पूरा हो गया तो अपने आप निपट जाता है।<br><br><b>फ़ोन नंबर ज़रूर डालें</b> — तभी WhatsApp पर याद दिला पाएँगे।",
+ "<b>Hinglish</b> — jaise abhi hai. Roman akshar, Hindi shabd.<br><b>English</b> — poora English. Un logon ke liye jinko Hindi nahi aati.<br><b>हिंदी</b> — Devanagari mein. Bade-buzurgon ke liye Roman padhna mushkil hota hai, unke liye ye sabse aasaan hai.<br><br>Tap karte hi poora app badal jaata hai — reload nahi karna padta, aur <b>aapka data kahin nahi jaata</b>.<br><br><span class=\"t-mute\">Hindi mein EMI, UPI, SMS jaise shabd angrezi mein hi rahenge — kyonki asli zindagi mein log aise hi bolte hain.</span>": "<b>Hinglish</b> — जैसे अभी है। रोमन अक्षर, हिंदी शब्द।<br><b>English</b> — पूरी अंग्रेज़ी। उन लोगों के लिए जिन्हें हिंदी नहीं आती।<br><b>हिंदी</b> — देवनागरी में। बड़े-बुज़ुर्गों के लिए रोमन पढ़ना मुश्किल होता है, उनके लिए यह सबसे आसान है।<br><br>दबाते ही पूरा ऐप बदल जाता है — रीलोड नहीं करना पड़ता, और <b>आपका डेटा कहीं नहीं जाता</b>।<br><br><span class=\"t-mute\">हिंदी में EMI, UPI, SMS जैसे शब्द अंग्रेज़ी में ही रहेंगे — क्योंकि असली ज़िंदगी में लोग ऐसे ही बोलते हैं।</span>",
+ "Aaj": "आज",
+ "Aaj backup hua ✓": "आज बैकअप हुआ ✓",
+ "Aaj due!": "आज देना है!",
+ "Aaj ka kharch average se {n}x zyada hai.": "आज का खर्च औसत से {n}x ज़्यादा है।",
+ "Aaj koi kharch nahi — zero-spend day! 🙌": "आज कोई खर्च नहीं — ज़ीरो-खर्च दिन! 🙌",
+ "Aapka saara hisaab <b>sirf is browser mein</b> hai — kisi server par nahi.<br><br>Matlab: phone kho gaya, browser ka data saaf kar diya, ya naya phone liya — to hisaab chala jayega.<br><br><b>Mahine mein ek baar</b> Backup dabao. File download hogi — usko WhatsApp par khud ko bhej do ya Google Drive mein rakh do. Naye phone par Restore se sab wapas.": "आपका सारा हिसाब <b>सिर्फ़ इस ब्राउज़र में</b> है — किसी सर्वर पर नहीं।<br><br>मतलब: फ़ोन खो गया, ब्राउज़र का डेटा साफ़ कर दिया, या नया फ़ोन लिया — तो हिसाब चला जाएगा।<br><br><b>महीने में एक बार</b> Backup दबाएँ। फ़ाइल डाउनलोड होगी — उसे WhatsApp पर खुद को भेज दें या Google Drive में रखें। नए फ़ोन पर Restore से सब वापस।",
+ "Aapki bachat, EMI aur udhar — teeno milaa kar 100 mein ek number.<br><br><b>Bachat 40</b> + <b>EMI 30</b> + <b>Udhar 30</b> = 100<br><br>Zyada number = behtar haalat. 80+ matlab zabardast, 45 se kam matlab dhyan dene ki zaroorat.<br><br><span class=\"t-mute\">Ye ek mota-mota andaaza hai — financial advice nahi.</span>": "आपकी बचत, EMI और लेन-देन — तीनों मिलाकर 100 में एक नंबर।<br><br><b>बचत 40</b> + <b>EMI 30</b> + <b>लेन-देन 30</b> = 100<br><br>ज़्यादा नंबर = बेहतर हालत। 80+ मतलब ज़बरदस्त, 45 से कम मतलब ध्यान देने की ज़रूरत।<br><br><span class=\"t-mute\">यह एक मोटा-मोटा अंदाज़ा है — वित्तीय सलाह नहीं।</span>",
+ "Aapki income ka kitna hissa EMI mein jaa raha hai.<br><br><b class=\"t-green\">30% se kam</b> — healthy<br><b class=\"t-gold\">30-50%</b> — thoda zyada<br><b class=\"t-red\">50% se zyada</b> — khatre ki baat<br><br>Sahi number dikhe iske liye is mahine ki income add karna zaroori hai.": "आपकी आमदनी का कितना हिस्सा EMI में जा रहा है।<br><br><b class=\"t-green\">30% से कम</b> — ठीक<br><b class=\"t-gold\">30-50%</b> — थोड़ा ज़्यादा<br><b class=\"t-red\">50% से ज़्यादा</b> — ख़तरे की बात<br><br>सही नंबर दिखे इसके लिए इस महीने की आमदनी जोड़ना ज़रूरी है।",
+ "Aaya ya diya?": "आया या दिया?",
+ "Ab tak": "अब तक",
+ "Ab tak kul {x} jama kiya": "अब तक कुल {x} जमा किया",
+ "Abhi tak koi backup nahi hua": "अभी तक कोई बैकअप नहीं हुआ",
+ "Active lena vs dena": "चालू लेना बनाम देना",
+ "Add": "जोड़ें",
+ "Add karo": "जोड़ें",
+ "Agla mahina": "अगला महीना",
+ "Aisa likho: naam@bank": "ऐसे लिखें: नाम@बैंक",
+ "Amount": "रकम",
+ "Amount likho, category tap karo, + dabao": "रकम लिखें, श्रेणी दबाएँ, + दबाएँ",
+ "Apna 4 digit ka PIN": "आपका 4 अंकों का PIN",
+ "Apna PIN daalo": "अपना PIN डालें",
+ "Apna Paisa, Apna Hisaab": "अपना पैसा, अपना हिसाब",
+ "App Lock": "ऐप लॉक",
+ "App Version": "ऐप वर्ज़न",
+ "App ka feel dekhne ke liye nakli data bharo": "ऐप का अंदाज़ा लेने के लिए नकली डेटा भरें",
+ "App kaise use karna hai — 3 screen mein": "ऐप कैसे चलाएँ — 3 स्क्रीन में",
+ "App kholte hi 4 digit ka PIN poochega. Ghar mein phone bhai, bachchon aur doston ke haath jaata hai — unse hisaab chhupa rehta hai.<br><br><b>Saaf baat:</b> ye <b>ghar walon se</b> hai, hacker se nahi. Aapka data isi phone ke browser mein hai. Jo aadmi computer ka jaankaar hai wo nikaal sakta hai. Hum jhootha bharosa nahi denge.<br><br>PIN khud kabhi save nahi hota — usko ghuma kar ek pehchaan banti hai, bas wahi rakhi jaati hai. Isliye <b>PIN bhool gaye to wapas nahi aa sakta</b>. Lock chalu karne se pehle <b>ek backup zaroor le lo</b>.<br><br><span class=\"t-mute\">2 minute se zyada app band rahe to wapas aane par dobara PIN poochega.</span>": "ऐप खोलते ही 4 अंकों का PIN पूछेगा। घर में फ़ोन भाई, बच्चों और दोस्तों के हाथ जाता है — उनसे हिसाब छुपा रहता है।<br><br><b>साफ़ बात:</b> यह <b>घर वालों से</b> है, हैकर से नहीं। आपका डेटा इसी फ़ोन के ब्राउज़र में है। जो आदमी कंप्यूटर का जानकार है वह निकाल सकता है। हम झूठा भरोसा नहीं देंगे।<br><br>PIN खुद कभी सेव नहीं होता — उसे घुमाकर एक पहचान बनती है, बस वही रखी जाती है। इसलिए <b>PIN भूल गए तो वापस नहीं आ सकता</b>। लॉक चालू करने से पहले <b>एक बैकअप ज़रूर ले लें</b>।<br><br><span class=\"t-mute\">2 मिनट से ज़्यादा ऐप बंद रहे तो वापस आने पर दोबारा PIN पूछेगा।</span>",
+ "App mein bahut saare features hain. Shuru mein sab dikhane se confusion hoti hai.<br><br>Simple Mode mein sirf <b>zaroori cheezein</b> dikhti hain — kharcha, udhar aur budget.<br><br>EMI, Bills, Subscriptions, Festive goals aur Stats chhupe rehte hain. Jab zaroorat lage, yahi switch on kar do — sab wapas aa jayenge.<br><br><span class=\"t-mute\">Chhupane se data nahi jaata — sirf dikhna band hota hai.</span>": "ऐप में बहुत सारे फ़ीचर हैं। शुरू में सब दिखाने से उलझन होती है।<br><br>आसान मोड में सिर्फ़ <b>ज़रूरी चीज़ें</b> दिखती हैं — खर्च, लेन-देन और बजट।<br><br>EMI, बिल, सब्सक्रिप्शन, त्योहार के लक्ष्य और आँकड़े छुपे रहते हैं। जब ज़रूरत लगे, यही स्विच चालू कर दें — सब वापस आ जाएँगे।<br><br><span class=\"t-mute\">छुपाने से डेटा नहीं जाता — सिर्फ़ दिखना बंद होता है।</span>",
+ "Baaki": "बाकी",
+ "Baaki mahine daalo": "बाकी महीने डालें",
+ "Baaki, total se zyada nahi ho sakta": "बाकी, कुल से ज़्यादा नहीं हो सकता",
+ "Bachat": "बचत",
+ "Bachat %": "बचत %",
+ "Bachat ka trend 📊": "बचत का रुझान 📊",
+ "Bachat kaise count hoti hai": "बचत कैसे गिनी जाती है",
+ "Bachega": "बचेगा",
+ "Backup": "बैकअप",
+ "Backup fail hua — dobara try karo": "बैकअप फ़ेल हुआ — दोबारा कोशिश करें",
+ "Backup ki .html ya .json file chuno": "बैकअप की .html या .json फ़ाइल चुनें",
+ "Backup se Restore": "बैकअप से रिस्टोर",
+ "Badlo": "बदलें",
+ "Band": "बंद",
+ "Band karo": "बंद करें",
+ "Band — koi bhi app khol sakta hai": "बंद — कोई भी ऐप खोल सकता है",
+ "Bank": "बैंक",
+ "Bank ke SMS mein sab likha hota hai — amount, dukaan ka naam, date.<br><br>Aapko bas SMS copy karke paste karna hai. App usme se sab nikaal leta hai.<br><br><b>Kai SMS ek saath</b> bhi chalenge — beech mein ek khaali line chhod do.<br><br>Category dukaan ke naam se andaaza lagayi jaati hai. Galat ho to badal do — <b>app agli baar yaad rakhega</b>.": "बैंक के SMS में सब लिखा होता है — रकम, दुकान का नाम, तारीख़।<br><br>आपको बस SMS कॉपी करके पेस्ट करना है। ऐप उसमें से सब निकाल लेता है।<br><br><b>कई SMS एक साथ</b> भी चलेंगे — बीच में एक खाली लाइन छोड़ दें।<br><br>श्रेणी दुकान के नाम से अंदाज़ा लगाई जाती है। ग़लत हो तो बदल दें — <b>ऐप अगली बार याद रखेगा</b>।",
+ "Bas, <b>ho gaya</b>": "बस, <b>हो गया</b>",
+ "Bharo": "भरें",
+ "Bhasha / Language": "भाषा",
+ "Bhasha badal gayi": "भाषा बदल गई",
+ "Bills": "बिल",
+ "Budget": "बजट",
+ "Budget apne aap aage badhta hai": "बजट अपने आप आगे बढ़ता है",
+ "Budget hataa diya": "बजट हटा दिया",
+ "Budget {p}% use — sirf {x} bacha hai.": "बजट {p}% इस्तेमाल — सिर्फ़ {x} बचा है।",
+ "Budget {x} se cross ho gaya!": "बजट {x} से पार हो गया!",
+ "Business": "बिज़नेस",
+ "Byaaj": "ब्याज",
+ "CSV Export": "CSV एक्सपोर्ट",
+ "Camera se kheencho ya gallery se chuno": "कैमरे से खींचें या गैलरी से चुनें",
+ "Camera ya gallery se": "कैमरे या गैलरी से",
+ "Card": "कार्ड",
+ "Cash": "नकद",
+ "Category chuno": "श्रेणी चुनें",
+ "Category-wise spending": "श्रेणी के हिसाब से खर्च",
+ "Caution": "सावधान",
+ "Chai": "चाय",
+ "Chalu — app kholte hi PIN poochega": "चालू — ऐप खोलते ही PIN पूछेगा",
+ "Char cheezein ek nazar mein:<br><br><b>Aaj</b> — aaj kitna kharch hua<br><b>Mahina</b> — is poore mahine ka kharch<br><b>Budget</b> — budget mein kitna bacha hai<br><b>Bachat</b> — income ka kitna % bach raha hai<br><br>Neeche ek line hoti hai — wo sabse kaam ki baat batati hai.": "चार चीज़ें एक नज़र में:<br><br><b>आज</b> — आज कितना खर्च हुआ<br><b>महीना</b> — इस पूरे महीने का खर्च<br><b>बजट</b> — बजट में कितना बचा है<br><b>बचत</b> — आमदनी का कितना % बच रहा है<br><br>नीचे एक लाइन होती है — वह सबसे काम की बात बताती है।",
+ "Check": "जाँचें",
+ "Check kar raha hoon…": "जाँच रहा हूँ…",
+ "Check nahi ho paaya — internet dekho": "जाँच नहीं हो पाई — इंटरनेट देखें",
+ "Chhodo": "छोड़ें",
+ "Clear": "साफ़",
+ "Cloud Backup": "क्लाउड बैकअप",
+ "Cloud mein doosra hisaab hai": "क्लाउड में अलग हिसाब है",
+ "Committee": "कमेटी",
+ "Committee delete hui": "कमेटी डिलीट हुई",
+ "Committee delete?": "कमेटी डिलीट करें?",
+ "Committee mein har aadmi ka ek number hota hai — kaunse mahine usko paisa milega.<br><br>Agar aapka <b>pehle</b> mahine mein hai to <b>1</b> likho, doosre mein to <b>2</b>, aur aise hi.<br><br>Abhi pata na ho to <b>khaali chhod do</b> — baad mein add kar sakte ho. Baaki sab hisaab phir bhi chalta rahega.": "कमेटी में हर आदमी का एक नंबर होता है — किस महीने उसे पैसा मिलेगा।<br><br>अगर आपका <b>पहले</b> महीने में है तो <b>1</b> लिखें, दूसरे में तो <b>2</b>, और ऐसे ही।<br><br>अभी पता न हो तो <b>खाली छोड़ दें</b> — बाद में जोड़ सकते हैं। बाकी सब हिसाब फिर भी चलता रहेगा।",
+ "Committee ya BC chalti ho to yahan rakho": "कमेटी या BC चलती हो तो यहाँ रखें",
+ "Daan": "दान",
+ "Danger": "ख़तरा",
+ "Dark mode chalu hai": "डार्क मोड चालू है",
+ "Data bada ho raha hai (": "डेटा बड़ा हो रहा है (",
+ "Data safe karo — tap karke backup lo": "डेटा सुरक्षित करें — दबाकर बैकअप लें",
+ "Date aur payment pehle se bhare hain — sirf amount aur category chahiye": "तारीख़ और भुगतान पहले से भरे हैं — सिर्फ़ रकम और श्रेणी चाहिए",
+ "Date chuno": "तारीख़ चुनें",
+ "Date nahi": "तारीख़ नहीं",
+ "Dekho": "देखें",
+ "Demo Data": "डेमो डेटा",
+ "Demo data?": "डेमो डेटा?",
+ "Dena": "देना",
+ "Dena Hai": "देना है",
+ "Devanagari mein": "देवनागरी में",
+ "Din 1 se 31 ke beech daalo": "दिन 1 से 31 के बीच डालें",
+ "Diwali, shaadi, trip — koi target rakho aur date daalo.<br><br>App bata dega ki <b>roz kitna bachana</b> padega.<br><br>Bachat ka hisaab: goal banane ke baad se <b>income minus kharch</b>. Sirf income nahi — asli bachat.": "दिवाली, शादी, यात्रा — कोई लक्ष्य रखें और तारीख़ डालें।<br><br>ऐप बता देगा कि <b>रोज़ कितना बचाना</b> पड़ेगा।<br><br>बचत का हिसाब: लक्ष्य बनाने के बाद से <b>आमदनी घटा खर्च</b>। सिर्फ़ आमदनी नहीं — असली बचत।",
+ "Diwali, shaadi, trip — target set karo": "दिवाली, शादी, यात्रा — लक्ष्य सेट करें",
+ "Do cheezein pakki hain aur ek anuman hai:<br><br><b>Ab tak</b> — jo kharch ho chuka. Pakka.<br><b>Pakka aana</b> — jo bill, EMI aur committee ki kisht abhi baaki hai. Ye bhi pakka, kyunki aap khud daal chuke ho.<br><b>End tak</b> — ab tak ka + aane wala + aapki roz ki raftaar se bache dino ka. Ispe <b>~</b> ka nishaan hai, kyunki ye andaaza hai.<br><br>Card par tap karo to poori list khul jaati hai — kaunsa kharcha baaki hai.<br><br><span class=\"t-mute\">Mahine ke pehle 2 din raftaar ka koi matlab nahi hota, isliye tab sirf pakke kharch gine jaate hain.</span>": "दो चीज़ें पक्की हैं और एक अंदाज़ा है:<br><br><b>अब तक</b> — जो खर्च हो चुका। पक्का।<br><b>पक्का आना</b> — जो बिल, EMI और कमेटी की किस्त अभी बाकी है। यह भी पक्का, क्योंकि आपने खुद डाला है।<br><b>महीने के अंत तक</b> — अब तक का + आने वाला + आपकी रोज़ की रफ़्तार से बचे दिनों का। इस पर <b>~</b> का निशान है, क्योंकि यह अंदाज़ा है।<br><br>कार्ड पर दबाएँ तो पूरी सूची खुल जाती है — कौन सा खर्च बाकी है।<br><br><span class=\"t-mute\">महीने के पहले 2 दिन रफ़्तार का कोई मतलब नहीं होता, इसलिए तब सिर्फ़ पक्के खर्च गिने जाते हैं।</span>",
+ "Dobara daalo": "दोबारा डालें",
+ "Dono PIN alag the — phir se": "दोनों PIN अलग थे — फिर से",
+ "Doodh": "दूध",
+ "Doosra": "अन्य",
+ "Doosre shabd se try karo": "दूसरे शब्द से कोशिश करें",
+ "Dost": "दोस्त",
+ "Due": "बाकी",
+ "Dukaan delete hui": "दुकान डिलीट हुई",
+ "Dukaan delete?": "दुकान डिलीट करें?",
+ "Dukaan ka naam daalo": "दुकान का नाम डालें",
+ "EMI": "EMI",
+ "EMI Load": "EMI बोझ",
+ "EMI add karo track karne ke liye": "EMI जोड़ें ट्रैक करने के लिए",
+ "EMI caution zone": "EMI सावधानी क्षेत्र",
+ "EMI danger zone": "EMI ख़तरे का क्षेत्र",
+ "EMI hataa diya": "EMI हटा दी",
+ "EMI healthy hai": "EMI बोझ ठीक है",
+ "EMI ka naam daalo": "EMI का नाम डालें",
+ "Education": "पढ़ाई",
+ "Ek baar set karo — agle mahine se khud carry ho jayega": "एक बार सेट करें — अगले महीने से खुद चलता रहेगा",
+ "Ek-do mahine ka aur hisaab aane do — phir bataunga ki <b>kahan aapka kharch normal se zyada</b> ja raha hai": "एक-दो महीने का और हिसाब आने दें — फिर बताऊँगा कि <b>कहाँ आपका खर्च सामान्य से ज़्यादा</b> जा रहा है",
+ "Email theek se likho": "ईमेल ठीक से लिखें",
+ "Email ya password galat hai": "ईमेल या पासवर्ड ग़लत है",
+ "End tak": "महीने के अंत तक",
+ "Entertainment": "मनोरंजन",
+ "Entries": "एंट्री",
+ "Entry hataa di": "एंट्री हटा दी",
+ "Example bhar diya — \"Padho\" dabao": "उदाहरण भर दिया — \"पढ़ो\" दबाएँ",
+ "Excel / Google Sheets mein kholne ke liye": "Excel / Google Sheets में खोलने के लिए",
+ "Export": "एक्सपोर्ट",
+ "Family": "परिवार",
+ "Festival chuno": "त्योहार चुनें",
+ "Festival ki date chuno": "त्योहार की तारीख़ चुनें",
+ "Festive": "त्योहार",
+ "File padhi nahi ja saki": "फ़ाइल पढ़ी नहीं जा सकी",
+ "Freelance": "फ़्रीलांस",
+ "Full English": "पूरी अंग्रेज़ी",
+ "Function chuno": "फ़ंक्शन चुनें",
+ "Function delete hua": "फ़ंक्शन डिलीट हुआ",
+ "Function delete?": "फ़ंक्शन डिलीट करें?",
+ "Galat PIN — phir se": "ग़लत PIN — फिर से",
+ "Gaon": "गाँव",
+ "Ghar": "घर",
+ "Gift": "गिफ़्ट",
+ "Gin raha hoon…": "गिन रहा हूँ…",
+ "Goal banane ke baad ki asli bachat (income − kharch) hi ginti hai — poori income nahi": "लक्ष्य बनाने के बाद की असली बचत (आमदनी − खर्च) ही गिनी जाती है — पूरी आमदनी नहीं",
+ "Goal hataa diya": "लक्ष्य हटा दिया",
+ "Haan, bhej diya": "हाँ, भेज दिया",
+ "Haan, chuka diya": "हाँ, चुका दिया",
+ "Haan, delete karo": "हाँ, डिलीट करें",
+ "Haan, logout": "हाँ, लॉगआउट",
+ "Haan, mil gaya": "हाँ, मिल गया",
+ "Haan, restore karo": "हाँ, रिस्टोर करें",
+ "Haan, sab mitaa do": "हाँ, सब मिटा दें",
+ "Health": "सेहत",
+ "Healthy": "ठीक",
+ "Home": "होम",
+ "Hotel": "होटल",
+ "Income": "आमदनी",
+ "Income Save Karo": "आमदनी सेव करें",
+ "Income data nahi": "आमदनी का डेटा नहीं",
+ "Income ka kitna hissa bach raha hai.<br><br><b class=\"t-green\">20% se zyada</b> — zabardast<br><b class=\"t-gold\">10-20%</b> — theek hai<br><b class=\"t-red\">10% se kam</b> — kharch zyada ho raha hai<br><br>Hisaab: (Income − Kharch) ÷ Income": "आमदनी का कितना हिस्सा बच रहा है।<br><br><b class=\"t-green\">20% से ज़्यादा</b> — ज़बरदस्त<br><b class=\"t-gold\">10-20%</b> — ठीक है<br><b class=\"t-red\">10% से कम</b> — खर्च ज़्यादा हो रहा है<br><br>हिसाब: (आमदनी − खर्च) ÷ आमदनी",
+ "Income ka sirf {p}% — badhiya!": "आमदनी का सिर्फ़ {p}% — बढ़िया!",
+ "Income ka {p}% — bahut zyada!": "आमदनी का {p}% — बहुत ज़्यादा!",
+ "Income ka {p}% — thoda zyada hai": "आमदनी का {p}% — थोड़ा ज़्यादा है",
+ "Income vs Kharch 💰💸": "आमदनी बनाम खर्च 💰💸",
+ "Intezaar": "इंतज़ार",
+ "Intro dobara dekho": "इंट्रो दोबारा देखें",
+ "Investment": "निवेश",
+ "Is email ka account pehle se hai — Login dabao": "इस ईमेल का अकाउंट पहले से है — Login दबाएँ",
+ "Is mahine bacha": "इस महीने बचा",
+ "Is mahine income add karo sahi % ke liye": "इस महीने की आमदनी जोड़ें सही % के लिए",
+ "Is mahine ka {x} dena hai": "इस महीने का {x} देना है",
+ "Is mahine ki kisht pehle hi di hui hai": "इस महीने की किस्त पहले ही दी हुई है",
+ "Is mahine koi entry nahi": "इस महीने कोई एंट्री नहीं",
+ "Is mahine sab clear": "इस महीने सब साफ़",
+ "Is mahine set kiya": "इस महीने सेट किया",
+ "Is mahine {x} dena hai": "इस महीने {x} देना है",
+ "Is phone mein contact list support nahi": "इस फ़ोन में कॉन्टैक्ट लिस्ट सपोर्ट नहीं",
+ "Is raftaar se {x} zyada ho jaayega. {d} din bache hain.": "इस रफ़्तार से {x} ज़्यादा हो जाएगा। {d} दिन बचे हैं।",
+ "Is rate pe {x} kharch hoga — income se zyada!": "इस रफ़्तार से {x} खर्च होगा — आमदनी से ज़्यादा!",
+ "Is text mein amount nahi mila — poora SMS paste karo": "इस टेक्स्ट में रकम नहीं मिली — पूरा SMS पेस्ट करें",
+ "Isi account mein aapka hisaab jaata hai": "इसी अकाउंट में आपका हिसाब जाता है",
+ "Kabhi backup nahi hua": "कभी बैकअप नहीं हुआ",
+ "Kam se kam 2 log": "कम से कम 2 लोग",
+ "Khaana": "खाना",
+ "Kharch": "खर्च",
+ "Kharch Save Karo": "खर्च सेव करें",
+ "Kharch kahan gaya? 💸": "खर्च कहाँ गया? 💸",
+ "Kharch normal hai": "खर्च सामान्य है",
+ "Kharche ke saath bill ki tasveer lagao. Teen jagah kaam aati hai:<br><br>• <b>Warranty</b> — 2 saal baad bill kaun dhoondega<br>• <b>Return</b> — dukaan bill maangti hai<br>• <b>\"Ye ₹4,000 kahan gaye the?\"</b> — photo dekh lo, yaad aa jaayega<br><br>Photo save hone se pehle app khud usko <b>chhota</b> kar deta hai — bill saaf padhta rahega par jagah 4 MB ki jagah ~150 KB lagegi.<br><br>Kitni jagah lagi hai, ye <b>Settings › Storage</b> mein dikhta hai. Backup mein photos bhi jaati hain — isliye backup file badi ho jaati hai.": "खर्च के साथ बिल की तस्वीर लगाएँ। तीन जगह काम आती है:<br><br>• <b>वारंटी</b> — 2 साल बाद बिल कौन ढूँढेगा<br>• <b>वापसी</b> — दुकान बिल माँगती है<br>• <b>\"ये ₹4,000 कहाँ गए थे?\"</b> — फ़ोटो देख लें, याद आ जाएगा<br><br>फ़ोटो सेव होने से पहले ऐप खुद उसे <b>छोटा</b> कर देता है — बिल साफ़ पढ़ता रहेगा पर जगह 4 MB की जगह ~150 KB लगेगी।<br><br>कितनी जगह लगी है, यह <b>Settings › Storage</b> में दिखता है। बैकअप में फ़ोटो भी जाती हैं — इसलिए बैकअप फ़ाइल बड़ी हो जाती है।",
+ "Khata": "खाता",
+ "Kholne ke liye tap karo ›": "खोलने के लिए दबाएँ ›",
+ "Kirana": "किराना",
+ "Kirane, doodhwale, panwale ke paas ek copy hoti hai jisme aapka udhar likha rehta hai. <b>Wo copy unke paas hai, aapke paas nahi.</b> Mahine ke end mein jo number wo bolte hain, wahi maanna padta hai.<br><br>Ab aapki apni copy: jo liya wo <b>🛒 Liya</b>, jo paisa diya wo <b>💵 Paisa diya</b>. App khud baaki nikaal dega.<br><br><b>Ek baat dhyan se:</b> saamaan lene par kharcha nahi ginaa jaata, <b>paisa dene par</b> ginaa jaata hai. Ghar ka hisaab aise hi chalta hai — warna ek hi cheez do baar gin jaati.<br><br>Dukaandaar se hisaab na mile to <b>\"💬 Khata bhejo\"</b> — poori list WhatsApp pe chali jaayegi. Jhagda wahin khatam.": "किराने, दूधवाले, पानवाले के पास एक कॉपी होती है जिसमें आपका उधार लिखा रहता है। <b>वह कॉपी उनके पास है, आपके पास नहीं।</b> महीने के अंत में जो नंबर वे बोलते हैं, वही मानना पड़ता है।<br><br>अब आपकी अपनी कॉपी: जो लिया वह <b>🛒 लिया</b>, जो पैसा दिया वह <b>💵 पैसा दिया</b>। ऐप खुद बाकी निकाल देगा।<br><br><b>एक बात ध्यान से:</b> सामान लेने पर खर्च नहीं गिना जाता, <b>पैसा देने पर</b> गिना जाता है। घर का हिसाब ऐसे ही चलता है — वरना एक ही चीज़ दो बार गिन जाती।<br><br>दुकानदार से हिसाब न मिले तो <b>\"💬 खाता भेजो\"</b> — पूरी सूची WhatsApp पर चली जाएगी। झगड़ा वहीं ख़त्म।",
+ "Kiraya": "किराया",
+ "Kisht ka amount daalo": "किस्त की रकम डालें",
+ "Kisht ka record hataa diya": "किस्त का रिकॉर्ड हटा दिया",
+ "Kisi bhi entry pe tap karo — badal sakte ho": "किसी भी एंट्री पर दबाएँ — बदल सकते हैं",
+ "Kisi category ki mahine ki limit set kar do — jaise Khaana ₹6,000.<br><br><b>Ek baar set karo, bas.</b> Agle mahine wahi limit apne aap chalti rahegi. Har mahine dobara set nahi karna.<br><br>Badalna ho? Jis mahine mein ho us mahine naya set kar do — us mahine se aage wahi chalega.": "किसी श्रेणी की महीने की सीमा सेट कर दें — जैसे खाना ₹6,000।<br><br><b>एक बार सेट करें, बस।</b> अगले महीने वही सीमा अपने आप चलती रहेगी। हर महीने दोबारा सेट नहीं करना।<br><br>बदलना हो? जिस महीने में हैं उसी महीने नया सेट कर दें — उस महीने से आगे वही चलेगा।",
+ "Kiska naam": "किसका नाम",
+ "Kiska udhar?": "किसका उधार?",
+ "Kisne kitna shagun diya, kisko kitna diya.\n              Agli baar app khud bata dega ki pichhli baar kya hua tha.": "किसने कितना शगुन दिया, किसको कितना दिया।\n              अगली बार ऐप खुद बता देगा कि पिछली बार क्या हुआ था।",
+ "Kitne paise": "कितने पैसे",
+ "Kitne paise?": "कितने पैसे?",
+ "Koi EMI nahi": "कोई EMI नहीं",
+ "Koi budget set nahi": "कोई बजट सेट नहीं",
+ "Koi category aapke apne average se khaas zyada nahi gayi — <b class=\"t-green\">sab control mein</b>": "कोई श्रेणी आपके अपने औसत से ख़ास ज़्यादा नहीं गई — <b class=\"t-green\">सब काबू में</b>",
+ "Koi committee nahi": "कोई कमेटी नहीं",
+ "Koi data nahi": "कोई डेटा नहीं",
+ "Koi dena baaki nahi": "कोई देना बाकी नहीं",
+ "Koi dukaan nahi": "कोई दुकान नहीं",
+ "Koi entry nahi": "कोई एंट्री नहीं",
+ "Koi festive goal nahi": "कोई त्योहार का लक्ष्य नहीं",
+ "Koi function nahi": "कोई फ़ंक्शन नहीं",
+ "Koi lena baaki nahi": "कोई लेना बाकी नहीं",
+ "Koi pakka kharcha baaki nahi": "कोई पक्का खर्च बाकी नहीं",
+ "Koi recurring bill nahi": "कोई हर-महीने का बिल नहीं",
+ "Koi settled udhar nahi": "कोई चुका हुआ लेन-देन नहीं",
+ "Koi subscription nahi": "कोई सब्सक्रिप्शन नहीं",
+ "Kuch baaki nahi hai": "कुछ बाकी नहीं है",
+ "Kuch likhna ho to…": "कुछ लिखना हो तो…",
+ "Kuch nahi mila": "कुछ नहीं मिला",
+ "Lagataar entry karne ka streak": "लगातार एंट्री का सिलसिला",
+ "Lagataar kitne din aapne entry ki.<br><br>Ek din chhoot gaya to 0 se shuru. 2 din se dikhna shuru hota hai.<br><br>Ye sirf aadat banane ke liye hai — paison ka koi hisaab nahi.": "लगातार कितने दिन आपने एंट्री की।<br><br>एक दिन छूट गया तो 0 से शुरू। 2 दिन से दिखना शुरू होता है।<br><br>यह सिर्फ़ आदत बनाने के लिए है — पैसों का कोई हिसाब नहीं।",
+ "Lena": "लेना",
+ "Lena Hai": "लेना है",
+ "Light mode chalu hai": "लाइट मोड चालू है",
+ "Local file — update check website pe hi chalta hai": "लोकल फ़ाइल — अपडेट जाँच सिर्फ़ वेबसाइट पर चलती है",
+ "Login": "लॉगिन",
+ "Login karo to hisaab cloud mein safe rahega": "लॉगिन करें तो हिसाब क्लाउड में सुरक्षित रहेगा",
+ "Login karoge to aapka saara hisaab cloud mein bhi save hota rahega. Naya phone liya? Wahi email-password se login karo — sab wapas aa jaayega.<br><br><b>Login zaroori NAHI hai.</b> Na karo to app bilkul aise hi chalta hai jaise abhi chalta hai — saara data aapke phone mein. Ye sirf upar se mili hui suraksha hai.<br><br><b>Kab jaata hai:</b> kuch badalne ke ~8 second baad apne aap. Net na ho to ruk jaata hai aur net aate hi chala jaata hai.<br><br><b>Kuch chup-chaap nahi mitega:</b> agar cloud wali copy aapke phone se alag nikli, to app poochega ki kaunsi rakhni hai. Khud faisla nahi karega.<br><br><b>Photos</b> default band hain — wo jagah bahut khaati hain. Chahiye to upar wala switch chalu kar do.<br><br><span class=\"t-mute\">Ek baat: free cloud account hafte bhar bilkul use na ho to so jaata hai. Roz app use karoge to kabhi nahi hoga.</span>": "लॉगिन करेंगे तो आपका सारा हिसाब क्लाउड में भी सेव होता रहेगा। नया फ़ोन लिया? वही ईमेल-पासवर्ड से लॉगिन करें — सब वापस आ जाएगा।<br><br><b>लॉगिन ज़रूरी नहीं है।</b> न करें तो ऐप बिल्कुल ऐसे ही चलता है जैसे अभी चलता है — सारा डेटा आपके फ़ोन में। यह सिर्फ़ ऊपर से मिली हुई सुरक्षा है।<br><br><b>कब जाता है:</b> कुछ बदलने के ~8 सेकंड बाद अपने आप। इंटरनेट न हो तो रुक जाता है और आते ही चला जाता है।<br><br><b>कुछ चुपचाप नहीं मिटेगा:</b> अगर क्लाउड वाली कॉपी आपके फ़ोन से अलग निकली, तो ऐप पूछेगा कि कौन सी रखनी है। खुद फ़ैसला नहीं करेगा।<br><br><b>फ़ोटो</b> डिफ़ॉल्ट बंद हैं — वे जगह बहुत खाती हैं। चाहिए तो ऊपर वाला स्विच चालू कर दें।<br><br><span class=\"t-mute\">एक बात: मुफ़्त क्लाउड अकाउंट हफ़्ते भर बिल्कुल इस्तेमाल न हो तो सो जाता है। रोज़ ऐप चलाएँगे तो कभी नहीं होगा।</span>",
+ "Login na karo to bhi app poora chalta hai — ye sirf backup ke liye hai": "लॉगिन न करें तो भी ऐप पूरा चलता है — यह सिर्फ़ बैकअप के लिए है",
+ "Logout": "लॉगआउट",
+ "Logout ho gaya — data is phone mein waisa hi hai": "लॉगआउट हो गया — डेटा इस फ़ोन में वैसा ही है",
+ "Logout karein?": "लॉगआउट करें?",
+ "Maan lo <b>10 log</b> hain. Har mahine sab <b>₹5,000</b> daalte hain. Har mahine ek aadmi ko poore <b>₹50,000</b> mil jaate hain. 10 mahine mein sabka number aa jaata hai.<br><br>Copy pe do cheezein likhna sab bhool jaate hain — <b>kitni kisht di</b> aur <b>mera number kab aayega</b>. App dono khud rakhta hai.<br><br><b>\"✓ Is mahine ki kisht\"</b> dabao → record bhi ban jaata hai aur <b>Investment</b> ka kharcha bhi. Kyunki committee kharcha nahi, <b>zabardasti ki bachat</b> hai.<br><br>Number aane par <b>\"💰 Number aa gaya\"</b> dabao → wo paisa income mein jud jaata hai.": "मान लीजिए <b>10 लोग</b> हैं। हर महीने सब <b>₹5,000</b> डालते हैं। हर महीने एक आदमी को पूरे <b>₹50,000</b> मिल जाते हैं। 10 महीने में सबका नंबर आ जाता है।<br><br>कॉपी पर दो चीज़ें लिखना सब भूल जाते हैं — <b>कितनी किस्त दी</b> और <b>मेरा नंबर कब आएगा</b>। ऐप दोनों खुद रखता है।<br><br><b>\"✓ इस महीने की किस्त\"</b> दबाएँ → रिकॉर्ड भी बन जाता है और <b>निवेश</b> का खर्च भी। क्योंकि कमेटी खर्च नहीं, <b>ज़बरदस्ती की बचत</b> है।<br><br>नंबर आने पर <b>\"💰 नंबर आ गया\"</b> दबाएँ → वह पैसा आमदनी में जुड़ जाता है।",
+ "Mahina": "महीना",
+ "Mahina abhi shuru hua hai — sirf pakke kharch gine hain": "महीना अभी शुरू हुआ है — सिर्फ़ पक्के खर्च गिने हैं",
+ "Mahina khatam hone wala hai": "महीना खत्म होने वाला है",
+ "Mahine-dar-mahine": "महीने-दर-महीने",
+ "Medical": "दवाई",
+ "Meri UPI ID": "मेरी UPI ID",
+ "Mitao": "मिटाएँ",
+ "Monthly": "हर महीने",
+ "Monthly Report": "महीने की रिपोर्ट",
+ "Monthly Summary": "महीने का सार",
+ "More": "और",
+ "Naam aa gaya — number theek nahi laga, haath se daal do": "नाम आ गया — नंबर ठीक नहीं लगा, हाथ से डालें",
+ "Naam daalna zaroori hai": "नाम डालना ज़रूरी है",
+ "Naam daalo": "नाम डालें",
+ "Naam se dhoondo — pichhli baar kitna diya tha?": "नाम से ढूँढें — पिछली बार कितना दिया था?",
+ "Naam, category ya amount se dhoondo…": "नाम, श्रेणी या रकम से ढूँढें…",
+ "Namaste 👋": "नमस्ते 👋",
+ "Namaste! Main <b>PaisaBook</b> hoon": "नमस्ते! मैं <b>PaisaBook</b> हूँ",
+ "Naya 4 digit ka PIN set karo": "नया 4 अंकों का PIN सेट करें",
+ "Naya PIN banao": "नया PIN बनाएँ",
+ "Naya Udhar Add Karo": "नया लेन-देन जोड़ें",
+ "Naya account": "नया अकाउंट",
+ "Naya version aa gaya — v{v}": "नया वर्ज़न आ गया — v{v}",
+ "Neeche ➕ se pehla kharcha add karo": "नीचे ➕ से पहला खर्च जोड़ें",
+ "Net": "कुल",
+ "Net nahi hai — net aate hi apne aap chala jaayega": "इंटरनेट नहीं है — आते ही अपने आप चला जाएगा",
+ "Netflix, Spotify — jo bhi ho, add karo": "Netflix, Spotify — जो भी हो, जोड़ें",
+ "Netflix, Spotify, Prime — jo apne aap kat-te rehte hain.<br><br>Yearly ya quarterly wale ka \"per mahina\" barabar bhi dikhta hai, taaki sahi tulna ho sake.<br><br>Billing date nikal jaane par app khud agli date par set kar deta hai.": "Netflix, Spotify, Prime — जो अपने आप कटते रहते हैं।<br><br>सालाना या तिमाही वाले का \"प्रति महीना\" बराबर भी दिखता है, ताकि सही तुलना हो सके।<br><br>बिलिंग की तारीख़ निकल जाने पर ऐप खुद अगली तारीख़ पर सेट कर देता है।",
+ "Netflix, Spotify…": "Netflix, Spotify…",
+ "Next billing date chuno": "अगली बिलिंग तारीख़ चुनें",
+ "Number aa gaya?": "नंबर आ गया?",
+ "Number daalo ya neeche se chuno": "नंबर डालें या नीचे से चुनें",
+ "Office": "ऑफ़िस",
+ "Other": "अन्य",
+ "Other Income": "अन्य आमदनी",
+ "Overspent ⚠️": "ज़्यादा खर्च ⚠️",
+ "PIN badlo": "PIN बदलें",
+ "PIN bhool gaye?": "PIN भूल गए?",
+ "PIN daalo": "PIN डालें",
+ "Paan": "पान",
+ "Padosi": "पड़ोसी",
+ "Paisa bhej diya?": "पैसा भेज दिया?",
+ "Pakka aana": "पक्का आना",
+ "Pakka karne ke liye wahi PIN": "पक्का करने के लिए वही PIN",
+ "Pakka?": "पक्का?",
+ "Password kam se kam 6 akshar": "पासवर्ड कम से कम 6 अक्षर",
+ "Pehle SMS paste karo": "पहले SMS पेस्ट करें",
+ "Pehle amount daalo": "पहले रकम डालें",
+ "Pehle function kholo": "पहले फ़ंक्शन खोलें",
+ "Pehle kuch transactions add karo": "पहले कुछ लेन-देन जोड़ें",
+ "Pehle purana PIN confirm karo": "पहले पुराना PIN पक्का करें",
+ "Pension": "पेंशन",
+ "Personal": "निजी",
+ "Phir bhi bharo": "फिर भी भरें",
+ "Photo dekho": "फ़ोटो देखें",
+ "Photo hataa di": "फ़ोटो हटा दी",
+ "Photo jodo": "फ़ोटो जोड़ें",
+ "Photo jodo (marzi se)": "फ़ोटो जोड़ें (मर्ज़ी से)",
+ "Photo lag gayi": "फ़ोटो लग गई",
+ "Photo nahi khul payi": "फ़ोटो नहीं खुल पाई",
+ "Photos bhi bhejo": "फ़ोटो भी भेजें",
+ "Pichhla mahina": "पिछला महीना",
+ "Pichhle 6 mahine": "पिछले 6 महीने",
+ "Poora analysis — top category, worst day, highlights": "पूरा विश्लेषण — टॉप श्रेणी, भारी दिन, ख़ास बातें",
+ "Poora chukaya?": "पूरा चुका दिया?",
+ "Poora form →": "पूरा फ़ॉर्म →",
+ "Quarterly": "तिमाही",
+ "Reason…": "वजह…",
+ "Refund": "रिफ़ंड",
+ "Reminder hataa diya": "रिमाइंडर हटा दिया",
+ "Rent, Bijli bill…": "किराया, बिजली बिल…",
+ "Rent, bijli, EMI — add karo, due date pe yaad aa jayega": "किराया, बिजली, EMI — जोड़ें, तारीख़ पर याद आ जाएगा",
+ "Report": "रिपोर्ट",
+ "Reset": "रीसेट",
+ "Restore": "रिस्टोर",
+ "Restore karein?": "रिस्टोर करें?",
+ "Rishtedaar": "रिश्तेदार",
+ "Roman — jaise abhi hai": "रोमन — जैसे अभी है",
+ "Roz ka {r} chal raha hai. {d} din aur bache hain.": "रोज़ का {r} चल रहा है। {d} दिन और बचे हैं।",
+ "Roz-marra ka kharch ({d} din)": "रोज़मर्रा का खर्च ({d} दिन)",
+ "Saara data hamesha ke liye delete ho jayega": "सारा डेटा हमेशा के लिए डिलीट हो जाएगा",
+ "Saare features dikh rahe hain (EMI, Bills, Festive, Stats)": "सारे फ़ीचर दिख रहे हैं (EMI, बिल, त्योहार, आँकड़े)",
+ "Saari entries hataa di": "सारी एंट्री हटा दी",
+ "Saari kisht ho chuki hain": "सारी किस्तें हो चुकी हैं",
+ "Sab Data Reset": "सारा डेटा रीसेट",
+ "Sab kuch delete?": "सब कुछ डिलीट करें?",
+ "Sab mitaa do": "सब मिटा दें",
+ "Sabse <b>tez</b> tareeka": "सबसे <b>तेज़</b> तरीक़ा",
+ "Sabse bada": "सबसे बड़ा",
+ "Sabse purana udhar {d} din se": "सबसे पुराना उधार {d} दिन से",
+ "Sabzi": "सब्ज़ी",
+ "Safe hai": "सुरक्षित",
+ "Salary": "सैलरी",
+ "Save nahi hua — storage full ho sakta hai": "सेव नहीं हुआ — स्टोरेज भरा हो सकता है",
+ "Service ka naam daalo": "सर्विस का नाम डालें",
+ "Settings": "सेटिंग",
+ "Shaadi wali copy — ab phone mein": "शादी वाली कॉपी — अब फ़ोन में",
+ "Shagun": "शगुन",
+ "Shopping": "शॉपिंग",
+ "Shubh Ratri 🌙": "शुभ रात्रि 🌙",
+ "Shubh Sham 🌆": "शुभ संध्या 🌆",
+ "Shuru ka mahina chuno": "शुरू का महीना चुनें",
+ "Simple Mode": "आसान मोड",
+ "Stats": "आँकड़े",
+ "Storage": "स्टोरेज",
+ "Subscription hataa diya": "सब्सक्रिप्शन हटा दिया",
+ "Suprabhat ☀️": "सुप्रभात ☀️",
+ "TEZ": "तेज़",
+ "Tap karke dekho": "दबाकर देखें",
+ "Tap karke update karo (data safe rahega)": "दबाकर अपडेट करें (डेटा सुरक्षित रहेगा)",
+ "Target amount daalo": "लक्ष्य की रकम डालें",
+ "Tasveer nahi ban payi": "तस्वीर नहीं बन पाई",
+ "Theek": "ठीक",
+ "Theme": "थीम",
+ "Tight": "तंग",
+ "Total mahine": "कुल महीने",
+ "Total mahine daalo": "कुल महीने डालें",
+ "Trading": "ट्रेडिंग",
+ "Transactions": "लेन-देन",
+ "Transport": "आना-जाना",
+ "Travel": "यात्रा",
+ "Tulna ke liye data kam hai": "तुलना के लिए डेटा कम है",
+ "UPI": "UPI",
+ "Udhar": "लेन-देन",
+ "Udhar overview 🤝": "लेन-देन का नज़ारा 🤝",
+ "Valid amount daalo": "सही रकम डालें",
+ "Valid limit daalo": "सही सीमा डालें",
+ "Wahi cheez jo PhonePe/GPay mein paisa bhejte waqt dikhti hai — jaise <b>9876543210@ybl</b> ya <b>rahul@okaxis</b>.<br><br><b>Dena Hai</b> mein daalo → ek tap mein unko paisa bhej sakte ho, number dhoondhne ki zaroorat nahi.<br><br><b>Lena Hai</b> mein aapki apni UPI ID kaam aati hai (Settings mein daalo) — yaad dilaane waale WhatsApp message mein paise bhejne ka link apne aap lag jaata hai. Saamne wale ko bas tap karna hai.<br><br><span class=\"t-mute\">App aapka UPI ID sirf aapke phone mein rakhta hai. Paisa kabhi app ke through nahi jaata — aapka apna UPI app hi kholta hai.</span>": "वही चीज़ जो PhonePe/GPay में पैसा भेजते समय दिखती है — जैसे <b>9876543210@ybl</b> या <b>rahul@okaxis</b>।<br><br><b>देना है</b> में डालें → एक दबाने में उन्हें पैसा भेज सकते हैं, नंबर ढूँढने की ज़रूरत नहीं।<br><br><b>लेना है</b> में आपकी अपनी UPI ID काम आती है (Settings में डालें) — याद दिलाने वाले WhatsApp मैसेज में पैसे भेजने का लिंक अपने आप लग जाता है। सामने वाले को बस दबाना है।<br><br><span class=\"t-mute\">ऐप आपकी UPI ID सिर्फ़ आपके फ़ोन में रखता है। पैसा कभी ऐप के ज़रिए नहीं जाता — आपका अपना UPI ऐप ही खुलता है।</span>",
+ "Wapas hataa diya": "वापस हटा दिया",
+ "WhatsApp": "WhatsApp",
+ "WhatsApp pe mahine ka hisaab bhejo": "WhatsApp पर महीने का हिसाब भेजें",
+ "Wo kharche jo <b>har mahine</b> aate hain — rent, bijli, pani.<br><br>Ek baar daal do, due date se pehle app khud yaad dila dega.<br><br><b>\"✓ Pay ho gaya\"</b> dabane par do kaam ek saath hote hain: expense entry ban jaati hai, aur wo bill is mahine ke liye chup ho jaata hai.": "वे खर्च जो <b>हर महीने</b> आते हैं — किराया, बिजली, पानी।<br><br>एक बार डाल दें, तारीख़ से पहले ऐप खुद याद दिला देगा।<br><br><b>\"✓ Pay ho gaya\"</b> दबाने पर दो काम एक साथ होते हैं: खर्च की एंट्री बन जाती है, और वह बिल इस महीने के लिए चुप हो जाता है।",
+ "Yaad dilaate waqt message mein \"paisa bhejo\" ka link lag jaayega": "याद दिलाते समय मैसेज में \"पैसा भेजो\" का लिंक लग जाएगा",
+ "Yahan paste karo…\n\nRs.347.00 debited from A/c XX1234 on 08-Sep-26 to SWIGGY via UPI -HDFC Bank": "यहाँ पेस्ट करें…\n\nRs.347.00 debited from A/c XX1234 on 08-Sep-26 to SWIGGY via UPI -HDFC Bank",
+ "Ye abhi aana baaki hai": "यह अभी आना बाकी है",
+ "Ye check sirf website pe kaam karta hai": "यह जाँच सिर्फ़ वेबसाइट पर काम करती है",
+ "Ye kya hai?": "यह क्या है?",
+ "Yearly": "सालाना",
+ "YouTube": "यूट्यूब",
+ "Zyada": "ज़्यादा",
+ "aapka@email.com": "aapka@email.com",
+ "category-wise kharch": "श्रेणी के हिसाब से खर्च",
+ "dena hai": "देना है",
+ "din": "दिन",
+ "extra": "अतिरिक्त",
+ "income": "आमदनी",
+ "jaise Phone EMI": "जैसे फ़ोन EMI",
+ "jaise: 9876543210@ybl": "जैसे: 9876543210@ybl",
+ "jaise: Mohalle wali committee": "जैसे: मोहल्ले वाली कमेटी",
+ "jaise: Rahul ki shaadi": "जैसे: राहुल की शादी",
+ "jaise: Sharma Kirana": "जैसे: शर्मा किराना",
+ "jaise: kapde bhi diye": "जैसे: कपड़े भी दिए",
+ "kam se kam 6 akshar": "कम से कम 6 अक्षर",
+ "kharch": "खर्च",
+ "naam@okaxis": "naam@okaxis",
+ "pata nahi": "पता नहीं",
+ "per mahina": "प्रति महीना",
+ "saaf hai": "साफ़ है",
+ "{a}/{b} kisht di": "{a}/{b} किस्त दी",
+ "{a}/{b} mahine paid": "{a}/{b} महीने चुकाए",
+ "{c} — normal se zyada": "{c} — सामान्य से ज़्यादा",
+ "{d} din": "{d} दिन",
+ "{d} din baaki": "{d} दिन बाकी",
+ "{d} din mein": "{d} दिन में",
+ "{d} din se backup nahi hua": "{d} दिन से बैकअप नहीं हुआ",
+ "{n} committee ki kisht baaki hai": "{n} कमेटी की किस्त बाकी है",
+ "{n} dukaan ka {x} baaki": "{n} दुकान का {x} बाकी",
+ "{n} kisht baaki hai": "{n} किस्त बाकी है",
+ "{n} log": "{n} लोग",
+ "{n} mahine ke average se tulna": "{n} महीने के औसत से तुलना",
+ "{n} udhar mein 30+ din ho gaye": "{n} लेन-देन में 30+ दिन हो गए",
+ "{p}% bachat — is mahine track pe ho!": "{p}% बचत — इस महीने सही चल रहे हैं!",
+ "{x} bacha": "{x} बचा",
+ "{x} ka udhar baaki hai": "{x} का लेन-देन बाकी है",
+ "{x}/din left": "{x}/दिन बाकी",
+ "{x}/mahina": "{x}/महीना",
+ "₹ / mahina": "₹ / महीना",
+ "₹ Amount": "₹ रकम",
+ "₹ Amount *": "₹ रकम *",
+ "₹ Har mahine ki kisht": "₹ हर महीने की किस्त",
+ "₹ Limit / mahina": "₹ सीमा / महीना",
+ "₹ Target": "₹ लक्ष्य",
+ "← Wapas": "← वापस",
+ "← Wapas ja kar dobara try karo": "← वापस जाकर दोबारा कोशिश करें",
+ "↩ Wapas aa gaya": "↩ वापस आ गया",
+ "↩ Wapas aa gayi": "↩ वापस आ गई",
+ "↩ Wapas hataa diya": "↩ वापस हटा दिया",
+ "☁️ Aapka hisaab cloud mein chala gaya": "☁️ आपका हिसाब क्लाउड में चला गया",
+ "☁️ Abhi sync karo": "☁️ अभी सिंक करें",
+ "☁️ Cloud": "☁️ क्लाउड",
+ "☁️ Cloud Backup": "☁️ क्लाउड बैकअप",
+ "☁️ Cloud mein save ho gaya": "☁️ क्लाउड में सेव हो गया",
+ "☁️ Cloud wala hisaab lag gaya": "☁️ क्लाउड वाला हिसाब लग गया",
+ "☕  Chai": "☕  चाय",
+ "♻️ Restore & Storage": "♻️ रिस्टोर और स्टोरेज",
+ "⚠️ Danger Zone": "⚠️ ख़तरे का क्षेत्र",
+ "⚠️ Kharch review karo aur udhar settle karo.": "⚠️ खर्च देखें और लेन-देन निपटाएँ।",
+ "⚡  Bills": "⚡  बिल",
+ "⚡ Aaj Ka Hisaab": "⚡ आज का हिसाब",
+ "⚡ EMI ya bachat par dhyan do — sudhaar ki jagah hai.": "⚡ EMI या बचत पर ध्यान दें — सुधार की जगह है।",
+ "⚡ Jaldi chuno": "⚡ जल्दी चुनें",
+ "⚡ Jaldi se likho": "⚡ जल्दी से लिखें",
+ "✅ Aap latest version pe ho (v": "✅ आप नए वर्ज़न पर हैं (v",
+ "✅ Pay ho gaya": "✅ भुगतान हो गया",
+ "✅ Settled": "✅ चुका हुआ",
+ "✅ ho gaya — {d}": "✅ हो गया — {d}",
+ "✅ {d} ko pay hua": "✅ {d} को भुगतान हुआ",
+ "✈️  Travel": "✈️  यात्रा",
+ "✈️  Trip": "✈️  यात्रा",
+ "✏️ Entry badal di": "✏️ एंट्री बदल दी",
+ "✓ Pay ho gaya": "✓ भुगतान हो गया",
+ "✨ Simple Mode": "✨ आसान मोड",
+ "➕ Add se apni EMI daalo": "➕ से अपनी EMI जोड़ें",
+ "➕ Add se apni committee ya BC daalo": "➕ से अपनी कमेटी या BC जोड़ें",
+ "➕ Add se category ki limit set karo": "➕ से श्रेणी की सीमा सेट करें",
+ "➕ Add se kirana, doodh ya paan wale ka khata banao": "➕ से किराना, दूध या पान वाले का खाता बनाएँ",
+ "➕ Add se naam aur amount daalo": "➕ से नाम और रकम डालें",
+ "➕ Add se shaadi, mundan ya koi bhi function banao": "➕ से शादी, मुंडन या कोई भी फ़ंक्शन बनाएँ",
+ "➕ upar se naya add karo": "➕ ऊपर से नया जोड़ें",
+ "🆘 Turant budget banao aur udhar chukao.": "🆘 तुरंत बजट बनाएँ और उधार चुकाएँ।",
+ "🌐 Bhasha": "🌐 भाषा",
+ "🌙  Eid": "🌙  ईद",
+ "🌾  Gaon": "🌾  गाँव",
+ "🌾  Pongal": "🌾  पोंगल",
+ "🍃  Paan": "🍃  पान",
+ "🍔  Khaana": "🍔  खाना",
+ "🍚  Anna Prashan": "🍚  अन्नप्राशन",
+ "🍽️  Hotel": "🍽️  होटल",
+ "🎂  Janamdin": "🎂  जन्मदिन",
+ "🎄  Christmas": "🎄  क्रिसमस",
+ "🎉  Doosra": "🎉  अन्य",
+ "🎉 Kaunsa function": "🎉 कौन सा फ़ंक्शन",
+ "🎉 Naya version aa gaya — v": "🎉 नया वर्ज़न आ गया — v",
+ "🎉 Zabardast! Ab SIP / investment ki soch sakte ho.": "🎉 ज़बरदस्त! अब SIP / निवेश की सोच सकते हैं।",
+ "🎨  Holi": "🎨  होली",
+ "🎨 Preferences": "🎨 पसंद",
+ "🎬  Entertainment": "🎬  मनोरंजन",
+ "🎯 Budget Limits": "🎯 बजट सीमा",
+ "🎯 Budget Set Karo": "🎯 बजट सेट करें",
+ "🎯 Budget kaise chalta hai": "🎯 बजट कैसे चलता है",
+ "🏘️  Padosi": "🏘️  पड़ोसी",
+ "🏠  Ghar": "🏠  घर",
+ "🏠  Griha Pravesh": "🏠  गृह प्रवेश",
+ "🏥 Financial Health": "🏥 आर्थिक सेहत",
+ "🏥 Financial Health Score": "🏥 आर्थिक सेहत स्कोर",
+ "🏦  Bank": "🏦  बैंक",
+ "🏦  EMI": "🏦  EMI",
+ "🏪  Kirana": "🏪  किराना",
+ "🏪 Dukaan Add Karo": "🏪 दुकान जोड़ें",
+ "🏪 Dukaan ka khata": "🏪 दुकान का खाता",
+ "🏪 Kis cheez ki": "🏪 किस चीज़ की",
+ "🏪 Meri Dukaanein": "🏪 मेरी दुकानें",
+ "🏪 Saari dukaanon ka baaki": "🏪 सारी दुकानों का बाकी",
+ "🐘  Ganesh Chaturthi": "🐘  गणेश चतुर्थी",
+ "👍 Accha chal raha hai — bachat thodi aur badha sakte ho.": "👍 अच्छा चल रहा है — बचत थोड़ी और बढ़ा सकते हैं।",
+ "👤  Doosra": "👤  अन्य",
+ "👤 Naam": "👤 नाम",
+ "👤 Naam *": "👤 नाम *",
+ "👥 Kitne log": "👥 कितने लोग",
+ "👥 Rishta": "👥 रिश्ता",
+ "👨‍👩‍👧  Family": "👨‍👩‍👧  परिवार",
+ "👨‍👩‍👧  Rishtedaar": "👨‍👩‍👧  रिश्तेदार",
+ "👶  Mundan": "👶  मुंडन",
+ "💇  Personal": "💇  निजी",
+ "💊  Health": "💊  सेहत",
+ "💊  Medical": "💊  दवाई",
+ "💍  Shaadi": "💍  शादी",
+ "💍 Aapke Function": "💍 आपके फ़ंक्शन",
+ "💍 Entry Save Karo": "💍 एंट्री सेव करें",
+ "💍 Function Banao": "💍 फ़ंक्शन बनाएँ",
+ "💐  Sagai": "💐  सगाई",
+ "💡 Insights": "💡 नज़र",
+ "💬 Register share karo": "💬 रजिस्टर शेयर करें",
+ "💰  Investment": "💰  निवेश",
+ "💰 Income": "💰 आमदनी",
+ "💰 Lena Hai": "💰 लेना है",
+ "💰 Lena Hai — Save Karo": "💰 लेना है — सेव करें",
+ "💰 Udhar Save Karo": "💰 लेन-देन सेव करें",
+ "💳  Card": "💳  कार्ड",
+ "💳 Payment": "💳 भुगतान",
+ "💵  Cash": "💵  नकद",
+ "💸 Kharch": "💸 खर्च",
+ "💼  Office": "💼  ऑफ़िस",
+ "💾 Backup file download ho gayi — Drive mein rakh do": "💾 बैकअप फ़ाइल डाउनलोड हो गई — Drive में रखें",
+ "💾 Backup kyun zaroori hai": "💾 बैकअप क्यों ज़रूरी है",
+ "📂 Category": "📂 श्रेणी",
+ "📅 Date": "📅 तारीख़",
+ "📅 Din (1–31)": "📅 दिन (1–31)",
+ "📅 Festival date": "📅 त्योहार की तारीख़",
+ "📅 Har mahine ka total": "📅 हर महीने का कुल",
+ "📅 Is Mahine": "📅 इस महीने",
+ "📅 Kab shuru hui": "📅 कब शुरू हुई",
+ "📅 Next billing": "📅 अगली बिलिंग",
+ "📅 har mahine {d} ko": "📅 हर महीने {d} को",
+ "📅 {n} din baaki — {d}": "📅 {n} दिन बाकी — {d}",
+ "📇 Contact list se uthao": "📇 कॉन्टैक्ट लिस्ट से उठाएँ",
+ "📈 6 Mahine": "📈 6 महीने",
+ "📊 Bachat %": "📊 बचत %",
+ "📊 Data chahiye — 📝 Is mahine ki income aur kharch add karo, sahi score dikhega.": "📊 डेटा चाहिए — 📝 इस महीने की आमदनी और खर्च जोड़ें, सही स्कोर दिखेगा।",
+ "📋 Report": "📋 रिपोर्ट",
+ "📋 Sab": "📋 सब",
+ "📚  Education": "📚  पढ़ाई",
+ "📝 Committee ka naam": "📝 कमेटी का नाम",
+ "📝 Dukaan ka naam": "📝 दुकान का नाम",
+ "📝 Is mahine ki income aur kharch add karo, sahi score dikhega.": "📝 इस महीने की आमदनी और खर्च जोड़ें, सही स्कोर दिखेगा।",
+ "📝 Kis liye? (marzi se)": "📝 किस लिए? (मर्ज़ी से)",
+ "📝 Kis liye? (marzi se) — jaise: chai, auto, sabzi": "📝 किस लिए? (मर्ज़ी से) — जैसे: चाय, ऑटो, सब्ज़ी",
+ "📝 Kiska (naam)": "📝 किसका (नाम)",
+ "📝 Note (marzi se)": "📝 नोट (मर्ज़ी से)",
+ "📝 Service": "📝 सर्विस",
+ "📤 Diya": "📤 दिया",
+ "📤 Diya — Save Karo": "📤 दिया — सेव करें",
+ "📤 Share & Export": "📤 शेयर और एक्सपोर्ट",
+ "📥 Aaya": "📥 आया",
+ "📥 Aaya — Save Karo": "📥 आया — सेव करें",
+ "📥 CSV download hua": "📥 CSV डाउनलोड हुआ",
+ "📥 Tasveer download ho gayi — ab share kar do": "📥 तस्वीर डाउनलोड हो गई — अब शेयर करें",
+ "📦  Other": "📦  अन्य",
+ "📧 Email": "📧 ईमेल",
+ "📩 Bank SMS se add": "📩 बैंक SMS से जोड़ें",
+ "📩 Bank SMS se add karo": "📩 बैंक SMS से जोड़ें",
+ "📱  UPI": "📱  UPI",
+ "📱 Active EMIs": "📱 चालू EMI",
+ "📱 EMI Add Karo": "📱 EMI जोड़ें",
+ "📱 EMI Load": "📱 EMI बोझ",
+ "📱 Phone (WhatsApp ke liye)": "📱 फ़ोन (WhatsApp के लिए)",
+ "📱 Phone (marzi se)": "📱 फ़ोन (मर्ज़ी से)",
+ "📱 Phone wala hisaab cloud mein chala gaya": "📱 फ़ोन वाला हिसाब क्लाउड में चला गया",
+ "📲 UPI ID": "📲 UPI ID",
+ "📷 Bill ki photo": "📷 बिल की फ़ोटो",
+ "📺 Subscription Add Karo": "📺 सब्सक्रिप्शन जोड़ें",
+ "📺 Subscriptions": "📺 सब्सक्रिप्शन",
+ "🔄 Cycle": "🔄 चक्र",
+ "🔑 Password": "🔑 पासवर्ड",
+ "🔒 App Lock": "🔒 ऐप लॉक",
+ "🔒 Suraksha": "🔒 सुरक्षा",
+ "🔔 Recurring": "🔔 हर महीने",
+ "🔔 Recurring bills": "🔔 हर महीने के बिल",
+ "🔔 Reminder Set Karo": "🔔 रिमाइंडर सेट करें",
+ "🔢 Mera number": "🔢 मेरा नंबर",
+ "🔥 Streak": "🔥 लगातार",
+ "🔮 Mahine ke end tak": "🔮 महीने के अंत तक",
+ "🔵 Active": "🔵 चालू",
+ "🕯️  Barsi": "🕯️  बरसी",
+ "🕺  Navratri": "🕺  नवरात्रि",
+ "🗑️ Sab data reset ho gaya — fresh start": "🗑️ सारा डेटा रीसेट हो गया — नई शुरुआत",
+ "🙏  Daan": "🙏  दान",
+ "🙏  Tilak": "🙏  तिलक",
+ "🙏 Dena Hai": "🙏 देना है",
+ "🙏 Dena Hai — Save Karo": "🙏 देना है — सेव करें",
+ "🛍️  Shopping": "🛍️  शॉपिंग",
+ "🛒  Doosra": "🛒  अन्य",
+ "🛵  Transport": "🛵  आना-जाना",
+ "🤝  Dost": "🤝  दोस्त",
+ "🤝 Committee / BC / Chit": "🤝 कमेटी / BC / चिट",
+ "🤝 Committee Add Karo": "🤝 कमेटी जोड़ें",
+ "🤝 Lena / Dena": "🤝 लेन-देन",
+ "🤝 Meri Committee": "🤝 मेरी कमेटी",
+ "🥛  Doodh": "🥛  दूध",
+ "🥬  Sabzi": "🥬  सब्ज़ी",
+ "🧪 Demo data bhar diya — Reset se hata sakte ho": "🧪 डेमो डेटा भर दिया — Reset से हटा सकते हैं",
+ "🧶  Raksha Bandhan": "🧶  रक्षाबंधन",
+ "🪔  Diwali": "🪔  दिवाली",
+ "🪔 Festival": "🪔 त्योहार",
+ "🪔 Festive Savings": "🪔 त्योहार की बचत",
+ "🪔 Festive goal": "🪔 त्योहार का लक्ष्य",
+ "🪔 Goal Set Karo": "🪔 लक्ष्य सेट करें"
+}
+};
+
+/* Poore app mein bhasha badalne ka ek hi darwaza */
+function t(s){
+  if(s === undefined || s === null) return s;
+  if(S.lang === 'hin') return s;
+  var d = STR[S.lang];
+  if(!d) return s;
+  var v = d[s];
+  return (v === undefined || v === '') ? s : v;   /* na mile to Hinglish */
+}
+/* Jisme number/naam beech mein aata hai: t('… {x} …') phir fill */
+function tf(s, vals){
+  var out = t(s);
+  for(var k in vals) out = out.split('{' + k + '}').join(vals[k]);
+  return out;
+}
+
+/* ── Static HTML ko ek baar scan karo ──
+   File mein likha hua saara text yahan pakda jaata hai — nav,
+   label, form, settings, sheet. Har string par haath se t() lagane
+   ki zaroorat nahi padti. Dynamic text (list, card) render ke waqt
+   t() se guzarta hai. */
+var i18nText = [], i18nAttr = [];
+function scanI18n(){
+  i18nText = []; i18nAttr = [];
+  var root = document.getElementById('app');
+  if(!root) return;
+  var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+  var n;
+  while((n = w.nextNode())){
+    var raw = n.nodeValue, tr = raw.trim();
+    if(tr.length < 2) continue;
+    if(!/[A-Za-zऀ-ॿ]/.test(tr)) continue;    /* sirf emoji/number — chhodo */
+    if(n.parentNode && /^(SCRIPT|STYLE)$/.test(n.parentNode.nodeName)) continue;
+    /* data-notr = "ise kabhi mat badlo". App ka naam isi mein aata
+       hai — "PaisaBook" ko "MoneyBook" bana dena bewakoofi hogi. */
+    if(n.parentNode && n.parentNode.closest && n.parentNode.closest('[data-notr]')) continue;
+    i18nText.push({ n:n, raw:raw, key:tr });
+  }
+  ['placeholder','aria-label','title'].forEach(function(a){
+    $$('[' + a + ']').forEach(function(el){
+      var v = el.getAttribute(a);
+      if(v && v.trim().length > 1 && /[A-Za-z]/.test(v)) i18nAttr.push({ el:el, a:a, key:v });
+    });
+  });
+}
+function applyLang(){
+  i18nText.forEach(function(it){ it.n.nodeValue = it.raw.replace(it.key, t(it.key)); });
+  i18nAttr.forEach(function(it){ it.el.setAttribute(it.a, t(it.key)); });
+  document.documentElement.lang = S.lang === 'hi' ? 'hi' : 'en';
+}
+function setLang(id){
+  S.lang = id;
+  var s = readObj(K.settings, {}); s.lang = id; writeObj(K.settings, s);
+  applyLang();
+  refreshAll();                 /* dynamic text dobara banega */
+  renderLangCard();
+  toast(t('Bhasha badal gayi'), 'ok');
+}
 
 /* ═══════════════════════════════════════════════════════════════
    2 · UTILS — chhote helper, poore app mein use hote hain
@@ -3038,7 +4407,9 @@ var S = {
   editId:null, theme:'dark', healthFolded:false,
   undo:null,           /* { label, revert() } */
   newVersion:null,     /* server pe naya version mila to uska number */
-  simple:true          /* naye banday ke liye simple mode ON (settings se badalta hai) */
+  simple:true,         /* naye banday ke liye simple mode ON (settings se badalta hai) */
+  lang:'hin',          /* hin · en · hi */
+  fcastOpen:false      /* "end tak" ka card khula hai ya nahi */
 };
 /* Chart.js ke instances — dobara banane se pehle purana destroy karna padta hai */
 var charts = {};
@@ -3127,7 +4498,7 @@ function activeBudgets(m, y, budgets){
 }
 /* Budget kitna bhar gaya → colour aur label */
 function budgetStatus(pct){
-  if(pct < 60)  return { c:'var(--green)',  cls:'c-green',  label:'Safe hai' };
+  if(pct < 60)  return { c:'var(--green)',  cls:'c-green',  label:t('Safe hai') };
   if(pct < 80)  return { c:'var(--gold)',   cls:'c-gold',   label:'Dhyan do' };
   if(pct < 100) return { c:'var(--orange)', cls:'c-orange', label:'Almost cross' };
   return              { c:'var(--red)',     cls:'c-red',    label:'Khatam!' };
@@ -3176,12 +4547,12 @@ function isPaidThisMonth(rec){
 }
 function recStatus(rec){
   if(isPaidThisMonth(rec))
-    return { label:'✅ Pay ho gaya', cls:'c-green', days:99, urgent:false, paid:true };
+    return { label:t('✅ Pay ho gaya'), cls:'c-green', days:99, urgent:false, paid:true };
   var left = daysUntil(nextDueKey(rec.day));
-  if(left === 0)  return { label:'Aaj due!',        cls:'c-red',    days:0,    urgent:true,  paid:false };
-  if(left <= 3)   return { label:left+' din mein',  cls:'c-red',    days:left, urgent:true,  paid:false };
-  if(left <= 7)   return { label:left+' din mein',  cls:'c-orange', days:left, urgent:false, paid:false };
-  return            { label:left+' din baaki',      cls:'c-green',  days:left, urgent:false, paid:false };
+  if(left === 0)  return { label:t('Aaj due!'),     cls:'c-red',    days:0,    urgent:true,  paid:false };
+  if(left <= 3)   return { label:tf('{d} din mein',  {d:left}), cls:'c-red',    days:left, urgent:true,  paid:false };
+  if(left <= 7)   return { label:tf('{d} din mein',  {d:left}), cls:'c-orange', days:left, urgent:false, paid:false };
+  return            { label:tf('{d} din baaki',      {d:left}), cls:'c-green',  days:left, urgent:false, paid:false };
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -3294,6 +4665,95 @@ function khataTotals(){
     }
   });
   return { baaki:baaki, shops:shops, oldestDays:oldest };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAHINE KE END TAK — ka anuman
+   ───────────────────────────────────────────────────────────────
+   App ab tak sirf ye batata tha ki KYA HO CHUKA. Serious banda 12
+   tareekh ko ye poochta hai: "mahine ke end tak kya haalat hogi?"
+
+   App ke paas jawab ka saara saamaan pehle se hai — ab tak ka
+   kharch, kitne din bache, kaunse bill abhi aane hain, EMI, aur
+   committee ki kisht.
+
+   SABSE NAZUK BAAT — DO BAAR GINTI:
+   Roz ka average agar POORE kharch se nikaalein, to usme wo bill
+   bhi shaamil hain jo is mahine pay ho chuke. Phir agar hum aage
+   aane wale bill alag se jodenge, to wahi paisa DO BAAR gin jaayega
+   aur anuman bahut bada dikhega.
+
+   Isliye: pehle pakke kharch (bill, kisht, EMI) alag karte hain,
+   bache hue "roz-marra" se raftaar nikaalte hain, aur aage ke pakke
+   kharch alag se jodte hain. Ek bhi rupaya do baar nahi ginta.
+
+   Deta hai: null (agar ye mahina abhi chal nahi raha), warna
+   { spent, everyday, rate, upcoming[], upTotal, projected, … }
+   ═══════════════════════════════════════════════════════════════ */
+function monthForecast(){
+  var now = new Date();
+  /* Ye sirf CHALU mahine ka auzaar hai. Purane mahine ka "anuman"
+     bekaar hai — wahan to sach pata hai. */
+  if(S.month !== now.getMonth() || S.year !== now.getFullYear()) return null;
+
+  var mTxns = monthTxns(read(K.txn), S.month, S.year);
+  var t     = totals(mTxns);
+  var dom   = now.getDate();
+  var dim   = daysInMonth(S.month, S.year);
+  var daysLeft = Math.max(0, dim - dom);
+
+  /* ── 1. Jo pakke kharch is mahine HO CHUKE ── */
+  var fixedPaid = 0;
+  read(K.rec).forEach(function(r){ if(recStatus(r).paid) fixedPaid += r.amount; });
+  read(K.cmtPay).forEach(function(p){
+    if(p.m === now.getMonth() && p.y === now.getFullYear()) fixedPaid += p.amount;
+  });
+  var emiLogged = 0;
+  mTxns.forEach(function(x){ if(x.type === 'expense' && x.category === 'EMI') emiLogged += x.amount; });
+  fixedPaid += emiLogged;
+
+  /* ── 2. Roz-marra ka kharch aur uski raftaar ── */
+  var everyday = Math.max(0, t.exp - fixedPaid);
+  var rate = dom > 0 ? everyday / dom : 0;
+
+  /* ── 3. Jo pakke kharch ABHI AANE hain ── */
+  var upcoming = [], upTotal = 0;
+  function add(ico, name, amt){
+    if(amt > 0){ upcoming.push({ ico:ico, name:name, amt:amt }); upTotal += amt; }
+  }
+  read(K.rec).forEach(function(r){ if(!recStatus(r).paid) add('🔔', r.name, r.amount); });
+  read(K.subs).forEach(function(s){
+    var d = daysUntil(s.nextDate);
+    if(d !== null && d >= 0 && d <= daysLeft) add('🔄', s.name, s.amount);
+  });
+  var pays = read(K.cmtPay);
+  read(K.cmt).forEach(function(c){
+    var st = cmtStatus(c, pays);
+    if(!st.done && st.dueThisMonth) add('🤝', c.name, c.amount);
+  });
+  /* EMI transaction nahi banati (sirf ginti ghatti hai), isliye wo
+     apne aap kharch mein nahi aati. Par agar banda ne khud EMI
+     category mein likh diya ho to utna ghata do. */
+  var emiDue = read(K.emi).reduce(function(s,e){ return e.left > 0 ? s + e.amount : s; }, 0);
+  add('🏦', 'EMI', Math.max(0, emiDue - emiLogged));
+
+  /* ── 4. Anuman ──
+     Mahine ke shuru mein 1-2 din ka average bharosemand nahi hota,
+     isliye 3 tareekh se pehle raftaar nahi lagate — sirf pakke
+     kharch dikhate hain. Jhootha number dene se behtar hai kam
+     kehna. */
+  var trustRate = dom >= 3;
+  var restEveryday = trustRate ? Math.round(rate * daysLeft) : 0;
+  var projected = Math.round(t.exp + restEveryday + upTotal);
+
+  return {
+    spent:t.exp, income:t.inc, everyday:everyday, fixedPaid:fixedPaid,
+    rate:Math.round(rate), dom:dom, dim:dim, daysLeft:daysLeft,
+    upcoming:upcoming.sort(function(a,b){ return b.amt - a.amt; }), upTotal:upTotal,
+    restEveryday:restEveryday, projected:projected, trustRate:trustRate,
+    willLeave: t.inc > 0 ? Math.round(t.inc - projected) : null,
+    hasData: t.exp > 0 || upTotal > 0
+  };
 }
 
 /* ── KAHAN NORMAL SE ZYADA KHARCH HUA ──
@@ -3659,6 +5119,7 @@ var toastTimer = null, undoTimer = null;
 /* toast('Saved!','ok')  · teesra argument undo ka function ho to
    toast mein UNDO button aa jaata hai */
 function toast(msg, kind, undoFn){
+  msg = t(msg);                 /* har toast yahin se bhasha badalta hai */
   var el = $('toast');
   el.className = (kind === 'bad' ? 'bad' : 'ok') + (undoFn ? ' can-undo' : '') + ' show';
   $('toast-msg').textContent = msg;
@@ -3698,10 +5159,10 @@ var confirmDismiss  = null;   /* bahar tap kiya — saaf karne ka mauka */
    galti se bahar daba kar kisi ka data badal jaata. */
 function askConfirm(opts){
   $('cfIco').textContent   = opts.icon  || '⚠️';
-  $('cfTitle').textContent = opts.title || 'Pakka?';
-  $('cfBody').innerHTML    = opts.body  || '';
-  $('cfYes').textContent   = opts.yes   || 'Haan';
-  $('cfNo').textContent    = opts.no    || 'Cancel';
+  $('cfTitle').textContent = t(opts.title || 'Pakka?');
+  $('cfBody').innerHTML    = t(opts.body  || '');
+  $('cfYes').textContent   = t(opts.yes   || 'Haan');
+  $('cfNo').textContent    = t(opts.no    || 'Cancel');
   $('cfYes').className     = 'btn btn-lg ' + (opts.tone === 'soft' ? 'btn-primary' : 'btn-red');
   confirmAction   = opts.onYes;
   confirmNoAction = opts.onNo || null;
@@ -3725,7 +5186,7 @@ function renderChips(container, items, selectedId, colorClass, onPick){
     var b = document.createElement('button');
     b.className = 'chip ' + colorClass + (it.id === selectedId ? ' on' : '');
     b.innerHTML = '<span class="chip-ico">' + it.ico + '</span>' +
-                  '<span class="chip-lbl">' + esc(it.id) + '</span>';
+                  '<span class="chip-lbl">' + esc(t(it.id)) + '</span>';
     b.addEventListener('click', function(){ onPick(it.id); });
     container.appendChild(b);
   });
@@ -3740,8 +5201,8 @@ function fillSelect(el, items, selected, placeholder){
   }
   items.forEach(function(it){
     var o = document.createElement('option');
-    o.value = it.id;
-    o.textContent = it.ico + '  ' + it.id;
+    o.value = it.id;                      /* value hamesha asli — data isi se judta hai */
+    o.textContent = it.ico + '  ' + t(it.id);
     if(it.id === selected) o.selected = true;
     el.appendChild(o);
   });
@@ -3752,6 +5213,7 @@ function barHTML(pct, color){
 }
 /* Khaali list ka message */
 function emptyHTML(icon, text, hint){
+  text = t(text); if(hint) hint = t(hint);
   return '<div class="empty"><div class="empty-ico">' + icon + '</div>' +
          '<div class="empty-txt">' + text + '</div>' +
          (hint ? '<div class="empty-hint">' + hint + '</div>' : '') + '</div>';
@@ -3768,6 +5230,7 @@ function renderHome(){
   renderQuickAdd();
   renderSummary();
   renderSnapshot();
+  renderForecast();
   renderHealth();
   renderAlerts();
   renderStreak();
@@ -3817,7 +5280,7 @@ function renderQuickAdd(){
   cats.forEach(function(c){
     var b = document.createElement('button');
     b.className = 'qchip' + (c === S.qCat ? ' on' : '');
-    b.innerHTML = '<span class="qchip-ico">' + catIcon(c) + '</span>' + esc(c);
+    b.innerHTML = '<span class="qchip-ico">' + catIcon(c) + '</span>' + esc(t(c));
     b.addEventListener('click', function(){
       S.qCat = c;
       renderQuickAdd();
@@ -3880,7 +5343,7 @@ function updateQuickState(){
   $('qHint').innerHTML = ok
     ? money(v) + ' · ' + catIcon(S.qCat) + ' ' + esc(S.qCat) +
       (note ? ' · "' + esc(note) + '"' : '') + ' — <b class="t-gold">+ dabao</b>'
-    : 'Amount likho, category tap karo, + dabao';
+    : t('Amount likho, category tap karo, + dabao');
 }
 
 function saveQuickAdd(){
@@ -3908,43 +5371,45 @@ function saveQuickAdd(){
 
 function renderGreeting(){
   var h = new Date().getHours();
-  $('greet').textContent =
+  $('greet').textContent = t(
     h < 5  ? 'Shubh Ratri 🌙' : h < 12 ? 'Suprabhat ☀️' :
-    h < 17 ? 'Namaste 👋'     : h < 21 ? 'Shubh Sham 🌆' : 'Shubh Ratri 🌙';
-  $('today').textContent = new Date().toLocaleDateString('en-IN',
+    h < 17 ? 'Namaste 👋'     : h < 21 ? 'Shubh Sham 🌆' : 'Shubh Ratri 🌙');
+  /* Tareekh bhi chuni hui bhasha mein — Hindi mein "मंगल, 6 अक्तू" */
+  $('today').textContent = new Date().toLocaleDateString(
+    S.lang === 'hi' ? 'hi-IN' : 'en-IN',
     {weekday:'short', day:'numeric', month:'short'});
 }
 
 function renderSummary(){
-  var t = totals(monthTxns(read(K.txn), S.month, S.year));
+  var tot = totals(monthTxns(read(K.txn), S.month, S.year));
 
-  $('sumInc').textContent = money(t.inc);
-  $('sumExp').textContent = money(t.exp);
-  $('sumIncSub').textContent = t.incCount + (t.incCount === 1 ? ' entry' : ' entries');
-  $('sumExpSub').textContent = t.expCount + (t.expCount === 1 ? ' entry' : ' entries');
+  $('sumInc').textContent = money(tot.inc);
+  $('sumExp').textContent = money(tot.exp);
+  $('sumIncSub').textContent = tot.incCount + (tot.incCount === 1 ? ' entry' : ' entries');
+  $('sumExpSub').textContent = tot.expCount + (tot.expCount === 1 ? ' entry' : ' entries');
 
   /* Bachat — negative ho to card laal ho jaata hai */
   var savCard = $('sumSavCard');
-  $('sumSav').textContent = money(t.net);
-  if(t.net < 0){
+  $('sumSav').textContent = money(tot.net);
+  if(tot.net < 0){
     savCard.className = 'card card-top sum c-red';
-    $('sumSavSub').textContent = 'Overspent ⚠️';
+    $('sumSavSub').textContent = t('Overspent ⚠️');
   } else {
     savCard.className = 'card card-top sum c-gold';
-    $('sumSavSub').textContent = 'Is mahine bacha';
+    $('sumSavSub').textContent = t('Is mahine bacha');
   }
 
   /* Bachat % + uska pill */
   var pctCard = $('sumPctCard'), pill = $('sumPctPill');
-  if(t.pct === null){
+  if(tot.pct === null){
     $('sumPct').textContent = '–'; $('sumPctIco').textContent = '📊';
     pctCard.className = 'card card-top sum c-mute';
     pill.className = 'pill c-mute'; pill.textContent = 'Koi data nahi';
   } else {
-    $('sumPct').textContent = t.pct + '%';
+    $('sumPct').textContent = tot.pct + '%';
     var cls, ico, txt;
-    if(t.pct < 10)      { cls='c-red';    ico='🔴'; txt='Kharch zyada'; }
-    else if(t.pct < 20) { cls='c-gold';   ico='🟡'; txt='Theek hai'; }
+    if(tot.pct < 10)      { cls='c-red';    ico='🔴'; txt='Kharch zyada'; }
+    else if(tot.pct < 20) { cls='c-gold';   ico='🟡'; txt='Theek hai'; }
     else                { cls='c-green';  ico='🟢'; txt='Zabardast 🎉'; }
     $('sumPctIco').textContent = ico;
     pctCard.className = 'card card-top sum ' + cls;
@@ -3987,8 +5452,75 @@ function renderSnapshot(){
     var el = $(id); el.textContent = text; el.className = 'snap-val num ' + cls;
   }
 }
+/* ── "Mahine ke end tak" ka card ── */
+function renderForecast(){
+  var f = monthForecast();
+  var card = $('fcast');
+  /* Purana mahina dekh rahe ho, ya abhi kuch data hi nahi — chhupa do */
+  if(!f || !f.hasData){ card.style.display = 'none'; return; }
+  card.style.display = '';
+
+  $('fcSpent').textContent = money(f.spent);
+  $('fcUp').textContent    = f.upTotal > 0 ? money(f.upTotal) : '–';
+  $('fcTotal').textContent = (f.trustRate ? '~' : '') + money(f.projected);
+
+  /* Bachat ka rang sach bolta hai — laal matlab laal */
+  var cell = $('fcLeft');
+  if(f.willLeave === null){ cell.textContent = '–'; cell.className = 'snap-val num t-mute'; }
+  else {
+    cell.textContent = (f.willLeave < 0 ? '−' : '') + money(Math.abs(f.willLeave));
+    cell.className = 'snap-val num ' + (f.willLeave < 0 ? 't-red' : f.willLeave > 0 ? 't-green' : 't-mute');
+  }
+
+  /* Ek pill jo door se haal bata de */
+  var pill = $('fcastPill'), cls, txt;
+  if(f.willLeave === null){ cls = 'c-mute';   txt = t('Intezaar'); }
+  else if(f.willLeave < 0) { cls = 'c-red';    txt = t('Zyada'); }
+  else if(f.income > 0 && f.willLeave < f.income * 0.1){ cls = 'c-orange'; txt = t('Tight'); }
+  else                     { cls = 'c-green';  txt = t('Theek'); }
+  pill.className = 'pill pill-br num ' + cls;
+  pill.textContent = txt;
+  card.className = 'card card-top ' + cls;
+
+  /* Ek line jisme asli salaah ho */
+  var tip;
+  if(!f.trustRate)
+    tip = t('Mahina abhi shuru hua hai — sirf pakke kharch gine hain');
+  else if(f.willLeave !== null && f.willLeave < 0)
+    tip = tf('Is raftaar se {x} zyada ho jaayega. {d} din bache hain.',
+             { x:money(Math.abs(f.willLeave)), d:f.daysLeft });
+  else if(f.daysLeft > 0 && f.rate > 0)
+    tip = tf('Roz ka {r} chal raha hai. {d} din aur bache hain.',
+             { r:money(f.rate), d:f.daysLeft });
+  else
+    tip = t('Mahina khatam hone wala hai');
+  $('fcastTipTxt').textContent = tip;
+
+  /* Khol kar dekho — kya-kya aana baaki hai */
+  var box = $('fcastList');
+  if(!f.upcoming.length){
+    box.innerHTML = '<div class="empty-hint">' + t('Koi pakka kharcha baaki nahi') + '</div>';
+  } else {
+    box.innerHTML = '<div class="eyebrow" style="margin-bottom:var(--s2)">' +
+      t('Ye abhi aana baaki hai') + '</div>' +
+      f.upcoming.map(function(u){
+        return '<div class="ph-item"><span class="ph-date">' + u.ico + ' ' + esc(u.name) +
+               '</span><span class="ph-amt num t-orange">' + money(u.amt) + '</span></div>';
+      }).join('') +
+      (f.trustRate && f.restEveryday > 0
+        ? '<div class="ph-item" style="opacity:.8"><span class="ph-date">🛒 ' +
+          tf('Roz-marra ka kharch ({d} din)', { d:f.daysLeft }) +
+          '</span><span class="ph-amt num t-mute">~' + money(f.restEveryday) + '</span></div>'
+        : '');
+  }
+  box.style.display = S.fcastOpen ? '' : 'none';
+  $('fcastChev').style.transform = S.fcastOpen ? 'rotate(180deg)' : '';
+}
+
 /* Sabse kaam ki ek line — priority order mein */
-function snapshotTip(t, todayExp, left, limit){
+/* Param ka naam 'tot' hai, 't' nahi — kyunki 't' bhasha wala
+   function hai aur yahan uski zaroorat padti hai. */
+function snapshotTip(tot, todayExp, left, limit){
   var now = new Date();
   var dom = now.getDate(), dim = daysInMonth(S.month, S.year);
   var isThisMonth = (S.month === now.getMonth() && S.year === now.getFullYear());
@@ -3999,27 +5531,29 @@ function snapshotTip(t, todayExp, left, limit){
          jo hamesha false hota. Isliye overspent amount kabhi dikhta
          hi nahi tha. Ab number pehle nikalte hain, phir compare.) */
   if(limit > 0 && left !== null){
-    if(left < 0) return { ico:'🚨', txt:'Budget ' + money(-left) + ' se cross ho gaya!' };
+    if(left < 0) return { ico:'🚨', txt:tf('Budget {x} se cross ho gaya!', { x:money(-left) }) };
     var used = Math.round(((limit - left) / limit) * 100);
-    if(used >= 80) return { ico:'⚠️', txt:'Budget ' + used + '% use — sirf ' + money(left) + ' bacha hai.' };
+    if(used >= 80) return { ico:'⚠️',
+      txt:tf('Budget {p}% use — sirf {x} bacha hai.', { p:used, x:money(left) }) };
   }
   /* 2. Aaj ka kharch average se bahut zyada */
-  if(isThisMonth && todayExp > 500 && t.exp > 0 && dom > 1){
-    var avg = t.exp / dom;
-    if(todayExp > avg * 2) return { ico:'📈', txt:'Aaj ka kharch average se ' + Math.round(todayExp/avg) + 'x zyada hai.' };
+  if(isThisMonth && todayExp > 500 && tot.exp > 0 && dom > 1){
+    var avg = tot.exp / dom;
+    if(todayExp > avg * 2) return { ico:'📈',
+      txt:tf('Aaj ka kharch average se {n}x zyada hai.', { n:Math.round(todayExp/avg) }) };
   }
   /* 3. Bachat achhi chal rahi hai */
-  if(t.pct !== null && t.pct >= 25 && t.exp > 0)
-    return { ico:'🎉', txt:t.pct + '% bachat — is mahine track pe ho!' };
+  if(tot.pct !== null && tot.pct >= 25 && tot.exp > 0)
+    return { ico:'🎉', txt:tf('{p}% bachat — is mahine track pe ho!', { p:tot.pct }) };
   /* 4. Is rate pe mahine ke end tak kitna hoga */
-  if(isThisMonth && t.exp > 0 && t.inc > 0 && dom >= 5){
-    var projected = Math.round((t.exp / dom) * dim);
-    if(projected > t.inc)
-      return { ico:'⚠️', txt:'Is rate pe ' + money(projected) + ' kharch hoga — income se zyada!' };
+  if(isThisMonth && tot.exp > 0 && tot.inc > 0 && dom >= 5){
+    var projected = Math.round((tot.exp / dom) * dim);
+    if(projected > tot.inc)
+      return { ico:'⚠️', txt:tf('Is rate pe {x} kharch hoga — income se zyada!', { x:money(projected) }) };
   }
   /* 5. Aaj kuch kharch nahi */
   if(isThisMonth && todayExp === 0 && dom > 1)
-    return { ico:'✅', txt:'Aaj koi kharch nahi — zero-spend day! 🙌' };
+    return { ico:'✅', txt:t('Aaj koi kharch nahi — zero-spend day! 🙌') };
   return null;
 }
 
@@ -4038,12 +5572,12 @@ function renderHealth(){
   setM('hmUdh', s.udh + '/30', s.udhCls);
 
   var tips = {
-    '💚 Excellent':   '🎉 Zabardast! Ab SIP / investment ki soch sakte ho.',
-    '🟢 Good':        '👍 Accha chal raha hai — bachat thodi aur badha sakte ho.',
-    '🟡 Average':     '⚡ EMI ya bachat par dhyan do — sudhaar ki jagah hai.',
-    '🔴 Needs work':  '⚠️ Kharch review karo aur udhar settle karo.',
-    '⚫ Critical':    '🆘 Turant budget banao aur udhar chukao.',
-    '📊 Data chahiye':'📝 Is mahine ki income aur kharch add karo, sahi score dikhega.'
+    '💚 Excellent':   t('🎉 Zabardast! Ab SIP / investment ki soch sakte ho.'),
+    '🟢 Good':        t('👍 Accha chal raha hai — bachat thodi aur badha sakte ho.'),
+    '🟡 Average':     t('⚡ EMI ya bachat par dhyan do — sudhaar ki jagah hai.'),
+    '🔴 Needs work':  t('⚠️ Kharch review karo aur udhar settle karo.'),
+    '⚫ Critical':    t('🆘 Turant budget banao aur udhar chukao.'),
+    '📊 Data chahiye':t('📝 Is mahine ki income aur kharch add karo, sahi score dikhega.')
   };
   $('healthTip').textContent = s.grade + ' — ' + (tips[s.grade] || '');
 
@@ -4067,7 +5601,7 @@ function renderAlerts(){
   /* 0. Naya version — sabse upar, kyunki isme bug fixes ho sakte hain */
   if(S.newVersion){
     box.appendChild(notice('c-gold','🎉',
-      'Naya version aa gaya — v' + S.newVersion,
+      tf('Naya version aa gaya — v{v}', { v:S.newVersion }),
       'Tap karke update karo (data safe rahega)',
       function(){ applyUpdate(); }));
   }
@@ -4076,7 +5610,7 @@ function renderAlerts(){
   var overdue = read(K.udhar).filter(function(u){ return !u.settled && daysAgo(u.date) >= 30; });
   if(overdue.length){
     box.appendChild(notice('c-red','⚠️',
-      overdue.length + (overdue.length === 1 ? ' udhar' : ' udhar') + ' mein 30+ din ho gaye',
+      tf('{n} udhar mein 30+ din ho gaye', { n:overdue.length }),
       'Tap karke dekho', function(){ go('udhar'); }));
   }
   /* 2. Bills jo 3 din mein due hain */
@@ -4096,16 +5630,16 @@ function renderAlerts(){
       if(!s.done && s.dueThisMonth) cAmt += c.amount;
     });
     box.appendChild(notice('c-orange','🤝',
-      cDue + (cDue === 1 ? ' committee' : ' committee') + ' ki kisht baaki hai',
-      'Is mahine ' + money(cAmt) + ' dena hai',
+      tf('{n} committee ki kisht baaki hai', { n:cDue }),
+      tf('Is mahine {x} dena hai', { x:money(cAmt) }),
       function(){ go('more'); setMoreTab('cmt'); }));
   }
   /* 4. Dukaan ka khata — jab purana ho tabhi tang karo */
   var kt = khataTotals();
   if(kt.baaki > 0 && kt.oldestDays >= 20){
     box.appendChild(notice('c-red','🏪',
-      kt.shops + (kt.shops === 1 ? ' dukaan' : ' dukaanon') + ' ka ' + money(kt.baaki) + ' baaki',
-      'Sabse purana udhar ' + kt.oldestDays + ' din se',
+      tf('{n} dukaan ka {x} baaki', { n:kt.shops, x:money(kt.baaki) }),
+      tf('Sabse purana udhar {d} din se', { d:kt.oldestDays }),
       function(){ go('more'); setMoreTab('khata'); }));
   }
 
@@ -4115,7 +5649,7 @@ function renderAlerts(){
     var since = (!raw || raw === 'null') ? Infinity : Math.floor((new Date() - new Date(raw))/86400000);
     if(since >= LIMIT.backupDays){
       box.appendChild(notice('c-info','💾',
-        since === Infinity ? 'Abhi tak koi backup nahi hua' : since + ' din se backup nahi hua',
+        since === Infinity ? t('Abhi tak koi backup nahi hua') : tf('{d} din se backup nahi hua', { d:since }),
         'Data safe karo — tap karke backup lo',
         function(){ doBackup(); }, function(){ sessionStorage.setItem('pb_bk_hide','1'); renderAlerts(); }));
     }
@@ -4125,8 +5659,8 @@ function renderAlerts(){
     var b = document.createElement(onTap ? 'button' : 'div');
     b.className = 'notice ' + cls;
     b.innerHTML = '<span class="notice-ico">' + ico + '</span>' +
-      '<div class="notice-body"><div class="notice-title">' + esc(title) + '</div>' +
-      '<div class="notice-sub">' + esc(sub) + '</div></div>' +
+      '<div class="notice-body"><div class="notice-title">' + esc(t(title)) + '</div>' +
+      '<div class="notice-sub">' + esc(t(sub)) + '</div></div>' +
       (onClose ? '<span class="t-mute" data-x="1">✕</span>' : '<span class="t-mute">›</span>');
     b.addEventListener('click', function(e){
       if(onClose && e.target.getAttribute('data-x')){ e.stopPropagation(); onClose(); return; }
@@ -4165,29 +5699,32 @@ function renderTxnList(txns){
     return;
   }
   var limit = S.showAllTxns ? txns.length : Math.min(txns.length, LIMIT.txnPreview);
-  txns.slice(0, limit).forEach(function(t, i){
-    var isInc = t.type === 'income';
+  /* Loop ka variable 'x' hai, 't' NAHI — kyunki 't' hamara bhasha
+     wala function hai. Agar yahan 't' naam rakhte to andar t()
+     bulaana namumkin ho jaata (wo dhak jaata). */
+  txns.slice(0, limit).forEach(function(x, i){
+    var isInc = x.type === 'income';
     var row = document.createElement('div');
     row.className = 'row';
     row.style.animationDelay = Math.min(i,8) * 0.04 + 's';
     row.innerHTML =
-      '<div class="row-ico" style="background:var(--' + (isInc?'green':'red') + '-bg)">' + catIcon(t.category) + '</div>' +
+      '<div class="row-ico" style="background:var(--' + (isInc?'green':'red') + '-bg)">' + catIcon(x.category) + '</div>' +
       '<div class="row-main">' +
-        '<div class="row-title">' + esc(t.note || t.category) + '</div>' +
+        '<div class="row-title">' + esc(x.note || t(x.category)) + '</div>' +
         '<div class="row-meta">' +
-          '<span class="pill c-mute">' + esc(t.category) + '</span>' +
-          '<span class="t-mute" style="font-size:var(--fs-xs)">' + fmtShort(t.date) + '</span>' +
-          (t.payment ? '<span class="t-mute" style="font-size:var(--fs-xs)">' + esc(t.payment) + '</span>' : '') +
-          (hasBill(t.id) ? '<span class="row-clip" title="Bill ki photo lagi hai">📎</span>' : '') +
+          '<span class="pill c-mute">' + esc(t(x.category)) + '</span>' +
+          '<span class="t-mute" style="font-size:var(--fs-xs)">' + fmtShort(x.date) + '</span>' +
+          (x.payment ? '<span class="t-mute" style="font-size:var(--fs-xs)">' + esc(t(x.payment)) + '</span>' : '') +
+          (hasBill(x.id) ? '<span class="row-clip" title="Bill ki photo lagi hai">📎</span>' : '') +
         '</div>' +
       '</div>' +
-      '<div class="row-amt num ' + (isInc?'t-green':'t-red') + '">' + (isInc?'+':'−') + money(t.amount) + '</div>' +
-      '<button class="btn-icon txn-del" data-del="' + t.id + '" aria-label="Delete">🗑</button>';
+      '<div class="row-amt num ' + (isInc?'t-green':'t-red') + '">' + (isInc?'+':'−') + money(x.amount) + '</div>' +
+      '<button class="btn-icon txn-del" data-del="' + x.id + '" aria-label="Delete">🗑</button>';
 
     /* Row pe tap → edit sheet. Delete button apna kaam karega. */
     row.addEventListener('click', function(e){
-      if(e.target.getAttribute('data-del')){ e.stopPropagation(); deleteTxn(t.id); return; }
-      openEdit(t.id);
+      if(e.target.getAttribute('data-del')){ e.stopPropagation(); deleteTxn(x.id); return; }
+      openEdit(x.id);
     });
     box.appendChild(row);
   });
@@ -4203,7 +5740,7 @@ function renderTxnList(txns){
   } else if(!S.search.trim()){
     var hint = document.createElement('div');
     hint.className = 'tap-hint';
-    hint.textContent = 'Kisi bhi entry pe tap karo — badal sakte ho';
+    hint.textContent = t('Kisi bhi entry pe tap karo — badal sakte ho');
     box.appendChild(hint);
   }
 }
@@ -4254,17 +5791,17 @@ function setAddType(type){
   $('tgExp').className = isInc ? '' : 'on';
   $('amtBox').className = 'amt-box focus ' + (isInc ? 'c-green' : 'c-red');
   $('btnSave').className = 'btn btn-lg btn-block ' + (isInc ? 'btn-green' : 'btn-red');
-  $('saveTxt').textContent = isInc ? 'Income Save Karo' : 'Kharch Save Karo';
+  $('saveTxt').textContent = t(isInc ? 'Income Save Karo' : 'Kharch Save Karo');
   renderAddCats();
   updateAmtHint();
 }
 function updateAmtHint(){
   var v = parseFloat($('amtIn').value), h = $('amtHint');
   if(!isNaN(v) && v > 0){
-    h.textContent = money(v) + ' ' + (S.addType === 'income' ? 'income' : 'kharch');
+    h.textContent = money(v) + ' ' + t(S.addType === 'income' ? 'income' : 'kharch');
     h.className = 'amt-hint ' + (S.addType === 'income' ? 't-green' : 't-red');
   } else {
-    h.textContent = 'Number daalo ya neeche se chuno';
+    h.textContent = t('Number daalo ya neeche se chuno');
     h.className = 'amt-hint t-mute';
   }
 }
@@ -4669,7 +6206,7 @@ function setUdharFormType(tab){
   var isLena = tab === 'lena';
   var btn = $('uSave');
   btn.className = 'btn btn-block ' + (isLena ? 'btn-green' : 'btn-red');
-  btn.textContent = isLena ? '💰 Lena Hai — Save Karo' : '🙏 Dena Hai — Save Karo';
+  btn.textContent = t(isLena ? '💰 Lena Hai — Save Karo' : '🙏 Dena Hai — Save Karo');
 }
 function resetUdharForm(){
   ['uName','uPhone','uAmt','uReason','uUpi'].forEach(function(id){
@@ -4735,7 +6272,7 @@ function renderUdharList(all){
   if(!list.length){
     box.innerHTML = S.udharFilter === 'settled'
       ? emptyHTML('✅','Koi settled udhar nahi')
-      : emptyHTML('🤝','Koi ' + (S.udharTab === 'lena' ? 'lena' : 'dena') + ' baaki nahi',
+      : emptyHTML('🤝', S.udharTab === 'lena' ? 'Koi lena baaki nahi' : 'Koi dena baaki nahi',
                   '➕ upar se naya add karo');
     return;
   }
@@ -4766,7 +6303,7 @@ function udharCard(u, i){
         '<div class="u-name">' + esc(u.name) + '</div>' +
         '<div class="row-meta">' +
           '<span class="pill ' + cls + '">' +
-            (u.settled ? '✅ Settled' : u.type === 'lena' ? 'Lena Hai' : 'Dena Hai') + '</span>' +
+            t(u.settled ? '✅ Settled' : u.type === 'lena' ? 'Lena Hai' : 'Dena Hai') + '</span>' +
           daysBadge(u) +
         '</div>' +
       '</div>' +
@@ -4804,25 +6341,25 @@ function udharCard(u, i){
     renderUdhar();
   });
   card.addEventListener('click', function(e){
-    var t = e.target;
-    if(t.getAttribute('data-payopen')){
+    var el = e.target;                 /* 't' bhasha wala function hai */
+    if(el.getAttribute('data-payopen')){
       e.stopPropagation();
       S.payOpenId = payOn ? null : u.id;
       renderUdhar();
       setTimeout(function(){ var el = $('payIn-' + u.id); if(el) el.focus(); }, 60);
     }
-    else if(t.getAttribute('data-pay')){ e.stopPropagation(); addPayment(u.id); }
-    else if(t.getAttribute('data-wa')){  e.stopPropagation(); sendWhatsAppReminder(u); }
-    else if(t.getAttribute('data-upi')){ e.stopPropagation(); payViaUpi(u); }
-    else if(t.getAttribute('data-udel')){ e.stopPropagation(); deleteUdhar(u.id); }
+    else if(el.getAttribute('data-pay')){ e.stopPropagation(); addPayment(u.id); }
+    else if(el.getAttribute('data-wa')){  e.stopPropagation(); sendWhatsAppReminder(u); }
+    else if(el.getAttribute('data-upi')){ e.stopPropagation(); payViaUpi(u); }
+    else if(el.getAttribute('data-udel')){ e.stopPropagation(); deleteUdhar(u.id); }
   });
   return card;
 
   function daysBadge(u){
-    if(u.settled) return '<span class="pill c-mute">✅ Settled</span>';
+    if(u.settled) return '<span class="pill c-mute">' + t('✅ Settled') + '</span>';
     var d = daysAgo(u.date);
     var c = d <= 7 ? 'c-green' : d <= 30 ? 'c-gold' : 'c-red';
-    return '<span class="pill ' + c + ' num">' + d + ' din</span>';
+    return '<span class="pill ' + c + ' num">' + tf('{d} din', { d:d }) + '</span>';
   }
   function waButton(u){
     if(isValidPhone(u.phone))
@@ -5014,7 +6551,7 @@ function showChartsOffline(panel){
 function renderPie(){
   var c = themeColors();
   var cats = catTotals(monthTxns(read(K.txn), S.month, S.year));
-  $('pieSub').textContent = MONTHS[S.month] + ' ' + S.year + ' — category-wise kharch';
+  $('pieSub').textContent = MONTHS[S.month] + ' ' + S.year + ' — ' + t('category-wise kharch');
 
   if(!cats.length){
     makeChart('cPie', {
@@ -5046,7 +6583,7 @@ function pieColor(_, i){ return CHART_COLORS[i % CHART_COLORS.length]; }
 function renderRank(){
   var cats = catTotals(monthTxns(read(K.txn), S.month, S.year));
   var box  = $('rankList');
-  $('pieSub').textContent = MONTHS[S.month] + ' ' + S.year + ' — category-wise kharch';
+  $('pieSub').textContent = MONTHS[S.month] + ' ' + S.year + ' — ' + t('category-wise kharch');
   if(!cats.length){
     box.innerHTML = emptyHTML('💸', MONTHS[S.month] + ' mein koi kharch nahi');
     return;
@@ -5127,7 +6664,7 @@ function renderInsights(){
   var box = $('tipsList'); box.innerHTML = '';
   var all = read(K.txn), uds = read(K.udhar), emis = read(K.emi), subs = read(K.subs);
   var cur = monthTxns(all, S.month, S.year);
-  var t   = totals(cur);
+  var tot = totals(cur);
   var cats = catTotals(cur);
   var months6 = lastMonths(6);
   var delay = 0;
@@ -5173,21 +6710,19 @@ function renderInsights(){
         '<b class="num">' + money(v.avg) + '</b> se <b class="t-red num">' +
         v.pct + '% zyada</b>' +
         '<div class="empty-hint" style="margin-top:var(--s1)">' +
-          '<b class="num">' + money(v.diff) + '</b> extra · ' +
-          v.months + ' mahine ke average se tulna' +
-          (v.top ? '<br>Sabse bada: <b>' + esc(v.top.note || v.cat) + '</b> ' +
+          '<b class="num">' + money(v.diff) + '</b> ' + t('extra') + ' · ' +
+          tf('{n} mahine ke average se tulna', { n:v.months }) +
+          (v.top ? '<br>' + t('Sabse bada') + ': <b>' + esc(v.top.note || t(v.cat)) + '</b> ' +
                    money(v.top.amount) + ' (' + fmtShort(v.top.date) + ')' : '') +
         '</div>';
-      card(catIcon(v.cat), '⚠️ ' + v.cat + ' — normal se zyada', html, 'c-red');
+      card(catIcon(v.cat), '⚠️ ' + tf('{c} — normal se zyada', { c:t(v.cat) }), html, 'c-red');
     });
   } else if(vs.length){
-    card('👌','Kharch normal hai',
-      'Koi category aapke apne average se khaas zyada nahi gayi — ' +
-      '<b class="t-green">sab control mein</b>');
+    card('👌', t('Kharch normal hai'),
+      t('Koi category aapke apne average se khaas zyada nahi gayi — <b class="t-green">sab control mein</b>'));
   } else {
-    card('📈','Tulna ke liye data kam hai',
-      'Ek-do mahine ka aur hisaab aane do — phir bataunga ki ' +
-      '<b>kahan aapka kharch normal se zyada</b> ja raha hai');
+    card('📈', t('Tulna ke liye data kam hai'),
+      t('Ek-do mahine ka aur hisaab aane do — phir bataunga ki <b>kahan aapka kharch normal se zyada</b> ja raha hai'));
   }
 
   /* 4b. Jahan kam kharch hua — ye batana bhi zaroori hai */
@@ -5246,19 +6781,19 @@ function renderInsights(){
   /* 8. Subscription burden */
   if(subs.length){
     var subTotal = subs.reduce(function(s,x){ return s + subMonthly(x); }, 0);
-    var pct = t.inc > 0 ? Math.round((subTotal/t.inc)*100) : 0;
+    var pct = tot.inc > 0 ? Math.round((subTotal/tot.inc)*100) : 0;
     var note = pct > 15 ? '🔴 Bahut zyada — review karo konsa band karna hai'
              : pct > 8  ? '🟡 Manageable hai, nazar rakho'
              : '🟢 Subscription load theek hai';
     card('📺','Subscription burden',
       subs.length + ' subscriptions = <b class="t-red num">' + money(subTotal) + '</b>/mahina' +
-      (t.inc > 0 ? ' (<b class="t-gold">' + pct + '%</b> income ka)' : '') +
+      (tot.inc > 0 ? ' (<b class="t-gold">' + pct + '%</b> income ka)' : '') +
       '<div class="empty-hint" style="margin-top:var(--s1)">' + note + '</div>');
   }
 
   /* 9. Saal bhar ki projection */
-  if(t.inc > 0 && t.exp > 0){
-    var yearly = t.net * 12;
+  if(tot.inc > 0 && tot.exp > 0){
+    var yearly = tot.net * 12;
     var note2 = yearly >= 50000 ? '💪 FD / SIP ke liye kaafi hai!'
               : yearly >= 0     ? 'Bachat thodi aur badha sakte ho'
               : '⚠️ Kharch kam karna padega';
@@ -5316,7 +6851,7 @@ function setMoreTab(tab){
   else if(tab === 'khata') renderShops();
   else if(tab === 'set')  { renderBackupStatus(); renderStorage(); renderTheme();
                             renderVersionCard(); renderSimpleCard(); renderMyUpi();
-                            renderLockCard(); renderCloudCard(); }
+                            renderLockCard(); renderCloudCard(); renderLangCard(); }
 }
 /* Ek form panel kholna/band karna + icon badalna */
 function toggleForm(panelId, icoId, onOpen, onClose){
@@ -5383,8 +6918,9 @@ function renderBudgets(){
 
   buds.sort(function(a,b){ return a.category < b.category ? -1 : 1; });
   buds.forEach(function(b, i){
-    var spent = txns.filter(function(t){ return t.type === 'expense' && t.category === b.category; })
-                    .reduce(function(s,t){ return s + t.amount; }, 0);
+    /* Callback ka param 'x' — 't' bhasha wala function hai */
+    var spent = txns.filter(function(x){ return x.type === 'expense' && x.category === b.category; })
+                    .reduce(function(s,x){ return s + x.amount; }, 0);
     var pct = b.limit > 0 ? Math.round((spent/b.limit)*100) : 0;
     var st  = budgetStatus(pct);
     var left = b.limit - spent;
@@ -5401,12 +6937,12 @@ function renderBudgets(){
       var perDay = (daysLeft > 0 && left > 0) ? Math.round(left/daysLeft) : 0;
       chips = '<div class="gcard-chips">' +
               '<span class="pill pill-br ' + fc.c + '">' + fc.t + '</span>' +
-              (perDay > 0 ? '<span class="pill pill-br c-mute num">📅 ' + money(perDay) + '/din left</span>' : '') +
+              (perDay > 0 ? '<span class="pill pill-br c-mute num">📅 ' + tf('{x}/din left', { x:money(perDay) }) + '</span>' : '') +
               '</div>';
     }
     /* Kis mahine se laagu hai */
     var since = (b.fromM === S.month && b.fromY === S.year)
-      ? 'Is mahine set kiya'
+      ? t('Is mahine set kiya')
       : MONTHS[b.fromM] + ' ' + b.fromY + ' se chal raha hai';
 
     var card = document.createElement('div');
@@ -5498,11 +7034,11 @@ function renderEmis(){
 
   /* Health strip */
   var st;
-  if(!emis.length)   st = { ico:'📱', cls:'c-mute',   title:'Koi EMI nahi',      sub:'EMI add karo track karne ke liye', pill:'–' };
-  else if(inc === 0) st = { ico:'📊', cls:'c-mute',   title:'Income data nahi',  sub:'Is mahine income add karo sahi % ke liye', pill:'–' };
-  else if(pct < 30)  st = { ico:'💚', cls:'c-green',  title:'EMI healthy hai',   sub:'Income ka sirf ' + pct + '% — badhiya!', pill:'Healthy' };
-  else if(pct < 50)  st = { ico:'🟡', cls:'c-gold',   title:'EMI caution zone',  sub:'Income ka ' + pct + '% — thoda zyada hai', pill:'Caution' };
-  else               st = { ico:'🔴', cls:'c-red',    title:'EMI danger zone',   sub:'Income ka ' + pct + '% — bahut zyada!', pill:'Danger' };
+  if(!emis.length)   st = { ico:'📱', cls:'c-mute',   title:t('Koi EMI nahi'),     sub:t('EMI add karo track karne ke liye'), pill:'–' };
+  else if(inc === 0) st = { ico:'📊', cls:'c-mute',   title:t('Income data nahi'), sub:t('Is mahine income add karo sahi % ke liye'), pill:'–' };
+  else if(pct < 30)  st = { ico:'💚', cls:'c-green',  title:t('EMI healthy hai'),  sub:tf('Income ka sirf {p}% — badhiya!',   {p:pct}), pill:t('Healthy') };
+  else if(pct < 50)  st = { ico:'🟡', cls:'c-gold',   title:t('EMI caution zone'), sub:tf('Income ka {p}% — thoda zyada hai', {p:pct}), pill:t('Caution') };
+  else               st = { ico:'🔴', cls:'c-red',    title:t('EMI danger zone'),  sub:tf('Income ka {p}% — bahut zyada!',    {p:pct}), pill:t('Danger') };
 
   $('emiStrip').className = 'card hstrip card-top ' + st.cls;
   $('emiStripIco').textContent   = st.ico;
@@ -5528,11 +7064,11 @@ function renderEmis(){
         '<div class="gcard-l">' +
           '<div class="row-ico">🏦</div>' +
           '<div><div class="gcard-name">' + esc(e.name) + '</div>' +
-          '<div class="gcard-note num">' + paid + '/' + e.total + ' mahine paid</div></div>' +
+          '<div class="gcard-note num">' + tf('{a}/{b} mahine paid', { a:paid, b:e.total }) + '</div></div>' +
         '</div>' +
         '<div class="gcard-r">' +
           '<div class="gcard-amt num t-gold">' + money(e.amount) + '</div>' +
-          '<div class="gcard-note">per mahina</div>' +
+          '<div class="gcard-note">' + t('per mahina') + '</div>' +
         '</div>' +
       '</div>' +
       barHTML(p, 'linear-gradient(90deg,var(--brand),var(--brand-2))') +
@@ -5648,7 +7184,7 @@ function renderRecurring(){
         '<div class="gcard-l">' +
           '<div class="row-ico">' + catIcon(r.category) + '</div>' +
           '<div><div class="gcard-name">' + esc(r.name) + '</div>' +
-          '<div class="gcard-note">📅 har mahine ' + ord + ' ko</div></div>' +
+          '<div class="gcard-note">' + tf('📅 har mahine {d} ko', { d:ord }) + '</div></div>' +
         '</div>' +
         '<div class="gcard-r">' +
           '<div class="gcard-amt num">' + money(r.amount) + '</div>' +
@@ -5656,9 +7192,9 @@ function renderRecurring(){
         '</div>' +
       '</div>' +
       '<div class="gcard-foot">' +
-        (st.paid ? '<span class="gcard-note t-green">✅ ' + fmtShort(r.lastPaid) + ' ko pay hua</span>'
+        (st.paid ? '<span class="gcard-note t-green">' + tf('✅ {d} ko pay hua', { d:fmtShort(r.lastPaid) }) + '</span>'
                  : '<button class="btn btn-soft c-green" style="padding:var(--s1) var(--s3);font-size:var(--fs-xs)" ' +
-                   'data-rpaid="' + r.id + '">✓ Pay ho gaya</button>') +
+                   'data-rpaid="' + r.id + '">' + t('✓ Pay ho gaya') + '</button>') +
         '<button class="btn-icon" data-rdel="' + r.id + '" aria-label="Delete">🗑</button>' +
       '</div>';
     card.addEventListener('click', function(e){
@@ -5725,12 +7261,12 @@ function renderSubs(){
   }
   subs.forEach(function(s, i){
     var left = daysUntil(s.nextDate);
-    var st = left === null ? { cls:'c-mute',  t:'Date nahi' }
-           : left <= 3     ? { cls:'c-red',   t:'⚠️ ' + left + ' din' }
-           : left <= 7     ? { cls:'c-orange',t:'📅 ' + left + ' din' }
-           :                 { cls:'c-green', t:'✓ ' + left + ' din' };
+    var st = left === null ? { cls:'c-mute',  t:t('Date nahi') }
+           : left <= 3     ? { cls:'c-red',   t:'⚠️ ' + tf('{d} din', {d:left}) }
+           : left <= 7     ? { cls:'c-orange',t:'📅 ' + tf('{d} din', {d:left}) }
+           :                 { cls:'c-green', t:'✓ ' + tf('{d} din', {d:left}) };
     var monthly = subMonthly(s);
-    var note = s.cycle === 'monthly' ? '' : '~' + money(monthly) + '/mahina';
+    var note = s.cycle === 'monthly' ? '' : '~' + tf('{x}/mahina', {x:money(monthly)});
 
     var card = document.createElement('div');
     card.className = 'card card-top gcard ' + st.cls;
@@ -5824,12 +7360,12 @@ function renderFestive(){
           '<div class="row-ico">' + festIcon(g.name) + '</div>' +
           '<div><div class="gcard-name">' + esc(g.name) + '</div>' +
           '<div class="gcard-note">' +
-            (past ? '✅ ho gaya — ' + fmtDate(g.date)
-                  : '📅 ' + left + ' din baaki — ' + fmtDate(g.date)) + '</div></div>' +
+            (past ? tf('✅ ho gaya — {d}', { d:fmtDate(g.date) })
+                  : tf('📅 {n} din baaki — {d}', { n:left, d:fmtDate(g.date) })) + '</div></div>' +
         '</div>' +
         '<div class="gcard-r">' +
           '<div class="gcard-amt num t-gold">' + money(g.target) + '</div>' +
-          '<div class="gcard-note num">' + money(saved) + ' bacha</div>' +
+          '<div class="gcard-note num">' + tf('{x} bacha', { x:money(saved) }) + '</div>' +
         '</div>' +
       '</div>' +
       barHTML(pct, 'linear-gradient(90deg,var(--brand),var(--brand-2))') +
@@ -5840,7 +7376,7 @@ function renderFestive(){
       '</div>' +
       (dena > 0 && !past
         ? '<div class="notice c-red" style="margin:var(--s2) 0 0"><span class="notice-ico">⚠️</span>' +
-          '<div class="notice-body"><div class="notice-title num">' + money(dena) + ' ka udhar baaki hai</div>' +
+          '<div class="notice-body"><div class="notice-title num">' + tf('{x} ka udhar baaki hai', { x:money(dena) }) + '</div>' +
           '<div class="notice-sub">Pehle wo settle karna behtar hoga</div></div></div>'
         : '');
     card.addEventListener('click', function(e){
@@ -5973,7 +7509,7 @@ function setShagunDir(dir){
   $('sgOut').className = 'uf-type-btn' + (dir === 'out' ? ' sel-dena' : '');
   var b = $('sgSave');
   b.className = 'btn btn-block ' + (dir === 'in' ? 'btn-green' : 'btn-red');
-  b.textContent = dir === 'in' ? '📥 Aaya — Save Karo' : '📤 Diya — Save Karo';
+  b.textContent = t(dir === 'in' ? '📥 Aaya — Save Karo' : '📤 Diya — Save Karo');
 }
 
 /* ── Function kholna / band karna ──
@@ -6022,7 +7558,7 @@ function renderFunctions(){
     return;
   }
   funcs.forEach(function(f, i){
-    var t = funcTotals(f.id);
+    var tot = funcTotals(f.id);
     var card = document.createElement('div');
     card.className = 'card card-top gcard c-gold';
     card.style.animationDelay = i * 0.05 + 's';
@@ -6034,14 +7570,14 @@ function renderFunctions(){
           '<div class="gcard-note">' + esc(f.type) + ' · ' + fmtDate(f.date) + '</div></div>' +
         '</div>' +
         '<div class="gcard-r">' +
-          '<div class="gcard-amt num t-green">+' + money(t.in) + '</div>' +
-          (t.out > 0 ? '<div class="gcard-note num t-red">−' + money(t.out) + '</div>' : '') +
+          '<div class="gcard-amt num t-green">+' + money(tot.in) + '</div>' +
+          (tot.out > 0 ? '<div class="gcard-note num t-red">−' + money(tot.out) + '</div>' : '') +
         '</div>' +
       '</div>' +
       '<div class="gcard-foot">' +
-        '<span class="pill c-mute num">' + t.count +
-          (t.count === 1 ? ' entry' : ' entries') + '</span>' +
-        '<span class="gcard-note">Kholne ke liye tap karo ›</span>' +
+        '<span class="pill c-mute num">' + tot.count +
+          (tot.count === 1 ? ' entry' : ' entries') + '</span>' +
+        '<span class="gcard-note">' + t('Kholne ke liye tap karo ›') + '</span>' +
         '<button class="btn-icon" data-fdel="' + f.id + '" aria-label="Delete">🗑</button>' +
       '</div>';
     card.addEventListener('click', function(e){
@@ -6565,9 +8101,9 @@ function forgotPin(){
 function renderLockCard(){
   var on = lockOn();
   $('lockSwitch').classList.toggle('on', on);
-  $('lockSubTxt').textContent = on
+  $('lockSubTxt').textContent = t(on
     ? 'Chalu — app kholte hi PIN poochega'
-    : 'Band — koi bhi app khol sakta hai';
+    : 'Band — koi bhi app khol sakta hai');
   $('btnLock').className = 'card set ' + (on ? 'c-green' : 'c-red');
   $('lockChangeRow').hidden = !on;
 }
@@ -6720,12 +8256,12 @@ function renderCommittees(){
     if(!s.done){ monthly += c.amount; if(s.dueThisMonth) dueN++; }
   });
   var st;
-  if(!list.length)  st = { ico:'🤝', cls:'c-mute', title:'Koi committee nahi',
-                           sub:'Committee ya BC chalti ho to yahan rakho', pill:'–' };
-  else if(dueN > 0) st = { ico:'🔔', cls:'c-orange', title: dueN + ' kisht baaki hai',
-                           sub:'Is mahine ka ' + money(monthly) + ' dena hai', pill:'Due' };
-  else              st = { ico:'✅', cls:'c-green', title:'Is mahine sab clear',
-                           sub:'Ab tak kul ' + money(given) + ' jama kiya', pill:'Clear' };
+  if(!list.length)  st = { ico:'🤝', cls:'c-mute', title:t('Koi committee nahi'),
+                           sub:t('Committee ya BC chalti ho to yahan rakho'), pill:'–' };
+  else if(dueN > 0) st = { ico:'🔔', cls:'c-orange', title: tf('{n} kisht baaki hai', {n:dueN}),
+                           sub:tf('Is mahine ka {x} dena hai', {x:money(monthly)}), pill:t('Due') };
+  else              st = { ico:'✅', cls:'c-green', title:t('Is mahine sab clear'),
+                           sub:tf('Ab tak kul {x} jama kiya', {x:money(given)}), pill:t('Clear') };
 
   $('cmtStrip').className      = 'card hstrip card-top ' + st.cls;
   $('cmtStripIco').textContent = st.ico;
@@ -6782,13 +8318,13 @@ function cmtCard(c, i, pays){
       '<div class="row-main">' +
         '<div class="u-name">' + esc(c.name) + '</div>' +
         '<div class="row-meta">' +
-          '<span class="pill ' + cls + ' num">' + money(c.amount) + '/mahina</span>' +
-          '<span class="pill c-mute num">' + c.members + ' log</span>' +
+          '<span class="pill ' + cls + ' num">' + tf('{x}/mahina', {x:money(c.amount)}) + '</span>' +
+          '<span class="pill c-mute num">' + tf('{n} log', {n:c.members}) + '</span>' +
         '</div>' +
       '</div>' +
       '<div class="u-right">' +
         '<div class="u-amt num">' + money(s.given) + '</div>' +
-        '<div class="u-total num">' + s.paid + '/' + c.members + ' kisht di</div>' +
+        '<div class="u-total num">' + tf('{a}/{b} kisht di', {a:s.paid, b:c.members}) + '</div>' +
         '<div class="u-chev">⌄</div>' +
       '</div>' +
     '</button>' +
@@ -6815,11 +8351,11 @@ function cmtCard(c, i, pays){
     S.cmtOpenId = open ? null : c.id; renderCommittees();
   });
   card.addEventListener('click', function(e){
-    var t = e.target;
-    if(t.getAttribute('data-kisht')){ e.stopPropagation(); payKisht(c.id); }
-    else if(t.getAttribute('data-kgot')){ e.stopPropagation(); cmtGotPayout(c.id); }
-    else if(t.getAttribute('data-kdel')){ e.stopPropagation(); deleteCommittee(c.id); }
-    else if(t.getAttribute('data-kundo')){ e.stopPropagation(); undoKisht(t.getAttribute('data-kundo')); }
+    var el = e.target;
+    if(el.getAttribute('data-kisht')){ e.stopPropagation(); payKisht(c.id); }
+    else if(el.getAttribute('data-kgot')){ e.stopPropagation(); cmtGotPayout(c.id); }
+    else if(el.getAttribute('data-kdel')){ e.stopPropagation(); deleteCommittee(c.id); }
+    else if(el.getAttribute('data-kundo')){ e.stopPropagation(); undoKisht(el.getAttribute('data-kundo')); }
   });
   return card;
 }
@@ -7026,7 +8562,7 @@ function shopCard(s, i, all){
       '</div>' +
       '<div class="u-right">' +
         '<div class="u-amt num">' + money(b.baaki) + '</div>' +
-        '<div class="u-total">' + (b.baaki > 0 ? 'dena hai' : 'saaf hai') + '</div>' +
+        '<div class="u-total">' + t(b.baaki > 0 ? 'dena hai' : 'saaf hai') + '</div>' +
         '<div class="u-chev">⌄</div>' +
       '</div>' +
     '</button>' +
@@ -7091,6 +8627,23 @@ function applyTheme(theme){
 /* ── Meri UPI ID ──
    Sirf is phone mein rehti hai (settings ke saath). Kahin bheji
    nahi jaati — bas WhatsApp message banate waqt use hoti hai. */
+/* ── Bhasha ka card ──
+   Teen chip. Chuni hui chip par nishaan. Tap karte hi poora app
+   badal jaata hai — reload nahi karna padta. */
+function renderLangCard(){
+  var box = $('langPicks'); if(!box) return;
+  box.innerHTML = '';
+  LANGS.forEach(function(L){
+    var b = document.createElement('button');
+    b.className = 'qchip' + (S.lang === L.id ? ' on' : '');
+    b.textContent = (S.lang === L.id ? '✓ ' : '') + L.name;
+    b.addEventListener('click', function(){ if(S.lang !== L.id) setLang(L.id); });
+    box.appendChild(b);
+  });
+  var cur = LANGS.filter(function(L){ return L.id === S.lang; })[0] || LANGS[0];
+  $('langSub').textContent = t(cur.sub);
+}
+
 function renderMyUpi(){
   var el = $('myUpi'); if(!el) return;
   el.value = readObj(K.settings, {}).myUpi || '';
@@ -7110,7 +8663,7 @@ function saveMyUpi(){
 function renderTheme(){
   var light = S.theme === 'light';
   $('themeIco').textContent  = light ? '☀️' : '🌙';
-  $('themeSub').textContent  = light ? 'Light mode chalu hai' : 'Dark mode chalu hai';
+  $('themeSub').textContent  = t(light ? 'Light mode chalu hai' : 'Dark mode chalu hai');
   $('themeSwitch').classList.toggle('on', light);
 }
 function toggleTheme(){
@@ -7317,13 +8870,13 @@ function renderBackupStatus(){
   var dot = $('bkDot'), txt = $('bkTxt');
   if(!raw || raw === 'null'){
     dot.style.background = 'var(--text-3)';
-    txt.textContent = 'Kabhi backup nahi hua';
+    txt.textContent = t('Kabhi backup nahi hua');
     return;
   }
   var last = new Date(raw);
   var days = Math.floor((new Date() - last) / 86400000);
   var disp = last.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
-  if(days === 0)      { dot.style.background = 'var(--green)';  txt.textContent = 'Aaj backup hua ✓'; }
+  if(days === 0)      { dot.style.background = 'var(--green)';  txt.textContent = t('Aaj backup hua ✓'); }
   else if(days < 7)   { dot.style.background = 'var(--gold)';   txt.textContent = days + ' din pehle — ' + disp; }
   else                { dot.style.background = 'var(--red)';    txt.textContent = days + ' din pehle — ' + disp + ' ⚠️'; }
 }
@@ -7756,7 +9309,7 @@ function renderCloudCard(){
   $('cloudIn').hidden   = !on;
 
   var st, pill, cls;
-  if(!on){                          st='Login karo to hisaab cloud mein safe rahega'; pill='Band'; cls='c-mute'; }
+  if(!on){                          st=t('Login karo to hisaab cloud mein safe rahega'); pill=t('Band'); cls='c-mute'; }
   else if(cloudState.s==='syncing'){st='Bhej raha hoon…';            pill='Sync';     cls='c-info'; }
   else if(cloudState.s==='offline'){st='Net nahi — net aate hi chala jaayega'; pill='Offline'; cls='c-orange'; }
   else if(cloudState.s==='error'){  st=cloudState.msg;               pill='Rukawat';  cls='c-red'; }
@@ -7922,7 +9475,7 @@ function renderVersionCard(){
     (S.newVersion ? ' · <span class="t-gold">v' + esc(S.newVersion) + ' available</span>' : '');
   var sub = $('updSub'); if(!sub) return;
   if(location.protocol === 'file:'){
-    sub.textContent = 'Local file — update check website pe hi chalta hai';
+    sub.textContent = t('Local file — update check website pe hi chalta hai');
   } else if(S.newVersion){
     sub.innerHTML = '<span class="t-gold">v' + esc(S.newVersion) + ' taiyaar hai — tap karke lo</span>';
   } else {
@@ -8406,8 +9959,8 @@ function shareReportWA(){
 function openHelp(key){
   var h = HELP[key];
   if(!h) return;
-  $('helpTitle').textContent = h.t;
-  $('helpBody').innerHTML    = h.b;
+  $('helpTitle').textContent = t(h.t);
+  $('helpBody').innerHTML    = t(h.b);
   openSheet('helpSheet');
 }
 
@@ -8627,6 +10180,10 @@ function wireEvents(){
     S.search = this.value; S.showAllTxns = false; renderTxnSection();
   });
   $('btnReport').addEventListener('click', showReport);
+  $('fcastHead').addEventListener('click', function(e){
+    if(e.target.closest('[data-help]')) return;
+    S.fcastOpen = !S.fcastOpen; renderForecast();
+  });
 
   /* Quick add (Home ke upar) */
   $('qAmt').addEventListener('input', function(){
@@ -9018,6 +10575,11 @@ function bootUI(){
     Chart.defaults.font.family = "'DM Sans',system-ui,sans-serif";
     Chart.defaults.font.size   = 11;
   }
+
+  /* 2b. Bhasha — DOM scan pehle, phir chuni hui bhasha lagao */
+  S.lang = settings.lang || 'hin';
+  scanI18n();
+  if(S.lang !== 'hin') applyLang();
 
   fillAllSelects();                              /* 3. dropdowns */
   wireEvents();                                  /* 4. buttons zinda karo */
