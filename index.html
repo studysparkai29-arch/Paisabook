@@ -45,7 +45,7 @@
      = user ko "Update karo" ka banner dikhta hai.
      BADALNA ZAROORI HAI: har baar GitHub pe naya file daalo, to ye
      number bhi badhao (aur JS mein APP.version bhi — dono same rakho). -->
-<meta name="pb-version" content="2.5">
+<meta name="pb-version" content="2.7">
 <meta name="theme-color" content="#0A0A0F">
 <meta name="description" content="PaisaBook — offline budget, udhar aur bill tracker. Aapka data sirf aapke phone mein.">
 <meta name="mobile-web-app-capable" content="yes">
@@ -683,8 +683,27 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
 .qchip:active{transform:scale(.93)}
 .qchip.on{border-color:var(--red);background:var(--red-bg);color:var(--red)}
 .qchip-ico{font-size:15px;line-height:1}
+.qadd-note{
+  width:100%;margin-top:var(--s2);background:var(--card-2);
+  border:1.5px solid var(--border);border-radius:var(--r-md);
+  color:var(--text);font-family:var(--font-body);font-size:var(--fs-md);
+  padding:var(--s2) var(--s3);outline:none;-webkit-appearance:none;
+  transition:border-color var(--t),box-shadow var(--t);
+}
+.qadd-note:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-bg)}
+.qadd-note::placeholder{color:var(--text-3)}
 .qadd-hint{font-size:var(--fs-xs);color:var(--text-3);margin-top:var(--s2);
            text-align:center;min-height:15px}
+/* Note ke suggestions — isi category mein pehle kya likha tha */
+.qadd-memo{display:flex;gap:var(--s2);overflow-x:auto;scrollbar-width:none;
+           margin-top:var(--s2);-webkit-overflow-scrolling:touch}
+.qadd-memo::-webkit-scrollbar{display:none}
+.qadd-memo:empty{display:none}
+.memo-chip{flex-shrink:0;padding:var(--s1) var(--s2);border-radius:var(--r-full);
+           border:1px dashed var(--border-2);background:transparent;
+           color:var(--text-2);font-size:var(--fs-xs);white-space:nowrap}
+.memo-chip:hover{border-color:var(--gold);color:var(--gold)}
+.memo-chip:active{transform:scale(.94)}
 
 /* Aaj ka snapshot */
 #snapshot{margin-bottom:var(--s3);padding:var(--s3)}
@@ -1045,6 +1064,12 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
         <button class="qadd-btn" id="qSave" aria-label="Add karo" disabled>+</button>
       </div>
       <div class="row-scroll qadd-cats" id="qCats"></div>
+      <!-- Chhota note — taaki 2 mahine baad bhi yaad rahe ki
+           ye kharcha tha kis cheez ka. Marzi se, zaroori nahi. -->
+      <input type="text" id="qNote" class="qadd-note" maxlength="60"
+             placeholder="📝 Kis liye? (marzi se) — jaise: chai, auto, sabzi" autocomplete="off">
+      <!-- Isi category mein pehle jo likha tha, wo chips ban kar aata hai -->
+      <div class="qadd-memo" id="qMemo"></div>
       <div class="qadd-hint" id="qHint">Amount likho, category tap karo, + dabao</div>
     </div>
 
@@ -1219,11 +1244,17 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
     </button>
 
     <div class="form-panel" id="uForm" style="margin-top:var(--s3)">
+      <!-- Jinke saath pehle lena-dena hua — ek tap mein naam+phone -->
+      <div class="row-scroll" id="uRecent" hidden></div>
       <div class="field-row">
         <div class="field">
           <label for="uName">👤 Naam *</label>
           <input type="text" id="uName" class="input" maxlength="40" placeholder="Kiska udhar?" autocomplete="off">
           <div class="err" id="uNameErr">Naam daalna zaroori hai</div>
+          <!-- Sirf Android Chrome mein dikhta hai (wahi support karta hai) -->
+          <button class="btn btn-soft c-mute" id="uContact" hidden
+                  style="margin-top:var(--s2);padding:var(--s2) var(--s3);font-size:var(--fs-xs)">
+            📇 Contact list se uthao</button>
         </div>
       </div>
       <div class="field-row">
@@ -1242,6 +1273,10 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
           <label for="uPhone">📱 Phone (WhatsApp ke liye)</label>
           <input type="tel" id="uPhone" class="input num" maxlength="10" inputmode="numeric" placeholder="10 digit" autocomplete="off">
           <div class="err" id="uPhoneErr">10 digit ka valid number daalo</div>
+        </div>
+        <div class="field">
+          <label for="uUpi">📲 UPI ID<span class="help" role="button" tabindex="0" data-help="upi" aria-label="Ye kya hai?">?</span></label>
+          <input type="text" id="uUpi" class="input" maxlength="50" placeholder="naam@okaxis" autocomplete="off">
         </div>
       </div>
       <div class="field-row">
@@ -1319,6 +1354,7 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
       <button class="mtab" data-p="emi"><span class="mtab-ico">📱</span>EMI</button>
       <button class="mtab" data-p="bills"><span class="mtab-ico">🔔</span>Bills</button>
       <button class="mtab" data-p="fest"><span class="mtab-ico">🪔</span>Festive</button>
+      <button class="mtab" data-p="shagun"><span class="mtab-ico">💍</span>Shagun</button>
       <button class="mtab" data-p="set"><span class="mtab-ico">⚙️</span>Settings</button>
     </div>
 
@@ -1394,6 +1430,9 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
                 id="rFormToggle"><span id="rFormIco">➕</span> Add</button>
       </div>
       <div class="form-panel" id="rForm">
+        <!-- Common bills — tap karo, naam + category + payment sab bhar jayenge -->
+        <div class="eyebrow" style="margin-bottom:var(--s2)">⚡ Jaldi chuno</div>
+        <div class="row-scroll" id="billPresets" style="margin-bottom:var(--s3)"></div>
         <div class="field-row">
           <div class="field"><label for="rName">📝 Naam</label>
             <input type="text" id="rName" class="input" maxlength="40" placeholder="Rent, Bijli bill…"></div>
@@ -1475,6 +1514,104 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
       <div id="fList"></div>
     </div>
 
+    <!-- ── SHAGUN / LENA-DENA REGISTER ──
+         Har Indian ghar mein shaadi ke waqt ek copy hoti hai: kisne
+         kitna shagun diya. Agli baar unke ghar function ho to usse
+         zyada dena hota hai. Ye wahi copy, phone mein. -->
+    <div class="panel" id="p-shagun">
+      <!-- Kaun sa function dekh rahe ho -->
+      <div id="shagunHome">
+        <div class="notice c-gold" id="shagunIntro">
+          <span class="notice-ico">💍</span>
+          <div class="notice-body">
+            <div class="notice-title">Shaadi wali copy — ab phone mein</div>
+            <div class="notice-sub">Kisne kitna shagun diya, kisko kitna diya.
+              Agli baar app khud bata dega ki pichhli baar kya hua tha.</div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-title">💍 Aapke Function</div>
+          <button class="btn btn-soft c-mute" style="padding:var(--s2) var(--s3);font-size:var(--fs-xs)"
+                  id="fnFormToggle"><span id="fnFormIco">➕</span> Add</button>
+        </div>
+        <div class="form-panel" id="fnForm">
+          <div class="field-row">
+            <div class="field"><label for="fnType">🎉 Kaunsa function</label>
+              <select id="fnType" class="input"></select></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="fnName">📝 Kiska (naam)</label>
+              <input type="text" id="fnName" class="input" maxlength="40"
+                     placeholder="jaise: Rahul ki shaadi"></div>
+            <div class="field"><label for="fnDate">📅 Date</label>
+              <input type="date" id="fnDate" class="input"></div>
+          </div>
+          <button class="btn btn-block btn-primary" id="fnSave">💍 Function Banao</button>
+        </div>
+
+        <!-- Kisi bhi aadmi ka poora history -->
+        <div class="search" style="margin-top:var(--s3)">
+          <span class="search-ico">🔍</span>
+          <input type="text" id="shagunSearch" class="input" autocomplete="off"
+                 placeholder="Naam se dhoondo — pichhli baar kitna diya tha?">
+        </div>
+        <div id="shagunSearchOut"></div>
+        <div id="fnList"></div>
+      </div>
+
+      <!-- Ek function ke andar ki entries -->
+      <div id="shagunDetail" hidden>
+        <button class="btn btn-soft c-mute" id="fnBack"
+                style="padding:var(--s2) var(--s3);font-size:var(--fs-xs);margin-bottom:var(--s3)">
+          ← Wapas</button>
+        <div class="card card-top c-gold card-pad" id="fnHead" style="margin-bottom:var(--s3)"></div>
+
+        <div class="sec" style="margin-top:0">
+          <div class="sec-title">Entries</div>
+          <button class="btn btn-soft c-mute" style="padding:var(--s2) var(--s3);font-size:var(--fs-xs)"
+                  id="sgFormToggle"><span id="sgFormIco">➕</span> Add</button>
+        </div>
+        <div class="form-panel" id="sgForm">
+          <div class="field-row">
+            <div class="field"><label for="sgName">👤 Naam</label>
+              <input type="text" id="sgName" class="input" maxlength="40" placeholder="Kiska naam"></div>
+          </div>
+          <div id="sgHistory"></div>
+          <div class="field-row">
+            <div class="field"><label for="sgAmt">₹ Amount</label>
+              <input type="number" id="sgAmt" class="input num" min="1" inputmode="decimal" placeholder="0"></div>
+            <div class="field"><label for="sgRel">👥 Rishta</label>
+              <select id="sgRel" class="input"></select></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Aaya ya diya?</label>
+              <div class="uf-type-toggle" style="display:flex;gap:var(--s2)">
+                <button class="uf-type-btn sel-lena" id="sgIn" style="flex:1">📥 Aaya</button>
+                <button class="uf-type-btn" id="sgOut" style="flex:1">📤 Diya</button>
+              </div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="sgNote">📝 Note (marzi se)</label>
+              <input type="text" id="sgNote" class="input" maxlength="60" placeholder="jaise: kapde bhi diye"></div>
+          </div>
+          <button class="btn btn-block btn-primary" id="sgSave">💍 Entry Save Karo</button>
+        </div>
+        <div class="row-scroll" id="sgFilters" style="margin-bottom:var(--s3)">
+          <button class="fpill active" data-sg="all">📋 Sab</button>
+          <button class="fpill" data-sg="in">📥 Aaya</button>
+          <button class="fpill" data-sg="out">📤 Diya</button>
+        </div>
+        <div class="list" id="sgList"></div>
+        <!-- Yahan sticky foot NAHI — panel mein wo form ko dhak leta hai.
+             List ke neeche sedha button theek hai. -->
+        <div id="sgFoot" hidden style="margin-top:var(--s4)">
+          <button class="btn btn-lg btn-block btn-soft c-wa" id="sgShare">💬 Register share karo</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ── SETTINGS ── -->
     <div class="panel" id="p-set">
       <div class="eyebrow" style="margin-bottom:var(--s3)">📤 Share &amp; Export</div>
@@ -1517,6 +1654,18 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
 
       <div class="divider"></div>
       <div class="eyebrow" style="margin-bottom:var(--s3)">🎨 Preferences</div>
+
+      <!-- Apni UPI ID — udhar yaad dilaane waale message mein pay link lagane ke liye -->
+      <div class="card set c-info" style="align-items:flex-start">
+        <div class="set-ico">📲</div>
+        <div class="set-body">
+          <div class="set-title">Meri UPI ID<span class="help" role="button" tabindex="0" data-help="upi" aria-label="Ye kya hai?">?</span></div>
+          <div class="set-sub">Yaad dilaate waqt message mein "paisa bhejo" ka link lag jaayega</div>
+          <input type="text" id="myUpi" class="input" maxlength="50" autocomplete="off"
+                 placeholder="jaise: 9876543210@ybl" style="margin-top:var(--s2)">
+          <div class="err" id="myUpiErr">Aisa likho: naam@bank</div>
+        </div>
+      </div>
 
       <button class="card set c-gold" id="btnSimple" style="width:100%;text-align:left">
         <div class="set-ico">✨</div>
@@ -1599,7 +1748,7 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
       <div class="footer">
         <div class="footer-logo">Paisa<b>Book</b></div>
         Apna Paisa, Apna Hisaab<br>
-        <span style="opacity:.6" id="verTxt">v2.5</span>
+        <span style="opacity:.6" id="verTxt">v2.6</span>
       </div>
     </div>
   </section>
@@ -1795,22 +1944,30 @@ var K = {
   settings:'pb_settings', backup:'pb_last_backup', tab:'pb_last_tab',
   streak:'pb_streak', streakDay:'pb_streak_last', milestone:'pb_streak_milestone',
   schema:'pb_schema',
-  merchants:'pb_merchants'      /* aapki sikhaayi hui merchant → category jodi */
+  merchants:'pb_merchants',     /* aapki sikhaayi hui merchant → category jodi */
+  funcs:'pb_functions',         /* shaadi/mundan jaise function */
+  shagun:'pb_shagun'            /* un functions mein kisne kitna diya/liya */
 };
 /* Ye keys arrays rakhti hain */
-var LIST_KEYS  = [K.txn,K.udhar,K.budget,K.fest,K.emi,K.subs,K.rec];
+var LIST_KEYS  = [K.txn,K.udhar,K.budget,K.fest,K.emi,K.subs,K.rec,K.funcs,K.shagun];
 /* Reset karte waqt ye SAB hatani hain (purane app mein streak reh jaata tha) */
 var ALL_KEYS   = LIST_KEYS.concat([K.settings,K.backup,K.tab,K.streak,K.streakDay,
                                    K.milestone,K.schema,K.merchants]);
 
 var CATS = {
   income:[
-    {id:'Salary',      ico:'💼'},
-    {id:'Freelance',   ico:'💻'},
-    {id:'Trading',     ico:'📈'},
-    {id:'Business',    ico:'🏪'},
-    {id:'YouTube',     ico:'📺'},
-    {id:'Other Income',ico:'💵'}
+    {id:'Salary',       ico:'💼'},
+    {id:'Kiraya',       ico:'🏠'},   /* makaan/dukaan ka kiraya jo AAPKO milta hai */
+    {id:'Family',       ico:'👨‍👩‍👧'},  /* ghar se aaya paisa */
+    {id:'Freelance',    ico:'💻'},
+    {id:'Business',     ico:'🏪'},
+    {id:'Trading',      ico:'📈'},
+    {id:'Byaaj',        ico:'🏦'},   /* FD/savings ka interest, dividend */
+    {id:'Refund',       ico:'↩️'},   /* wapas aaya paisa, cashback */
+    {id:'Gift',         ico:'🎁'},   /* shagun, neg */
+    {id:'Pension',      ico:'🧓'},
+    {id:'YouTube',      ico:'📺'},
+    {id:'Other Income', ico:'💵'}
   ],
   expense:[
     {id:'Ghar',         ico:'🏠'},
@@ -1824,6 +1981,9 @@ var CATS = {
     {id:'Family',       ico:'👨‍👩‍👧'},
     {id:'Investment',   ico:'💰'},
     {id:'Shopping',     ico:'🛍️'},
+    {id:'Travel',       ico:'✈️'},   /* trip, ghoomna — roz ke Transport se alag */
+    {id:'Daan',         ico:'🙏'},   /* mandir, daan, shagun, chanda */
+    {id:'Personal',     ico:'💇'},   /* salon, grooming, kapde ki silai */
     {id:'Other',        ico:'📦'}
   ]
 };
@@ -1847,7 +2007,7 @@ var QUICK_AMOUNTS = [100,200,500,1000,2000,5000];
    Yahan likha hai ki simple mode mein kya CHHUPTA hai. */
 var SIMPLE_HIDES = {
   navTabs:   ['stats'],                  /* bottom nav se */
-  morePanels:['emi','bills','fest']      /* More ke andar se */
+  morePanels:['emi','bills','fest','shagun']   /* More ke andar se */
 };
 
 /* ── HELP ──
@@ -1900,6 +2060,17 @@ var HELP = {
     '<b class="t-red">Dena Hai</b> — aapne kisi se liya tha, aapko wapas dena hai<br><br>' +
     'Thoda-thoda chukaane par "Payment" se jod sakte ho. Poora ho gaya to apne aap settle ho jaata hai.<br><br>' +
     '<b>Phone number zaroor daalo</b> — tabhi WhatsApp par yaad dila paoge.' },
+
+  upi:{ t:'📲 UPI ID', b:
+    'Wahi cheez jo PhonePe/GPay mein paisa bhejte waqt dikhti hai — jaise ' +
+    '<b>9876543210@ybl</b> ya <b>rahul@okaxis</b>.<br><br>' +
+    '<b>Dena Hai</b> mein daalo → ek tap mein unko paisa bhej sakte ho, ' +
+    'number dhoondhne ki zaroorat nahi.<br><br>' +
+    '<b>Lena Hai</b> mein aapki apni UPI ID kaam aati hai (Settings mein daalo) — ' +
+    'yaad dilaane waale WhatsApp message mein paise bhejne ka link apne aap lag jaata hai. ' +
+    'Saamne wale ko bas tap karna hai.<br><br>' +
+    '<span class="t-mute">App aapka UPI ID sirf aapke phone mein rakhta hai. ' +
+    'Paisa kabhi app ke through nahi jaata — aapka apna UPI app hi kholta hai.</span>' },
 
   sms:{ t:'📩 Bank SMS se add', b:
     'Bank ke SMS mein sab likha hota hai — amount, dukaan ka naam, date.<br><br>' +
@@ -2005,10 +2176,59 @@ var MERCHANTS = {
 /* Income wale SMS ke liye — chhoti list kaafi hai */
 var INCOME_MERCHANTS = {
   Salary:['SALARY','SAL CR','SALARY CREDIT','PAYROLL','WAGES','STIPEND'],
+  Refund:['REFUND','REVERSAL','CASHBACK','RETURN','REFND'],
+  Byaaj:['INTEREST','INT CR','INT.CR','DIVIDEND','FD MATURITY','MATURITY','RD INT'],
+  Kiraya:['RENT RECEIVED','RENT CR','KIRAYA','TENANT','RENTAL'],
   Freelance:['FREELANC','CONSULT','INVOICE','UPWORK','FIVERR','CONTRACT'],
-  Trading:['ZERODHA','GROWW','UPSTOX','DIVIDEND','MATURITY','REDEMPTION'],
+  Trading:['ZERODHA','GROWW','UPSTOX','REDEMPTION','SELL'],
+  Pension:['PENSION','PPO','EPS'],
   YouTube:['GOOGLE ADSENSE','ADSENSE','YOUTUBE']
 };
+
+/* ── FUNCTION KE TYPE (Shagun register ke liye) ──
+   Har Indian ghar mein shaadi ke waqt ek copy hoti hai: kisne kitna
+   shagun diya. Agli baar unke ghar function ho to usse zyada dena
+   hota hai. Ye list un functions ke liye hai. */
+var FUNCTION_TYPES = [
+  { id:'Shaadi',         ico:'💍' },
+  { id:'Sagai',          ico:'💐' },
+  { id:'Mundan',         ico:'👶' },
+  { id:'Griha Pravesh',  ico:'🏠' },
+  { id:'Janamdin',       ico:'🎂' },
+  { id:'Tilak',          ico:'🙏' },
+  { id:'Barsi',          ico:'🕯️' },
+  { id:'Anna Prashan',   ico:'🍚' },
+  { id:'Doosra',         ico:'🎉' }
+];
+/* Rishta — taaki har baar type na karna pade */
+var RELATIONS = [
+  { id:'Rishtedaar', ico:'👨‍👩‍👧' }, { id:'Dost',   ico:'🤝' },
+  { id:'Padosi',     ico:'🏘️' },     { id:'Office', ico:'💼' },
+  { id:'Gaon',       ico:'🌾' },     { id:'Doosra', ico:'👤' }
+];
+
+/* ── COMMON BILLS ──
+   Recurring bill add karte waqt ye chips dikhte hain — festival
+   wali list ki tarah. Tap karo, naam + category + payment sab
+   apne aap bhar jaate hain. Apna naam likhna ho to bhi likh sakte ho. */
+var BILL_PRESETS = [
+  { n:'Ghar ka kiraya',      ico:'🏠', cat:'Ghar',       pay:'Bank' },
+  { n:'Bijli bill',          ico:'⚡', cat:'Bills',      pay:'UPI'  },
+  { n:'Paani bill',          ico:'💧', cat:'Bills',      pay:'UPI'  },
+  { n:'Gas',                 ico:'🔥', cat:'Bills',      pay:'UPI'  },
+  { n:'Internet / WiFi',     ico:'📶', cat:'Bills',      pay:'UPI'  },
+  { n:'Mobile recharge',     ico:'📱', cat:'Bills',      pay:'UPI'  },
+  { n:'DTH / Cable',         ico:'📺', cat:'Bills',      pay:'UPI'  },
+  { n:'Society maintenance', ico:'🏢', cat:'Ghar',       pay:'Bank' },
+  { n:'Kaamwali',            ico:'🧹', cat:'Ghar',       pay:'Cash' },
+  { n:'Doodh',               ico:'🥛', cat:'Khaana',     pay:'Cash' },
+  { n:'School fees',         ico:'🎒', cat:'Education',  pay:'Bank' },
+  { n:'Tuition',             ico:'📚', cat:'Education',  pay:'UPI'  },
+  { n:'Insurance premium',   ico:'🛡️', cat:'Investment', pay:'Bank' },
+  { n:'Loan EMI',            ico:'🏦', cat:'EMI',        pay:'Bank' },
+  { n:'Gym',                 ico:'💪', cat:'Health',     pay:'UPI'  },
+  { n:'Newspaper',           ico:'📰', cat:'Bills',      pay:'Cash' }
+];
 /* Pie / donut chart ke colours */
 var CHART_COLORS = ['#FF5C6E','#FF9A3C','#F0C040','#3ECF80','#5AA8FF',
                     '#A46BFF','#FF6BB5','#3ECFCF','#9AD442','#FF8A5C'];
@@ -2037,9 +2257,21 @@ function $$(sel,root){ return Array.prototype.slice.call((root||document).queryS
 function money(n){
   return '₹' + new Intl.NumberFormat('en-IN',{maximumFractionDigits:0}).format(Math.abs(Math.round(n||0)));
 }
-/* moneyShort(125000) → "₹1.3L" · charts ke axis ke liye */
+/* moneyShort(125000) → "₹1.3L" · charts ke axis aur share card ke liye
+   PEHLE Intl ka "compact" use hota tha. Wo en-IN mein 63,000 ko
+   "₹63T" likhta hai — T matlab thousand. India mein koi aise
+   nahi padhta; log "63K" ya "63 hazaar" samajhte hain. Ab khud
+   likhte hain: K (hazaar) · L (lakh) · Cr (crore). */
 function moneyShort(n){
-  return '₹' + new Intl.NumberFormat('en-IN',{notation:'compact',maximumFractionDigits:1}).format(n||0);
+  var v = Math.abs(n || 0), s = (n || 0) < 0 ? '-₹' : '₹';
+  var UNITS = [[10000000,'Cr'], [100000,'L'], [1000,'K']];
+  for(var i = 0; i < UNITS.length; i++){
+    /* 0.9995 ka thoda jhukav: 99,999 ko "₹100K" nahi, "₹1L" likhna
+       chahiye — warna round hone ke baad unit galat dikhti hai */
+    if(v < UNITS[i][0] * 0.9995) continue;
+    return s + (Math.round(v / UNITS[i][0] * 10) / 10) + UNITS[i][1];
+  }
+  return s + Math.round(v);
 }
 /* Unique id — har naye record ko */
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
@@ -2096,6 +2328,30 @@ function festIcon(name){
   return '🎉';
 }
 function isValidPhone(p){ return /^[6-9]\d{9}$/.test(p||''); }
+
+/* ── UPI ──
+   UPI ID ka shape: <kuch>@<bank handle>. Bank wala hissa sirf
+   akshar hota hai (ybl, okaxis, paytm…). Hum sirf shape check
+   karte hain — sach mein chalega ya nahi, ye UPI app hi batayega.
+
+   upiLink() se "upi://pay?..." banta hai. Ye koi website nahi —
+   phone isko dekhte hi PhonePe/GPay/Paytm khol deta hai, amount
+   aur naam pehle se bhara hua. Paisa kabhi hamare app se nahi
+   jaata; hum sirf unka app khol dete hain. Laptop pe ye link
+   kuch nahi karta — isliye button sirf phone pe dikhta hai. */
+function isValidUpi(v){ return /^[a-zA-Z0-9][a-zA-Z0-9._-]{1,48}@[a-zA-Z]{2,20}$/.test((v||'').trim()); }
+function upiLink(vpa, name, amt, note){
+  var q = 'pa=' + encodeURIComponent(vpa) + '&cu=INR';
+  /* pn (payee ka naam) sirf tab bhejo jab sach mein pata ho.
+     Naam na pata ho to UPI app khud bank se asli naam le aata
+     hai — jhootha naam dikhane se banda ghabra jaata hai. */
+  if(name) q += '&pn=' + encodeURIComponent(name);
+  if(amt > 0) q += '&am=' + (Math.round(amt * 100) / 100);
+  if(note)    q += '&tn=' + encodeURIComponent(String(note).slice(0, 40));
+  return 'upi://pay?' + q;
+}
+/* Phone hai ya laptop? UPI link sirf phone pe kaam karta hai. */
+function isMobile(){ return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent||''); }
 
 /* ═══════════════════════════════════════════════════════════════
    3 · STORAGE — IndexedDB (localStorage fallback ke saath)
@@ -2332,8 +2588,13 @@ var S = {
   udharTab:'lena', udharFilter:'active', udharOpenId:null, payOpenId:null,
   /* home */
   search:'', showAllTxns:false,
+  /* shagun register */
+  fnOpen:null,         /* kaun sa function khula hai (id) */
+  sgDir:'in',          /* nayi entry — aaya ya diya */
+  sgFilter:'all',      /* detail list ka filter */
   /* misc */
   qCat:'',             /* quick-add mein chuni hui category */
+  hideAmounts:false,   /* share ki tasveer mein rupaye chhupane hain? */
   editId:null, theme:'dark', healthFolded:false,
   undo:null,           /* { label, revert() } */
   newVersion:null,     /* server pe naya version mila to uska number */
@@ -2481,6 +2742,61 @@ function recStatus(rec){
   if(left <= 3)   return { label:left+' din mein',  cls:'c-red',    days:left, urgent:true,  paid:false };
   if(left <= 7)   return { label:left+' din mein',  cls:'c-orange', days:left, urgent:false, paid:false };
   return            { label:left+' din baaki',      cls:'c-green',  days:left, urgent:false, paid:false };
+}
+
+/* ── KAHAN NORMAL SE ZYADA KHARCH HUA ──
+   Purana insight kehta tha: "Ghar band karo to saal mein ₹1.5L bachega".
+   Ye bekaar salah hai — kiraya to dena hi padega. Jo kharcha ho raha
+   hai wo hoga hi.
+
+   Kaam ki baat ye hai: AAPNE APNE HI normal se kahan zyada kharch kiya.
+   Isliye har category ka is mahine ka kharch, aapke apne pichhle
+   mahino ke average se tulta hai. Wahi cheez aap sach mein control
+   kar sakte ho.
+
+   Deta hai: [{cat, now, avg, diff, pct, months, top}] — diff ke
+   hisaab se bade se chhota. `top` = us category ka is mahine ka
+   sabse bada ek kharcha (taaki pata chale kaunsi cheez ne badhaya). */
+function categoryVsAverage(){
+  var all = read(K.txn);
+  var curTxns = monthTxns(all, S.month, S.year);
+  var cur = catTotals(curTxns);
+  if(!cur.length) return [];
+
+  /* Pichhle 6 mahine (ye mahina chhod kar) */
+  var past = [], m = S.month, y = S.year;
+  for(var i = 0; i < 6; i++){
+    if(--m < 0){ m = 11; y--; }
+    past.push({ m:m, y:y });
+  }
+
+  var out = [];
+  cur.forEach(function(c){
+    var sum = 0, months = 0;
+    past.forEach(function(pm){
+      var t = monthTxns(all, pm.m, pm.y);
+      if(!t.length) return;                  /* us mahine koi data hi nahi */
+      var amt = 0;
+      t.forEach(function(x){
+        if(x.type === 'expense' && x.category === c.cat) amt += x.amount;
+      });
+      sum += amt; months++;
+    });
+    if(months === 0) return;                 /* tulna ke liye kuch nahi */
+    var avg = sum / months;
+    if(avg <= 0) return;
+
+    /* Is category ka is mahine ka sabse bada ek kharcha */
+    var top = null;
+    curTxns.forEach(function(x){
+      if(x.type === 'expense' && x.category === c.cat && (!top || x.amount > top.amount)) top = x;
+    });
+
+    out.push({ cat:c.cat, now:c.amt, avg:avg, diff:c.amt - avg,
+               pct:Math.round(((c.amt - avg) / avg) * 100),
+               months:months, top:top });
+  });
+  return out.sort(function(a,b){ return b.diff - a.diff; });
 }
 
 /* ── FESTIVE: asli bachat ──
@@ -2942,37 +3258,77 @@ function renderQuickAdd(){
   if(on && on.scrollIntoView){
     on.scrollIntoView({ block:'nearest', inline:'nearest' });
   }
+  renderQuickMemo();
   updateQuickState();
+}
+
+/* ── Note ke suggestions ──
+   Isi category mein pehle aapne jo likha tha, wo chips ban kar
+   aate hain. "chai" ek baar likho — aage se tap karke bhar lo.
+   Isse note likhna mehnat nahi lagta. */
+function recentNotes(cat, n){
+  var seen = {}, out = [];
+  var list = read(K.txn).slice().sort(function(a,b){
+    return (b.createdAt || '') < (a.createdAt || '') ? -1 : 1;
+  });
+  for(var i = 0; i < list.length && out.length < (n || 5); i++){
+    var t = list[i];
+    if(t.type !== 'expense' || t.category !== cat) continue;
+    var note = (t.note || '').trim();
+    if(!note || note === t.category) continue;      /* khaali ya category ka hi naam */
+    var key = note.toLowerCase();
+    if(seen[key]) continue;
+    seen[key] = 1; out.push(note);
+  }
+  return out;
+}
+function renderQuickMemo(){
+  var box = $('qMemo'); if(!box) return;
+  box.innerHTML = '';
+  recentNotes(S.qCat, 5).forEach(function(note){
+    var b = document.createElement('button');
+    b.className = 'memo-chip';
+    b.textContent = note;
+    b.addEventListener('click', function(){
+      $('qNote').value = note;
+      updateQuickState();
+      $('qAmt').focus();
+    });
+    box.appendChild(b);
+  });
 }
 
 /* + button tabhi chalu ho jab amount theek ho */
 function updateQuickState(){
   var v = parseFloat($('qAmt').value);
   var ok = !!v && v > 0;
+  var note = ($('qNote').value || '').trim();
   $('qSave').disabled = !ok;
   $('qHint').innerHTML = ok
-    ? money(v) + ' · ' + catIcon(S.qCat) + ' ' + esc(S.qCat) + ' — <b class="t-gold">+ dabao</b>'
+    ? money(v) + ' · ' + catIcon(S.qCat) + ' ' + esc(S.qCat) +
+      (note ? ' · "' + esc(note) + '"' : '') + ' — <b class="t-gold">+ dabao</b>'
     : 'Amount likho, category tap karo, + dabao';
 }
 
 function saveQuickAdd(){
   var amt = parseFloat($('qAmt').value);
+  var note = ($('qNote').value || '').trim();
   if(!amt || amt <= 0){ $('qAmt').focus(); return; }
   amt = Math.min(amt, LIMIT.amount);
 
   var txn = {
     id:uid(), type:'expense', amount:amt, category:S.qCat,
-    payment:S.addPay || 'UPI', note:S.qCat, date:todayKey(),
+    payment:S.addPay || 'UPI', note:note || S.qCat, date:todayKey(),
     source:'quick', createdAt:nowStamp(), updatedAt:nowStamp()
   };
   var list = read(K.txn); list.push(txn);
   if(!write(K.txn, list)) return;
 
   bumpStreak();
-  toast('💸 ' + money(amt) + ' ' + S.qCat + ' add hua', 'ok', function(){
+  toast('💸 ' + money(amt) + ' ' + (note || S.qCat) + ' add hua', 'ok', function(){
     removeTxn(txn.id); toast('↩ Wapas hataa diya','ok'); refreshAll();
   });
-  $('qAmt').value = '';
+  $('qAmt').value = ''; $('qNote').value = '';
   refreshAll();
   $('qAmt').focus();          /* agla kharcha turant likh sako */
 }
@@ -3630,8 +3986,78 @@ function toggleUdharForm(){
   $('uForm').classList.toggle('open', open);
   $('uFormIco').textContent = open ? '✕' : '➕';
   $('uFormTxt').textContent = open ? 'Band Karo' : 'Naya Udhar Add Karo';
-  if(open){ setUdharFormType(S.udharTab); $('uDate').value = todayKey(); $('uName').focus(); }
+  if(open){ setUdharFormType(S.udharTab); $('uDate').value = todayKey();
+            renderRecentPeople(); $('uName').focus(); }
   else resetUdharForm();
+}
+
+/* ── NAAM BHARNA AASAAN ──
+   Udhar ka 80% ek hi do-chaar logon ke saath hota hai — bhai,
+   dost, dukaandaar. Har baar unka naam aur number dobara type
+   karwana bekaar hai.
+
+   Do raaste hain:
+     1. Recent chips — purane entries se naam nikaal kar chips.
+        Ye HAR phone aur laptop pe chalta hai, aur contact list
+        se bhi tez hai (2 tap vs 5).
+     2. Contact Picker — sirf Android Chrome support karta hai,
+        aur sirf https pe. Isliye wo button chhupa rehta hai jab
+        tak browser haan na bole. Jahan nahi chalta wahan user ko
+        pata bhi nahi chalega ki kuch missing hai.
+   Browser sirf wahi contact deta hai jo user khud chunta hai —
+   poori list app ko kabhi nahi milti. */
+function recentPeople(){
+  var seen = {}, out = [];
+  read(K.udhar).slice()
+    .sort(function(a,b){ return (b.createdAt||'') < (a.createdAt||'') ? -1 : 1; })
+    .forEach(function(u){
+      var k = normName(u.name);
+      if(!k || seen[k]) return;
+      seen[k] = 1;
+      out.push({ name:u.name, phone:u.phone || '', upi:u.upi || '' });
+    });
+  return out.slice(0, 8);
+}
+function renderRecentPeople(){
+  var box = $('uRecent'); if(!box) return;
+  var people = recentPeople();
+  box.hidden = !people.length;
+  if(!people.length){ box.innerHTML = ''; return; }
+  box.innerHTML = people.map(function(p, i){
+    return '<button class="qchip" data-person="' + i + '">' +
+             '<span class="qchip-ico">👤</span>' + esc(p.name) + '</button>';
+  }).join('');
+  $$('#uRecent .qchip').forEach(function(b){
+    b.addEventListener('click', function(){
+      var p = people[parseInt(b.getAttribute('data-person'), 10)];
+      if(!p) return;
+      $('uName').value  = p.name;
+      $('uPhone').value = p.phone;
+      $('uUpi').value   = p.upi;
+      $$('#uRecent .qchip').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      $('uAmt').focus();                       /* ab sirf amount bacha */
+    });
+  });
+}
+/* Contact list se naam + number — Android Chrome only */
+function contactPickerOK(){
+  return !!(navigator.contacts && navigator.contacts.select && window.ContactsManager);
+}
+function pickContact(){
+  if(!contactPickerOK()){ toast('Is phone mein contact list support nahi','bad'); return; }
+  navigator.contacts.select(['name','tel'], { multiple:false }).then(function(list){
+    if(!list || !list.length) return;          /* user ne cancel kiya */
+    var c = list[0];
+    var nm = (c.name && c.name[0]) ? c.name[0] : '';
+    var tel = (c.tel && c.tel[0]) ? String(c.tel[0]) : '';
+    /* +91, spaces, dashes hata kar aakhri 10 digit lo */
+    var digits = tel.replace(/\D/g,'').slice(-10);
+    if(nm) $('uName').value = nm.slice(0, 40);
+    if(isValidPhone(digits)) $('uPhone').value = digits;
+    else if(digits) toast('Naam aa gaya — number theek nahi laga, haath se daal do','bad');
+    $('uAmt').focus();
+  }).catch(function(){ /* permission nahi di — chup rehna theek hai */ });
 }
 /* Form ka rang aur button ka text current tab ke hisaab se */
 function setUdharFormType(tab){
@@ -3641,9 +4067,10 @@ function setUdharFormType(tab){
   btn.textContent = isLena ? '💰 Lena Hai — Save Karo' : '🙏 Dena Hai — Save Karo';
 }
 function resetUdharForm(){
-  ['uName','uPhone','uAmt','uReason'].forEach(function(id){
+  ['uName','uPhone','uAmt','uReason','uUpi'].forEach(function(id){
     $(id).value = ''; $(id).classList.remove('bad');
   });
+  $$('#uRecent .qchip').forEach(function(x){ x.classList.remove('on'); });
   ['uNameErr','uPhoneErr','uAmtErr'].forEach(function(id){ $(id).classList.remove('show'); });
 }
 function saveUdhar(){
@@ -3660,8 +4087,10 @@ function saveUdhar(){
   if(!amt || amt <= 0)            { flag('uAmt','uAmtErr');    ok = false; }
   if(!ok) return;
 
+  var upi = $('uUpi').value.trim();
   var entry = {
     id:uid(), name:name, phone: isValidPhone(phone) ? phone : '',
+    upi: isValidUpi(upi) ? upi : '',
     total:amt, remaining:amt, payments:[],
     type:S.udharTab, reason:reason,
     date: date || todayKey(), settled:false, createdAt:nowStamp()
@@ -3757,6 +4186,7 @@ function udharCard(u, i){
           '</div>' +
           '<div class="u-actions">' +
             '<button class="btn btn-soft c-green" data-payopen="' + u.id + '">➕ Payment</button>' +
+            upiButton(u) +
             waButton(u) +
             '<button class="btn btn-soft c-red narrow" data-udel="' + u.id + '">🗑</button>' +
           '</div>') +
@@ -3778,6 +4208,7 @@ function udharCard(u, i){
     }
     else if(t.getAttribute('data-pay')){ e.stopPropagation(); addPayment(u.id); }
     else if(t.getAttribute('data-wa')){  e.stopPropagation(); sendWhatsAppReminder(u); }
+    else if(t.getAttribute('data-upi')){ e.stopPropagation(); payViaUpi(u); }
     else if(t.getAttribute('data-udel')){ e.stopPropagation(); deleteUdhar(u.id); }
   });
   return card;
@@ -3793,6 +4224,46 @@ function udharCard(u, i){
       return '<button class="btn btn-soft c-wa" data-wa="' + u.id + '">💬 Yaad dilao</button>';
     return '<button class="btn btn-soft c-mute" disabled title="Phone number nahi hai">💬 No number</button>';
   }
+  /* "Dena Hai" mein unki UPI ID ho to ek tap mein chukao.
+     Laptop pe upi:// link kuch nahi karta, isliye wahan button
+     nahi dikhate — jhootha button dena bura hai. */
+  function upiButton(u){
+    if(u.type !== 'dena' || !isValidUpi(u.upi) || !isMobile()) return '';
+    return '<button class="btn btn-soft c-info" data-upi="' + u.id + '">📲 UPI se chukao</button>';
+  }
+}
+
+/* UPI app khol do — amount pehle se bhara hua.
+   Hamein kabhi pata nahi chalta ki payment hua ya nahi (browser
+   ko UPI app jawab nahi deta). Isliye wapas aane par KHUD nahi
+   likhte — banday se poochte hain. Jhootha entry karne se behtar
+   hai ek sawaal poochna. */
+function payViaUpi(u){
+  var link = upiLink(u.upi, u.name, u.remaining, 'Udhar — PaisaBook');
+  window.location.href = link;
+
+  /* App se wapas aane ka intezaar — tab poochenge */
+  setTimeout(function(){
+    askConfirm({
+      icon:'📲', title:'Paisa bhej diya?',
+      body:'<b>' + esc(u.name) + '</b> ko <b class="num">' + money(u.remaining) + '</b>' +
+           ' bhejne ke liye UPI app khola tha.<br><br>' +
+           'Agar bhej diya ho to "Haan" dabao — entry apne aap ho jaayegi.',
+      yes:'Haan, bhej diya',
+      onYes:function(){
+        var list = read(K.udhar);
+        var i = list.findIndex(function(x){ return x.id === u.id; });
+        if(i === -1) return;
+        var amt = list[i].remaining;
+        list[i].payments.push({ amount:amt, date:todayKey(), at:nowStamp() });
+        list[i].remaining = 0;
+        list[i].settled   = true;
+        write(K.udhar, list);
+        toast('✅ ' + u.name + ' ka poora hisaab saaf','ok');
+        refreshAll();
+      }
+    });
+  }, 1200);
 }
 
 function addPayment(id){
@@ -3832,9 +4303,22 @@ function deleteUdhar(id){
   });
   refreshAll();
 }
+/* Yaad dilaao — aur agar aapne apni UPI ID daali hai to message
+   mein seedha "paisa bhejo" ka link bhi jod do. Saamne waale ko
+   bas tap karna hai; na number poochna, na QR dhoondhna.
+   Yahi cheez udhar wapas aane ki sabse badi rukawat hatati hai. */
 function sendWhatsAppReminder(u){
   var msg = 'Hey ' + u.name + '! 👋\n' + money(u.remaining) +
             ' ka udhar baaki hai (' + fmtDate(u.date) + ' se).\nJab bhi ho sake. 😊';
+
+  var mine = (readObj(K.settings, {}).myUpi || '').trim();
+  if(u.type === 'lena' && isValidUpi(mine)){
+    /* UPI ID pehle — wo har jagah kaam karta hai (copy-paste bhi).
+       Link baad mein, kyunki har WhatsApp usko tappable nahi
+       banata. Is tarah dono haalat mein kaam ban jaata hai. */
+    msg += '\n\n📲 UPI se bhej do: ' + mine +
+           '\nYa ye link dabao: ' + upiLink(mine, '', u.remaining, 'Udhar');
+  }
   window.open('https://wa.me/91' + u.phone + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
@@ -4069,11 +4553,46 @@ function renderInsights(){
   else
     card('🏆','Best bachat','<span class="t-mute">Abhi tak koi positive bachat nahi</span>');
 
-  /* 4. Saal bhar ka hisaab */
-  if(cats.length)
-    card('💡','Band karo to…',
-      catIcon(cats[0].cat) + ' <b class="t-gold">' + esc(cats[0].cat) + '</b> band karo to saal mein ' +
-      '<b class="t-green num">' + money(cats[0].amt * 12) + '</b> bachega');
+  /* 4. Kahan normal se zyada kharch hua
+        (pehle yahan "band karo to saal mein X bachega" likha tha —
+         wo bekaar salah thi, kyunki kiraya ya khaana band nahi hota.
+         Ab tulna aapke apne pichhle mahino se hoti hai.) */
+  var vs = categoryVsAverage();
+  var high = vs.filter(function(v){ return v.pct >= 25 && v.diff >= 300; });
+  var low  = vs.filter(function(v){ return v.pct <= -20 && v.diff <= -300; });
+
+  if(high.length){
+    high.slice(0,2).forEach(function(v){
+      var html =
+        '<b class="t-red num">' + money(v.now) + '</b> — aapke average ' +
+        '<b class="num">' + money(v.avg) + '</b> se <b class="t-red num">' +
+        v.pct + '% zyada</b>' +
+        '<div class="empty-hint" style="margin-top:var(--s1)">' +
+          '<b class="num">' + money(v.diff) + '</b> extra · ' +
+          v.months + ' mahine ke average se tulna' +
+          (v.top ? '<br>Sabse bada: <b>' + esc(v.top.note || v.cat) + '</b> ' +
+                   money(v.top.amount) + ' (' + fmtShort(v.top.date) + ')' : '') +
+        '</div>';
+      card(catIcon(v.cat), '⚠️ ' + v.cat + ' — normal se zyada', html, 'c-red');
+    });
+  } else if(vs.length){
+    card('👌','Kharch normal hai',
+      'Koi category aapke apne average se khaas zyada nahi gayi — ' +
+      '<b class="t-green">sab control mein</b>');
+  } else {
+    card('📈','Tulna ke liye data kam hai',
+      'Ek-do mahine ka aur hisaab aane do — phir bataunga ki ' +
+      '<b>kahan aapka kharch normal se zyada</b> ja raha hai');
+  }
+
+  /* 4b. Jahan kam kharch hua — ye batana bhi zaroori hai */
+  if(low.length){
+    var l = low[0];
+    card(catIcon(l.cat), '👏 ' + l.cat + ' — normal se kam',
+      '<b class="t-green num">' + money(l.now) + '</b> — average ' +
+      '<b class="num">' + money(l.avg) + '</b> se <b class="t-green num">' +
+      Math.abs(l.pct) + '% kam</b>. <b class="num">' + money(-l.diff) + '</b> bach gaya 🎉');
+  }
 
   /* 5. Udhar status */
   var active = uds.filter(function(u){ return !u.settled; });
@@ -4185,10 +4704,11 @@ function setMoreTab(tab){
 
   if(tab === 'budget')     renderBudgets();
   else if(tab === 'emi')   renderEmis();
-  else if(tab === 'bills'){ renderRecurring(); renderSubs(); renderBillsTotal(); }
+  else if(tab === 'bills'){ renderRecurring(); renderSubs(); renderBillsTotal(); renderBillPresets(); }
   else if(tab === 'fest')  renderFestive();
+  else if(tab === 'shagun')renderShagun();
   else if(tab === 'set')  { renderBackupStatus(); renderStorage(); renderTheme();
-                            renderVersionCard(); renderSimpleCard(); }
+                            renderVersionCard(); renderSimpleCard(); renderMyUpi(); }
 }
 /* Ek form panel kholna/band karna + icon badalna */
 function toggleForm(panelId, icoId, onOpen, onClose){
@@ -4199,6 +4719,13 @@ function toggleForm(panelId, icoId, onOpen, onClose){
   if(!open && onClose) onClose();
 }
 function clearFields(ids){ ids.forEach(function(id){ $(id).value = ''; $(id).classList.remove('bad'); }); }
+/* Form ko zabardasti band karo (toggle nahi — seedha band).
+   Zaroorat tab padti hai jab screen badal rahi ho: form khula
+   reh jaaye to agli baar toggle ulta chalta hai. */
+function closeFormPanel(panelId, icoId){
+  $(panelId).classList.remove('open');
+  if($(icoId)) $(icoId).textContent = '➕';
+}
 
 /* ─────────── BUDGET ─────────── */
 function saveBudget(){
@@ -4415,6 +4942,29 @@ function renderEmis(){
 }
 
 /* ─────────── BILLS: recurring ─────────── */
+
+/* Common bills ke chips. Tap karne par naam, category aur payment
+   teeno apne aap bhar jaate hain — jaise festival wali list mein. */
+function renderBillPresets(){
+  var box = $('billPresets'); if(!box) return;
+  box.innerHTML = '';
+  BILL_PRESETS.forEach(function(b){
+    var el = document.createElement('button');
+    el.className = 'qchip';
+    el.innerHTML = '<span class="qchip-ico">' + b.ico + '</span>' + esc(b.n);
+    el.addEventListener('click', function(){
+      $('rName').value = b.n;
+      $('rCat').value  = b.cat;
+      $('rPay').value  = b.pay;
+      /* Chuna hua chip highlight karo */
+      $$('#billPresets .qchip').forEach(function(x){ x.classList.remove('on'); });
+      el.classList.add('on');
+      $('rAmt').focus();                 /* ab sirf amount aur din bacha */
+    });
+    box.appendChild(el);
+  });
+}
+
 function saveRecurring(){
   var name = $('rName').value.trim();
   var amt  = parseFloat($('rAmt').value);
@@ -4431,6 +4981,7 @@ function saveRecurring(){
   toast('🔔 ' + name + ' — har mahine ' + day + ' ko yaad dilaunga','ok');
   toggleForm('rForm','rFormIco');
   clearFields(['rName','rAmt','rDay']);
+  $$('#billPresets .qchip').forEach(function(x){ x.classList.remove('on'); });
   renderRecurring(); renderBillsTotal(); renderHome();
 }
 function deleteRecurring(id){
@@ -4692,6 +5243,359 @@ function renderFestive(){
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   11b · SHAGUN / LENA-DENA REGISTER
+   ───────────────────────────────────────────────────────────────
+   Har Indian shaadi mein ek copy hoti hai jisme likha jaata hai ki
+   kisne kitna shagun diya. Agli baar unke ghar function ho to usse
+   zyada dena hota hai — isliye wo copy saalon tak sambhaal kar
+   rakhi jaati hai, aur aksar kho jaati hai.
+
+   Do level hain:
+     Function  — "Rahul ki shaadi, 12 Feb 2026"
+     Entry     — "Sharma ji · Rishtedaar · ₹2,100 · aaya"
+
+   Sabse kaam ki cheez: naam se dhoondo → us aadmi ka POORA history
+   dikh jaata hai, har function ka. Yahi baat copy nahi kar sakti.
+   ═══════════════════════════════════════════════════════════════ */
+
+function funcIcon(type){
+  for(var i = 0; i < FUNCTION_TYPES.length; i++)
+    if(FUNCTION_TYPES[i].id === type) return FUNCTION_TYPES[i].ico;
+  return '🎉';
+}
+/* Naam ko ek jaisa banao, taaki "Sharma Ji" aur "sharma ji" ek hi ginein */
+function normName(n){ return String(n || '').toLowerCase().replace(/\s+/g,' ').trim(); }
+
+/* Ek function ka total — kitna aaya, kitna diya */
+function funcTotals(fnId){
+  var inn = 0, out = 0, n = 0;
+  read(K.shagun).forEach(function(e){
+    if(e.fnId !== fnId) return;
+    n++;
+    if(e.dir === 'in') inn += e.amount; else out += e.amount;
+  });
+  return { in:inn, out:out, net:inn - out, count:n };
+}
+/* Ek aadmi ka poora history — har function mein kya hua */
+function personHistory(name){
+  var key = normName(name);
+  if(key.length < 2) return [];
+  var funcs = {};
+  read(K.funcs).forEach(function(f){ funcs[f.id] = f; });
+  return read(K.shagun)
+    .filter(function(e){ return normName(e.name).indexOf(key) > -1; })
+    .map(function(e){ return { e:e, f:funcs[e.fnId] }; })
+    .filter(function(r){ return r.f; })
+    .sort(function(a,b){ return dayKey(a.f.date) < dayKey(b.f.date) ? 1 : -1; });
+}
+
+/* ── Function add / delete ── */
+function saveFunction(){
+  var type = $('fnType').value;
+  var name = $('fnName').value.trim();
+  var date = $('fnDate').value;
+  if(!type){ toast('Function chuno','bad'); return; }
+  if(!date){ toast('Date chuno','bad'); return; }
+
+  var list = read(K.funcs);
+  list.push({ id:uid(), type:type, name:name || type, date:date, createdAt:nowStamp() });
+  write(K.funcs, list);
+  toast(funcIcon(type) + ' ' + (name || type) + ' ban gaya','ok');
+  toggleForm('fnForm','fnFormIco');
+  clearFields(['fnName']); $('fnDate').value = '';
+  renderFunctions();
+}
+function deleteFunction(id){
+  var f = read(K.funcs).filter(function(x){ return x.id === id; })[0];
+  var entries = read(K.shagun).filter(function(e){ return e.fnId === id; });
+  askConfirm({
+    icon:'🗑️', title:'Function delete?',
+    body:'<b>' + esc(f.name) + '</b> aur iski <b class="num">' + entries.length +
+         '</b> entries delete ho jaayengi.<br><br><span class="t-red">Ye undo nahi ho sakta.</span>',
+    yes:'Haan, delete karo',
+    onYes:function(){
+      write(K.funcs,  read(K.funcs).filter(function(x){ return x.id !== id; }));
+      write(K.shagun, read(K.shagun).filter(function(e){ return e.fnId !== id; }));
+      toast('Function delete hua','ok');
+      closeFunction();
+    }
+  });
+}
+
+/* ── Entry add / delete ── */
+function saveShagun(){
+  var name = $('sgName').value.trim();
+  var amt  = parseFloat($('sgAmt').value);
+  if(!S.fnOpen){ toast('Pehle function kholo','bad'); return; }
+  if(!name){ $('sgName').classList.add('bad'); toast('Naam daalo','bad'); return; }
+  if(!amt || amt <= 0){ $('sgAmt').classList.add('bad'); toast('Valid amount daalo','bad'); return; }
+  $('sgName').classList.remove('bad'); $('sgAmt').classList.remove('bad');
+
+  var entry = {
+    id:uid(), fnId:S.fnOpen, name:name, amount:amt,
+    relation:$('sgRel').value || 'Rishtedaar',
+    dir:S.sgDir || 'in', note:$('sgNote').value.trim(),
+    createdAt:nowStamp()
+  };
+  var list = read(K.shagun); list.push(entry);
+  write(K.shagun, list);
+
+  toast((entry.dir === 'in' ? '📥 ' : '📤 ') + name + ' — ' + money(amt), 'ok', function(){
+    write(K.shagun, read(K.shagun).filter(function(e){ return e.id !== entry.id; }));
+    toast('↩ Wapas hataa diya','ok'); renderShagun();
+  });
+  clearFields(['sgName','sgAmt','sgNote']);
+  $('sgHistory').innerHTML = '';
+  $('sgName').focus();
+  renderShagun();
+}
+function deleteShagun(id){
+  var list = read(K.shagun);
+  var e = list.filter(function(x){ return x.id === id; })[0];
+  write(K.shagun, list.filter(function(x){ return x.id !== id; }));
+  toast('Entry hataa di','ok', function(){
+    var back = read(K.shagun); back.push(e); write(K.shagun, back);
+    toast('↩ Wapas aa gayi','ok'); renderShagun();
+  });
+  renderShagun();
+}
+function setShagunDir(dir){
+  S.sgDir = dir;
+  $('sgIn').className  = 'uf-type-btn' + (dir === 'in'  ? ' sel-lena' : '');
+  $('sgOut').className = 'uf-type-btn' + (dir === 'out' ? ' sel-dena' : '');
+  var b = $('sgSave');
+  b.className = 'btn btn-block ' + (dir === 'in' ? 'btn-green' : 'btn-red');
+  b.textContent = dir === 'in' ? '📥 Aaya — Save Karo' : '📤 Diya — Save Karo';
+}
+
+/* ── Function kholna / band karna ──
+   Ek hi jagah se, taaki form aur filter hamesha saaf shuru hon.
+   Pehle ye do jagah bikhra tha aur form khula reh jaata tha —
+   phir "Add" dabane par wo ulta BAND ho jaata tha. */
+function openFunction(id){
+  S.fnOpen = id;
+  S.sgFilter = 'all';
+  S.sgDir = 'in';
+  closeFormPanel('sgForm','sgFormIco');
+  clearFields(['sgName','sgAmt','sgNote']);
+  $('sgHistory').innerHTML = '';
+  $$('#sgFilters .fpill').forEach(function(x){ x.classList.remove('active'); });
+  var all = $('sgFilters').querySelector('[data-sg="all"]');
+  if(all) all.classList.add('active');
+  renderShagun();
+  $('main').scrollTop = 0;
+}
+function closeFunction(){
+  S.fnOpen = null;
+  closeFormPanel('sgForm','sgFormIco');
+  closeFormPanel('fnForm','fnFormIco');
+  renderShagun();
+  $('main').scrollTop = 0;
+}
+
+/* ── Render ── */
+function renderShagun(){
+  var inDetail = !!S.fnOpen && read(K.funcs).some(function(f){ return f.id === S.fnOpen; });
+  $('shagunHome').hidden   = inDetail;
+  $('shagunDetail').hidden = !inDetail;
+  if(inDetail) renderFuncDetail(); else renderFunctions();
+}
+
+function renderFunctions(){
+  var funcs = read(K.funcs).slice().sort(function(a,b){
+    return dayKey(a.date) < dayKey(b.date) ? 1 : -1;      /* naya pehle */
+  });
+  var box = $('fnList'); box.innerHTML = '';
+  $('shagunIntro').style.display = funcs.length ? 'none' : 'flex';
+
+  if(!funcs.length){
+    box.innerHTML = emptyHTML('💍','Koi function nahi',
+      '➕ Add se shaadi, mundan ya koi bhi function banao');
+    return;
+  }
+  funcs.forEach(function(f, i){
+    var t = funcTotals(f.id);
+    var card = document.createElement('div');
+    card.className = 'card card-top gcard c-gold';
+    card.style.animationDelay = i * 0.05 + 's';
+    card.innerHTML =
+      '<div class="gcard-head">' +
+        '<div class="gcard-l">' +
+          '<div class="row-ico">' + funcIcon(f.type) + '</div>' +
+          '<div><div class="gcard-name">' + esc(f.name) + '</div>' +
+          '<div class="gcard-note">' + esc(f.type) + ' · ' + fmtDate(f.date) + '</div></div>' +
+        '</div>' +
+        '<div class="gcard-r">' +
+          '<div class="gcard-amt num t-green">+' + money(t.in) + '</div>' +
+          (t.out > 0 ? '<div class="gcard-note num t-red">−' + money(t.out) + '</div>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="gcard-foot">' +
+        '<span class="pill c-mute num">' + t.count +
+          (t.count === 1 ? ' entry' : ' entries') + '</span>' +
+        '<span class="gcard-note">Kholne ke liye tap karo ›</span>' +
+        '<button class="btn-icon" data-fdel="' + f.id + '" aria-label="Delete">🗑</button>' +
+      '</div>';
+    card.addEventListener('click', function(e){
+      if(e.target.getAttribute('data-fdel')){ deleteFunction(f.id); return; }
+      openFunction(f.id);
+    });
+    box.appendChild(card);
+  });
+}
+
+function renderFuncDetail(){
+  var f = read(K.funcs).filter(function(x){ return x.id === S.fnOpen; })[0];
+  if(!f){ S.fnOpen = null; renderShagun(); return; }
+  var t = funcTotals(f.id);
+
+  $('fnHead').innerHTML =
+    '<div style="display:flex;align-items:center;gap:var(--s3)">' +
+      '<div style="font-size:34px">' + funcIcon(f.type) + '</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div class="gcard-name" style="font-size:var(--fs-lg)">' + esc(f.name) + '</div>' +
+        '<div class="gcard-note">' + esc(f.type) + ' · ' + fmtDate(f.date) + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="snap-grid" style="margin-top:var(--s3)">' +
+      '<div class="snap-cell"><span class="snap-ico">📥</span><span class="snap-lbl">Aaya</span>' +
+        '<span class="snap-val num t-green">' + money(t.in) + '</span></div>' +
+      '<div class="snap-cell"><span class="snap-ico">📤</span><span class="snap-lbl">Diya</span>' +
+        '<span class="snap-val num t-red">' + money(t.out) + '</span></div>' +
+      '<div class="snap-cell"><span class="snap-ico">📊</span><span class="snap-lbl">Net</span>' +
+        '<span class="snap-val num ' + (t.net >= 0 ? 't-green' : 't-red') + '">' +
+        money(t.net) + '</span></div>' +
+      '<div class="snap-cell"><span class="snap-ico">👥</span><span class="snap-lbl">Aadmi</span>' +
+        '<span class="snap-val num">' + t.count + '</span></div>' +
+    '</div>';
+
+  var all = read(K.shagun).filter(function(e){ return e.fnId === f.id; });
+  var list = S.sgFilter === 'in'  ? all.filter(function(e){ return e.dir === 'in'; })
+           : S.sgFilter === 'out' ? all.filter(function(e){ return e.dir === 'out'; })
+           : all;
+  list.sort(function(a,b){ return b.amount - a.amount; });      /* bade amount pehle */
+
+  $('sgFoot').hidden = !all.length;
+  var box = $('sgList'); box.innerHTML = '';
+  if(!list.length){
+    box.innerHTML = emptyHTML('💍','Koi entry nahi','➕ Add se naam aur amount daalo');
+    return;
+  }
+  list.forEach(function(e, i){
+    var isIn = e.dir === 'in';
+    var row = document.createElement('div');
+    row.className = 'row';
+    row.style.animationDelay = Math.min(i,10) * 0.03 + 's';
+    row.innerHTML =
+      '<div class="row-ico" style="background:var(--' + (isIn?'green':'red') + '-bg)">' +
+        (isIn ? '📥' : '📤') + '</div>' +
+      '<div class="row-main">' +
+        '<div class="row-title">' + esc(e.name) + '</div>' +
+        '<div class="row-meta">' +
+          '<span class="pill c-mute">' + esc(e.relation) + '</span>' +
+          (e.note ? '<span class="t-mute" style="font-size:var(--fs-xs)">' + esc(e.note) + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="row-amt num ' + (isIn?'t-green':'t-red') + '">' +
+        (isIn?'+':'−') + money(e.amount) + '</div>' +
+      '<button class="btn-icon txn-del" data-sdel="' + e.id + '" aria-label="Delete">🗑</button>';
+    row.addEventListener('click', function(ev){
+      if(ev.target.getAttribute('data-sdel')) deleteShagun(e.id);
+    });
+    box.appendChild(row);
+  });
+}
+
+/* Naam type karte hi uska pichhla history dikhao — yahi is feature
+   ki asli taakat hai. Copy ye kabhi nahi kar sakti. */
+function renderNameHistory(){
+  var box = $('sgHistory'); if(!box) return;
+  var rows = personHistory($('sgName').value).filter(function(r){ return r.e.fnId !== S.fnOpen; });
+  if(!rows.length){ box.innerHTML = ''; return; }
+  box.innerHTML =
+    '<div class="notice c-info" style="margin:0 0 var(--s3)">' +
+      '<span class="notice-ico">🕐</span>' +
+      '<div class="notice-body">' +
+        '<div class="notice-title">Pichhli baar</div>' +
+        '<div class="notice-sub">' +
+          rows.slice(0,3).map(function(r){
+            return (r.e.dir === 'in' ? '📥 aaya ' : '📤 diya ') +
+                   '<b>' + money(r.e.amount) + '</b> — ' +
+                   esc(r.f.name) + ' (' + fmtDate(r.f.date) + ')';
+          }).join('<br>') +
+        '</div>' +
+      '</div>' +
+    '</div>';
+}
+
+/* Naam se dhoondo — har function ka record ek saath */
+function renderShagunSearch(){
+  var box = $('shagunSearchOut'); if(!box) return;
+  var q = $('shagunSearch').value;
+  if(normName(q).length < 2){ box.innerHTML = ''; return; }
+
+  var rows = personHistory(q);
+  if(!rows.length){
+    box.innerHTML = '<div class="empty-hint" style="padding:var(--s3) 0">' +
+      'Is naam ka koi record nahi mila</div>';
+    return;
+  }
+  var inn = 0, out = 0;
+  rows.forEach(function(r){ if(r.e.dir === 'in') inn += r.e.amount; else out += r.e.amount; });
+
+  box.innerHTML =
+    '<div class="card card-top c-gold card-pad" style="margin-bottom:var(--s3)">' +
+      '<div class="eyebrow">' + rows.length + ' record mile</div>' +
+      '<div style="display:flex;gap:var(--s4);margin:var(--s2) 0 var(--s3)">' +
+        '<span>📥 Aaya <b class="t-green num">' + money(inn) + '</b></span>' +
+        '<span>📤 Diya <b class="t-red num">' + money(out) + '</b></span>' +
+      '</div>' +
+      rows.slice(0,8).map(function(r){
+        return '<div class="rpt-row" style="margin-bottom:var(--s1)">' +
+          '<div class="rpt-row-l"><div class="rpt-row-i">' + funcIcon(r.f.type) + '</div>' +
+          '<div><div class="rpt-row-t">' + esc(r.e.name) + '</div>' +
+          '<div class="rpt-row-s">' + esc(r.f.name) + ' · ' + fmtDate(r.f.date) + '</div></div></div>' +
+          '<div class="rpt-row-v num ' + (r.e.dir === 'in' ? 't-green' : 't-red') + '">' +
+            (r.e.dir === 'in' ? '+' : '−') + money(r.e.amount) + '</div></div>';
+      }).join('') +
+    '</div>';
+}
+
+/* Poora register text mein share karo */
+function shareShagun(){
+  var f = read(K.funcs).filter(function(x){ return x.id === S.fnOpen; })[0];
+  if(!f) return;
+  var t = funcTotals(f.id);
+  var all = read(K.shagun).filter(function(e){ return e.fnId === f.id; })
+            .sort(function(a,b){ return b.amount - a.amount; });
+
+  var L = [ funcIcon(f.type) + ' *' + f.name + '*', f.type + ' · ' + fmtDate(f.date), '' ];
+  var inn = all.filter(function(e){ return e.dir === 'in'; });
+  var out = all.filter(function(e){ return e.dir === 'out'; });
+  if(inn.length){
+    L.push('📥 *Aaya — ' + money(t.in) + '*');
+    inn.forEach(function(e){ L.push('• ' + e.name + ' — ' + money(e.amount) +
+      (e.relation ? ' (' + e.relation + ')' : '')); });
+    L.push('');
+  }
+  if(out.length){
+    L.push('📤 *Diya — ' + money(t.out) + '*');
+    out.forEach(function(e){ L.push('• ' + e.name + ' — ' + money(e.amount) +
+      (e.relation ? ' (' + e.relation + ')' : '')); });
+    L.push('');
+  }
+  L.push('_PaisaBook — Apna Paisa, Apna Hisaab_');
+  var text = L.join('\n');
+
+  /* Share API ho to seedha, warna WhatsApp link */
+  if(navigator.share){
+    navigator.share({ title:f.name, text:text }).catch(function(){});
+  } else {
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
    12 · SETTINGS · BACKUP · EXPORT · REPORT
    ═══════════════════════════════════════════════════════════════ */
 
@@ -4704,6 +5608,25 @@ function applyTheme(theme){
   document.querySelector('meta[name=theme-color]')
     .setAttribute('content', theme === 'light' ? '#F3F3F8' : '#0A0A0F');
   renderTheme();
+}
+/* ── Meri UPI ID ──
+   Sirf is phone mein rehti hai (settings ke saath). Kahin bheji
+   nahi jaati — bas WhatsApp message banate waqt use hoti hai. */
+function renderMyUpi(){
+  var el = $('myUpi'); if(!el) return;
+  el.value = readObj(K.settings, {}).myUpi || '';
+  el.classList.remove('bad');
+  $('myUpiErr').classList.remove('show');
+}
+function saveMyUpi(){
+  var v = $('myUpi').value.trim();
+  var bad = v.length > 0 && !isValidUpi(v);
+  $('myUpi').classList.toggle('bad', bad);
+  $('myUpiErr').classList.toggle('show', bad);
+  if(bad) return;                                /* galat shape save mat karo */
+  var s = readObj(K.settings, {});
+  s.myUpi = v;
+  writeObj(K.settings, s);
 }
 function renderTheme(){
   var light = S.theme === 'light';
@@ -4787,6 +5710,7 @@ function backupPayload(){
       budgets:      read(K.budget), emis: read(K.emi),
       subscriptions:read(K.subs), recurring: read(K.rec),
       festivals:    read(K.fest), settings: readObj(K.settings,{}),
+      functions:    read(K.funcs), shagun: read(K.shagun),  /* shaadi wali copy bhi */
       merchants:    readObj(K.merchants,{})   /* aapki sikhaayi hui categories bhi backup mein */
     }
   };
@@ -4961,7 +5885,8 @@ function previewRestore(raw){
 function applyRestore(p){
   var d = p.data;
   var map = [[K.txn,'transactions'],[K.udhar,'udhar'],[K.budget,'budgets'],
-             [K.emi,'emis'],[K.subs,'subscriptions'],[K.rec,'recurring'],[K.fest,'festivals']];
+             [K.emi,'emis'],[K.subs,'subscriptions'],[K.rec,'recurring'],[K.fest,'festivals'],
+             [K.funcs,'functions'],[K.shagun,'shagun']];
   map.forEach(function(pair){ if(d[pair[1]]) write(pair[0], d[pair[1]]); });
   if(d.settings)  writeObj(K.settings,  d.settings);
   if(d.merchants) writeObj(K.merchants, d.merchants);
@@ -5247,11 +6172,32 @@ function showReport(){
       h += row(medals[i], c.cat, catIcon(c.cat) + ' ' + c.cat, money(c.amt), 't-red');
     });
   }
-  h += '<button class="btn btn-lg btn-block btn-soft c-wa" id="rptWa" ' +
-       'style="margin-top:var(--s5)">💬 WhatsApp pe share karo</button>';
+  /* ── Share ke do tareeke ──
+     Tasveer pehle rakhi hai, kyunki log tasveer hi share karte hain. */
+  h += '<div class="sheet-foot">' +
+         '<button class="card set c-mute" id="hideAmtRow" ' +
+                 'style="width:100%;text-align:left;margin-bottom:var(--s2)">' +
+           '<div class="set-ico">🙈</div>' +
+           '<div class="set-body">' +
+             '<div class="set-title">Amount chhupao</div>' +
+             '<div class="set-sub">Sirf % aur streak jayega — rupaye nahi</div>' +
+           '</div>' +
+           '<div class="switch" id="hideAmtSwitch"><i></i></div>' +
+         '</button>' +
+         '<button class="btn btn-lg btn-block btn-primary" id="btnShareImg">' +
+           '📸 Tasveer share karo</button>' +
+         '<button class="btn btn-block btn-soft c-wa" id="rptWa" ' +
+                 'style="margin-top:var(--s2)">💬 Text bhejo</button>' +
+       '</div>';
 
   $('rptBody').innerHTML = h;
   $('rptWa').addEventListener('click', shareReportWA);
+  $('btnShareImg').addEventListener('click', function(){ shareCardImage(S.hideAmounts); });
+  $('hideAmtRow').addEventListener('click', function(){
+    S.hideAmounts = !S.hideAmounts;
+    $('hideAmtSwitch').classList.toggle('on', S.hideAmounts);
+  });
+  $('hideAmtSwitch').classList.toggle('on', S.hideAmounts);
   openSheet('reportSheet');
 
   function stat(ico, label, val, cls){
@@ -5266,6 +6212,204 @@ function showReport(){
       '<div class="rpt-row-v num ' + cls + '">' + esc(val) + '</div></div>';
   }
 }
+/* ═══════════════════════════════════════════════════════════════
+   12d · REPORT KI TASVEER (share ke liye)
+   ───────────────────────────────────────────────────────────────
+   KYUN: India mein log text nahi, TASVEER share karte hain —
+   WhatsApp status, family group, story. Text waala report koi
+   forward nahi karta; ek sundar card ki photo log khud lagate hain.
+
+   KAISE: canvas pe card banate hain → PNG → navigator.share() se
+   seedha WhatsApp. Share API 92.77% browsers pe chalta hai; jahan
+   nahi chalta wahan file download ho jaati hai.
+
+   PRIVACY: "Amount chhupao" switch hai. Har koi apni income nahi
+   dikhana chahta — phir sirf % aur streak jaata hai, rupaye nahi.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Card ka size: 1080×1350 — WhatsApp status aur Instagram dono ke
+   liye theek baithta hai (4:5 portrait). */
+var CARD_W = 1080, CARD_H = 1350;
+
+function buildShareCard(hideAmounts){
+  var t  = totals(monthTxns(read(K.txn), S.month, S.year));
+  var u  = udharTotals(read(K.udhar));
+  var h  = healthScore();
+  var streak = parseInt(localStorage.getItem(K.streak) || '0', 10);
+  var cats = catTotals(monthTxns(read(K.txn), S.month, S.year));
+
+  var c = document.createElement('canvas');
+  c.width = CARD_W; c.height = CARD_H;
+  var x = c.getContext('2d');
+
+  /* ── Background ── */
+  var bg = x.createLinearGradient(0, 0, CARD_W, CARD_H);
+  bg.addColorStop(0, '#12121A');
+  bg.addColorStop(1, '#0A0A0F');
+  x.fillStyle = bg; x.fillRect(0, 0, CARD_W, CARD_H);
+
+  /* Upar gold ki patti */
+  var gold = x.createLinearGradient(0, 0, CARD_W, 0);
+  gold.addColorStop(0, '#F0C040'); gold.addColorStop(1, '#E08020');
+  x.fillStyle = gold; x.fillRect(0, 0, CARD_W, 10);
+
+  var F = function(size, weight){
+    return weight + ' ' + size + 'px "DM Sans", system-ui, sans-serif';
+  };
+  var center = CARD_W / 2;
+
+  /* ── Header ── */
+  x.textAlign = 'center';
+  x.fillStyle = '#F0C040'; x.font = F(40, '700');
+  x.fillText('₹ PaisaBook', center, 110);
+
+  x.fillStyle = '#9A9AC4'; x.font = F(34, '500');
+  x.fillText('Mera Hisaab', center, 168);
+
+  x.fillStyle = '#F0F0F5'; x.font = F(76, '800');
+  x.fillText(MONTHS[S.month] + ' ' + S.year, center, 268);
+
+  /* ── Bada number: bachat % ── */
+  var pct = t.pct;
+  var pctCol = pct === null ? '#9A9AC4' : pct >= 20 ? '#3ECF80' : pct >= 10 ? '#F0C040' : '#FF5C6E';
+  roundRect(x, 90, 330, CARD_W - 180, 290, 40, '#1A1A24', '#2A2A38');
+
+  x.fillStyle = '#9A9AC4'; x.font = F(32, '600');
+  x.fillText('IS MAHINE BACHAYA', center, 400);
+
+  x.fillStyle = pctCol; x.font = F(170, '800');
+  x.fillText(pct === null ? '—' : pct + '%', center, 548);
+
+  if(!hideAmounts && t.net !== 0){
+    x.fillStyle = '#9A9AC4'; x.font = F(34, '500');
+    x.fillText(money(t.net), center, 598);
+  }
+
+  /* ── Teen box: income / kharch / health ── */
+  var boxW = (CARD_W - 180 - 40) / 3, boxY = 660;
+  var boxes = hideAmounts
+    ? [['💰','Income','—','#3ECF80'],
+       ['💸','Kharch','—','#FF5C6E'],
+       ['🏥','Health', (h.hasData ? h.total + '/100' : '—'), '#F0C040']]
+    : [['💰','Income', moneyShort(t.inc), '#3ECF80'],
+       ['💸','Kharch', moneyShort(t.exp), '#FF5C6E'],
+       ['🏥','Health', (h.hasData ? h.total + '/100' : '—'), '#F0C040']];
+
+  boxes.forEach(function(b, i){
+    var bx = 90 + i * (boxW + 20);
+    roundRect(x, bx, boxY, boxW, 190, 28, '#1A1A24', '#2A2A38');
+    x.font = F(44, '400'); x.fillStyle = '#F0F0F5';
+    x.fillText(b[0], bx + boxW/2, boxY + 62);
+    x.font = F(26, '600'); x.fillStyle = '#9A9AC4';
+    x.fillText(b[1].toUpperCase(), bx + boxW/2, boxY + 108);
+    x.font = F(40, '800'); x.fillStyle = b[3];
+    x.fillText(b[2], bx + boxW/2, boxY + 160);
+  });
+
+  /* ── Neeche ke optional blocks: streak · top kharch · udhar ──
+     Ye teeno hamesha nahi hote. Pehle inko ek-ek karke fixed
+     jagah pe likha jaata tha — teeno aa gaye to aakhri block
+     footer ke upar chadh jaata tha aur text ek doosre pe likha
+     dikhta tha.
+
+     Ab pehle list banti hai, phir naapte hain ki kitni jagah
+     bachi hai. Na bache to sabse kam zaroori block (udhar, phir
+     top kharch) chhod dete hain. Adhoora card bhaga hua card se
+     behtar hai. */
+  var BH = 96, GAP = 16;                      /* block ki height aur beech ki jagah */
+  var blocks = [];
+
+  if(streak >= 2) blocks.push(function(y){
+    roundRect(x, 90, y, CARD_W - 180, BH, 28, 'rgba(255,154,60,.10)', 'rgba(255,154,60,.28)');
+    x.textAlign = 'center'; x.font = F(40, '700'); x.fillStyle = '#FF9A3C';
+    x.fillText('🔥 ' + streak + ' din lagataar hisaab rakha', center, y + 62);
+  });
+
+  if(cats.length) blocks.push(function(y){
+    roundRect(x, 90, y, CARD_W - 180, BH, 28, '#1A1A24', '#2A2A38');
+    x.textAlign = 'left';
+    x.font = F(34, '600'); x.fillStyle = '#9A9AC4';
+    x.fillText('Top kharch', 135, y + 40);
+    x.font = F(40, '700'); x.fillStyle = '#F0F0F5';
+    x.fillText(cats[0].cat, 135, y + 80);
+    if(!hideAmounts){
+      x.textAlign = 'right'; x.font = F(42, '800'); x.fillStyle = '#FF5C6E';
+      x.fillText(money(cats[0].amt), CARD_W - 135, y + 68);
+    }
+    x.textAlign = 'center';
+  });
+
+  if(!hideAmounts && (u.lena > 0 || u.dena > 0)) blocks.push(function(y){
+    roundRect(x, 90, y, CARD_W - 180, BH, 28, '#1A1A24', '#2A2A38');
+    x.textAlign = 'center'; x.font = F(34, '600'); x.fillStyle = '#9A9AC4';
+    x.fillText('🤝 Lena ' + moneyShort(u.lena) + '   ·   Dena ' + moneyShort(u.dena),
+               center, y + 60);
+  });
+
+  var areaTop = boxY + 190 + 28;              /* teen box ke theek neeche */
+  var areaBot = CARD_H - 128;                 /* footer ke upar saans lene ki jagah */
+  var room    = areaBot - areaTop;
+  while(blocks.length && blocks.length * BH + (blocks.length - 1) * GAP > room) blocks.pop();
+
+  /* Jitne bache, unko bachi hui jagah ke beech mein rakho */
+  var used = blocks.length ? blocks.length * BH + (blocks.length - 1) * GAP : 0;
+  var y2 = areaTop + Math.max(0, (room - used) / 2);
+  blocks.forEach(function(draw){ draw(y2); y2 += BH + GAP; });
+
+  /* ── Footer ── */
+  x.fillStyle = '#6E6E90'; x.font = F(30, '500');
+  x.fillText('Apna Paisa, Apna Hisaab', center, CARD_H - 72);
+  x.fillStyle = '#F0C040'; x.font = F(32, '700');
+  x.fillText('PaisaBook', center, CARD_H - 30);
+
+  return c;
+}
+/* Gol kone waala box — canvas mein ye khud se nahi hota */
+function roundRect(x, px, py, w, h, r, fill, stroke){
+  x.beginPath();
+  if(x.roundRect) x.roundRect(px, py, w, h, r);
+  else {
+    x.moveTo(px + r, py);
+    x.arcTo(px + w, py,     px + w, py + h, r);
+    x.arcTo(px + w, py + h, px,     py + h, r);
+    x.arcTo(px,     py + h, px,     py,     r);
+    x.arcTo(px,     py,     px + w, py,     r);
+    x.closePath();
+  }
+  if(fill){ x.fillStyle = fill; x.fill(); }
+  if(stroke){ x.strokeStyle = stroke; x.lineWidth = 2; x.stroke(); }
+}
+
+/* Card ko PNG bana kar share karo (ya download) */
+function shareCardImage(hideAmounts){
+  var btn = $('btnShareImg');
+  if(btn){ btn.disabled = true; btn.textContent = 'Bana raha hoon…'; }
+
+  try{
+    buildShareCard(hideAmounts).toBlob(function(blob){
+      if(btn){ btn.disabled = false; btn.textContent = '📸 Tasveer share karo'; }
+      if(!blob){ toast('Tasveer nahi ban payi','bad'); return; }
+
+      var file = new File([blob], 'paisabook-' + MONTHS[S.month] + '-' + S.year + '.png',
+                          { type:'image/png' });
+      /* Pehle asli share try karo — WhatsApp, Instagram, kahin bhi */
+      if(navigator.canShare && navigator.canShare({ files:[file] })){
+        navigator.share({
+          files:[file],
+          title:'PaisaBook — ' + MONTHS[S.month] + ' ' + S.year
+        }).catch(function(){ /* user ne cancel kiya — kuch mat karo */ });
+      } else {
+        /* Share na chale to download kar do, banda khud bhej dega */
+        download(file.name, blob);
+        toast('📥 Tasveer download ho gayi — ab share kar do','ok');
+      }
+    }, 'image/png');
+  } catch(e){
+    if(btn){ btn.disabled = false; btn.textContent = '📸 Tasveer share karo'; }
+    toast('Tasveer nahi ban payi','bad');
+  }
+}
+
 function shareReportWA(){
   var mTxns = monthTxns(read(K.txn), S.month, S.year);
   var t = totals(mTxns), cats = catTotals(mTxns);
@@ -5529,13 +6673,19 @@ function wireEvents(){
   $('qAmt').addEventListener('keydown', function(e){
     if(e.key === 'Enter') saveQuickAdd();     /* Enter se bhi save */
   });
+  $('qNote').addEventListener('input', updateQuickState);
+  $('qNote').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') saveQuickAdd();
+  });
   $('qSave').addEventListener('click', saveQuickAdd);
   $('qMore').addEventListener('click', function(){
     /* Poora form chahiye? Amount le kar Add screen par le jao */
     var v = $('qAmt').value;
     go('add');
+    var nt = $('qNote').value;
     if(v){ $('amtIn').value = v; updateAmtHint(); }
     if(S.qCat){ setAddType('expense'); S.addCat = S.qCat; renderAddCats(); }
+    if(nt) $('noteIn').value = nt;
   });
 
   /* Add */
@@ -5567,6 +6717,11 @@ function wireEvents(){
   $('uTabDena').addEventListener('click', function(){ setUdharTab('dena'); });
   $('uFormToggle').addEventListener('click', toggleUdharForm);
   $('uSave').addEventListener('click', saveUdhar);
+  /* Contact button sirf tab dikhao jab browser sach mein support kare */
+  $('uContact').hidden = !contactPickerOK();
+  $('uContact').addEventListener('click', pickContact);
+  /* Meri UPI ID — type karte hi save, galat shape pe laal */
+  $('myUpi').addEventListener('input', saveMyUpi);
   $$('#uFilters .fpill').forEach(function(p){
     p.addEventListener('click', function(){ setUdharFilter(p.getAttribute('data-f')); });
   });
@@ -5587,13 +6742,53 @@ function wireEvents(){
   $('eFormToggle').addEventListener('click', function(){ toggleForm('eForm','eFormIco'); });
   $('eSave').addEventListener('click', saveEmi);
   $('rFormToggle').addEventListener('click', function(){
-    toggleForm('rForm','rFormIco'); });
+    toggleForm('rForm','rFormIco',
+      renderBillPresets,                                /* khulte waqt chips banao */
+      function(){                                       /* band karte waqt saaf karo */
+        clearFields(['rName','rAmt','rDay']);
+        $$('#billPresets .qchip').forEach(function(x){ x.classList.remove('on'); });
+      });
+  });
   $('rSave').addEventListener('click', saveRecurring);
   $('sFormToggle').addEventListener('click', function(){
     toggleForm('sForm','sFormIco', function(){ if(!$('sDate').value) $('sDate').value = todayKey(); }); });
   $('sSave').addEventListener('click', saveSub);
   $('fFormToggle').addEventListener('click', function(){ toggleForm('fForm','fFormIco'); });
   $('fSave').addEventListener('click', saveFestive);
+
+  /* ── Shagun register ── */
+  $('fnFormToggle').addEventListener('click', function(){
+    toggleForm('fnForm','fnFormIco', function(){
+      if(!$('fnDate').value) $('fnDate').value = todayKey();   /* aaj default */
+    });
+  });
+  $('fnSave').addEventListener('click', saveFunction);
+  $('fnName').addEventListener('keydown', function(e){ if(e.key === 'Enter') saveFunction(); });
+  $('fnBack').addEventListener('click', closeFunction);
+  $('shagunSearch').addEventListener('input', renderShagunSearch);
+  $('sgFormToggle').addEventListener('click', function(){
+    toggleForm('sgForm','sgFormIco',
+      function(){ setShagunDir(S.sgDir || 'in'); $('sgName').focus(); },
+      function(){ clearFields(['sgName','sgAmt','sgNote']); $('sgHistory').innerHTML = ''; });
+  });
+  /* Naam type karte hi pichhla history dikhao */
+  $('sgName').addEventListener('input', renderNameHistory);
+  $('sgIn').addEventListener('click',  function(){ setShagunDir('in');  });
+  $('sgOut').addEventListener('click', function(){ setShagunDir('out'); });
+  $('sgAmt').addEventListener('input', function(){
+    if(parseFloat(this.value) > LIMIT.amount) this.value = LIMIT.amount;
+  });
+  $('sgAmt').addEventListener('keydown', function(e){ if(e.key === 'Enter') saveShagun(); });
+  $('sgSave').addEventListener('click', saveShagun);
+  $$('#sgFilters .fpill').forEach(function(p){
+    p.addEventListener('click', function(){
+      S.sgFilter = p.getAttribute('data-sg');
+      $$('#sgFilters .fpill').forEach(function(x){ x.classList.remove('active'); });
+      p.classList.add('active');
+      renderFuncDetail();
+    });
+  });
+  $('sgShare').addEventListener('click', shareShagun);
 
   /* Help (?) — ek hi listener saare (?) buttons sambhalta hai.
      Delegation: click poore document pe sunte hain, phir dekhte
@@ -5672,6 +6867,9 @@ function fillAllSelects(){
   fillSelect($('rPay'),   PAYMENTS,     'UPI');
   fillSelect($('sCat'),   CATS.expense, 'Entertainment');
   fillSelect($('fName'),  FESTIVALS,    '', 'Festival chuno');
+  /* Shagun: function ke type dropdown mein icon bhi dikhe */
+  fillSelect($('fnType'), FUNCTION_TYPES, 'Shaadi');
+  fillSelect($('sgRel'),  RELATIONS,      'Rishtedaar');
 }
 
 /* ── PWA manifest ──
