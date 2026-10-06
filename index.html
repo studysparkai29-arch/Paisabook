@@ -45,7 +45,7 @@
      = user ko "Update karo" ka banner dikhta hai.
      BADALNA ZAROORI HAI: har baar GitHub pe naya file daalo, to ye
      number bhi badhao (aur JS mein APP.version bhi — dono same rakho). -->
-<meta name="pb-version" content="2.7">
+<meta name="pb-version" content="3.0">
 <meta name="theme-color" content="#0A0A0F">
 <meta name="description" content="PaisaBook — offline budget, udhar aur bill tracker. Aapka data sirf aapke phone mein.">
 <meta name="mobile-web-app-capable" content="yes">
@@ -473,7 +473,10 @@ select.input{background-image:none}
   transform:translateX(-50%) translateY(16px);
   /* width:max-content = jitna text hai utni chaudai. Isse chhota
      message ek hi line mein rehta hai, lamba message wrap hota hai. */
-  width:max-content;max-width:min(calc(100vw - var(--s6)), var(--maxw));z-index:900;
+  /* Sheet (1000) se UPAR. Pehle 900 tha — matlab jab koi sheet
+     khuli ho (bill, edit, SMS) tab toast uske PEECHE chhup jaata
+     tha aur UNDO dabaya hi nahi ja sakta tha. */
+  width:max-content;max-width:min(calc(100vw - var(--s6)), var(--maxw));z-index:1100;
   background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);
   box-shadow:var(--sh-2);padding:var(--s3) var(--s4);
   display:flex;align-items:center;gap:var(--s3);
@@ -837,8 +840,12 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
 .ph-item{display:flex;align-items:center;justify-content:space-between;
          padding:var(--s2) var(--s3);background:var(--card-2);
          border:1px solid var(--border);border-radius:var(--r-sm);margin-top:var(--s1)}
-.ph-date{font-size:var(--fs-sm);color:var(--text-2)}
-.ph-amt{font-family:var(--font-head);font-size:var(--fs-md);font-weight:700;color:var(--green)}
+.ph-date{font-size:var(--fs-sm);color:var(--text-2);min-width:0;overflow:hidden;
+         text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+/* Amount kabhi toot kar do line mein nahi jaana chahiye — "+" upar
+   aur number neeche padhne mein bekaar lagta hai */
+.ph-amt{font-family:var(--font-head);font-size:var(--fs-md);font-weight:700;color:var(--green);
+        white-space:nowrap;flex-shrink:0;margin-left:auto}
 .u-actions{display:flex;gap:var(--s2)}
 .u-actions .btn{flex:1}
 .u-actions .btn.narrow{flex:0 0 auto}
@@ -846,6 +853,7 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
             padding:var(--s3);background:var(--card-2);
             border:1.5px solid var(--green-br);border-radius:var(--r-md)}
 .pay-inline.open{display:flex}
+.pay-inline.red{border-color:var(--red-br)}
 .pay-inline .field-row{align-items:center}
 .settled-strip{display:flex;align-items:center;justify-content:center;gap:var(--s2);
                padding:var(--s2);background:var(--green-bg);
@@ -1007,10 +1015,97 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
 .splash-name b{color:var(--gold)}
 .splash-tag{font-size:var(--fs-md);color:var(--text-2);letter-spacing:.4px;
             animation:noticeIn .4s var(--ease) .45s both}
+
+/* ═══════════════════════════════════════════════════════════════
+   8 · LOCK SCREEN + BILL KI PHOTO
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Lock ──
+   Splash (500) se bhi upar, taaki app kholte hi sabse pehle yahi
+   dikhe aur neeche ka data ek pal ke liye bhi na jhaanke. */
+#lock{
+  /* Sabse upar — sheet (1000) aur toast (1100) dono se. Lock laga
+     ho to neeche ka kuch bhi na dikhe, na chhua ja sake. */
+  position:fixed;inset:0;z-index:1200;background:var(--bg);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:var(--s5) var(--s4) calc(var(--s5) + env(safe-area-inset-bottom,0px));
+}
+#lock.show{display:flex;animation:noticeIn .25s var(--ease) both}
+.lock-ico{font-size:38px;margin-bottom:var(--s3)}
+.lock-title{font-family:var(--font-head);font-size:var(--fs-xl);font-weight:800;
+            letter-spacing:-.5px;text-align:center}
+.lock-sub{font-size:var(--fs-md);color:var(--text-2);margin-top:var(--s2);
+          text-align:center;min-height:20px;line-height:1.5}
+.lock-sub.bad{color:var(--red)}
+.lock-dots{display:flex;gap:var(--s3);margin:var(--s5) 0}
+.lock-dot{width:16px;height:16px;border-radius:var(--r-full);
+          border:2px solid var(--border);background:transparent;transition:all var(--t)}
+.lock-dot.on{background:var(--brand);border-color:var(--brand);transform:scale(1.15)}
+.lock-dots.shake{animation:lockShake .4s var(--ease)}
+@keyframes lockShake{
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-9px)}
+  40%{transform:translateX(9px)}   60%{transform:translateX(-6px)} 80%{transform:translateX(6px)}
+}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s3);
+        width:100%;max-width:280px}
+.keypad button{
+  height:62px;border-radius:var(--r-lg);background:var(--card);
+  border:1.5px solid var(--border);font-family:var(--font-head);
+  font-size:var(--fs-xl);font-weight:700;color:var(--text-1);
+  display:flex;align-items:center;justify-content:center;transition:transform var(--t);
+}
+.keypad button:active{transform:scale(.93);background:var(--card-2)}
+.keypad button.ghost{background:transparent;border-color:transparent;font-size:var(--fs-lg)}
+/* Chhodo button ko grid se HATANA nahi hai, sirf chhupana hai —
+   warna "0" aur "⌫" baayein khisak jaate hain aur keypad tedha
+   lagta hai. Isliye [hidden] ki jagah ye class. */
+.keypad button.blank{visibility:hidden;pointer-events:none}
+.lock-foot{margin-top:var(--s5);display:flex;flex-direction:column;
+           align-items:center;gap:var(--s2)}
+
+/* ── Bill ki photo ── */
+.bill-box{
+  display:flex;align-items:center;gap:var(--s3);padding:var(--s3);
+  background:var(--card);border:1.5px dashed var(--border);
+  border-radius:var(--r-md);width:100%;text-align:left;
+}
+.bill-box.has{border-style:solid;border-color:var(--gold-br,var(--border))}
+.bill-thumb{width:52px;height:52px;flex-shrink:0;border-radius:var(--r-sm);
+            object-fit:cover;background:var(--card-2);border:1px solid var(--border)}
+.bill-txt{flex:1;min-width:0}
+.bill-t{font-size:var(--fs-md);font-weight:600;line-height:1.3}
+.bill-s{font-size:var(--fs-xs);color:var(--text-2);margin-top:2px}
+#billView img{width:100%;height:auto;border-radius:var(--r-md);display:block;
+              background:var(--card-2)}
+.row-clip{font-size:var(--fs-xs);color:var(--text-2);margin-left:2px}
 </style>
 </head>
 <body>
 <div id="app">
+
+  <!-- ══ LOCK SCREEN ══
+       App ke andar sab kuch isi ke peeche hai. Splash se bhi upar
+       hai, taaki data ek pal ke liye bhi na dikhe. -->
+  <div id="lock">
+    <div class="lock-ico" id="lockIco">🔒</div>
+    <div class="lock-title" id="lockTitle">PIN daalo</div>
+    <div class="lock-sub" id="lockSub">Apna 4 digit ka PIN</div>
+    <div class="lock-dots" id="lockDots">
+      <div class="lock-dot"></div><div class="lock-dot"></div>
+      <div class="lock-dot"></div><div class="lock-dot"></div>
+    </div>
+    <div class="keypad" id="keypad">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <button class="ghost blank" id="lockCancel">Chhodo</button>
+      <button data-k="0">0</button>
+      <button class="ghost" data-k="del" aria-label="Mitao">⌫</button>
+    </div>
+    <div class="lock-foot">
+      <button class="btn btn-ghost" id="lockForgot">PIN bhool gaye?</button>
+    </div>
+  </div>
 
   <!-- ══ SPLASH ══ -->
   <div id="splash">
@@ -1213,6 +1308,23 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
              placeholder="Kuch likhna ho to…" autocomplete="off">
     </div>
 
+    <!-- Bill ki photo. Warranty, return, ya "ye ₹4,000 kahan gaye the" —
+         teeno ke liye. Photo pehle chhoti ki jaati hai, phir save hoti hai. -->
+    <div class="block">
+      <div class="eyebrow">📷 Bill ki photo<span class="help" role="button" tabindex="0" data-help="bill" aria-label="Ye kya hai?">?</span></div>
+      <button class="bill-box" id="addBillBox">
+        <img class="bill-thumb" id="addBillThumb" alt="" hidden>
+        <span class="bill-thumb" id="addBillIco"
+              style="display:flex;align-items:center;justify-content:center;font-size:22px">📷</span>
+        <span class="bill-txt">
+          <span class="bill-t" id="addBillT">Photo jodo (marzi se)</span>
+          <span class="bill-s" id="addBillS">Camera se kheencho ya gallery se chuno</span>
+        </span>
+        <span class="t-mute" id="addBillX" hidden>✕</span>
+      </button>
+      <input type="file" id="addBillFile" accept="image/*" hidden>
+    </div>
+
     <button class="btn btn-lg btn-block btn-green" id="btnSave">
       <span id="saveIco">✓</span><span id="saveTxt">Income Save Karo</span>
     </button>
@@ -1355,6 +1467,8 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
       <button class="mtab" data-p="bills"><span class="mtab-ico">🔔</span>Bills</button>
       <button class="mtab" data-p="fest"><span class="mtab-ico">🪔</span>Festive</button>
       <button class="mtab" data-p="shagun"><span class="mtab-ico">💍</span>Shagun</button>
+      <button class="mtab" data-p="cmt"><span class="mtab-ico">🤝</span>Committee</button>
+      <button class="mtab" data-p="khata"><span class="mtab-ico">🏪</span>Khata</button>
       <button class="mtab" data-p="set"><span class="mtab-ico">⚙️</span>Settings</button>
     </div>
 
@@ -1612,6 +1726,81 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
       </div>
     </div>
 
+    <!-- ── COMMITTEE / BC / CHIT ──
+         Crores log kisi committee mein hain, par iske liye koi app
+         nahi — sab copy pe likhte hain. Sabse badi uljhan: "mera
+         number kab aayega aur tab tak kitna aur dena hai". -->
+    <div class="panel" id="p-cmt">
+      <div class="card hstrip card-top" id="cmtStrip">
+        <div class="hstrip-ico" id="cmtStripIco">🤝</div>
+        <div class="hstrip-body">
+          <div class="hstrip-title" id="cmtStripTitle">Committee</div>
+          <div class="hstrip-sub" id="cmtStripSub">—</div>
+        </div>
+        <span class="pill pill-br" id="cmtStripPill">–</span>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">🤝 Meri Committee<span class="help" role="button" tabindex="0" data-help="committee" aria-label="Ye kya hai?">?</span></div>
+        <button class="btn btn-soft c-mute" style="padding:var(--s2) var(--s3);font-size:var(--fs-xs)"
+                id="cFormToggle"><span id="cFormIco">➕</span> Add</button>
+      </div>
+      <div class="form-panel" id="cForm">
+        <div class="field-row">
+          <div class="field"><label for="cName">📝 Committee ka naam</label>
+            <input type="text" id="cName" class="input" maxlength="40" placeholder="jaise: Mohalle wali committee"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="cAmt">₹ Har mahine ki kisht</label>
+            <input type="number" id="cAmt" class="input num" min="1" inputmode="decimal" placeholder="5000"></div>
+          <div class="field"><label for="cMembers">👥 Kitne log</label>
+            <input type="number" id="cMembers" class="input num" min="2" max="120" inputmode="numeric" placeholder="10"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="cStart">📅 Kab shuru hui</label>
+            <input type="month" id="cStart" class="input"></div>
+          <div class="field"><label for="cTurn">🔢 Mera number<span class="help" role="button" tabindex="0" data-help="cmtTurn" aria-label="Ye kya hai?">?</span></label>
+            <input type="number" id="cTurn" class="input num" min="0" max="120" inputmode="numeric" placeholder="pata nahi"></div>
+        </div>
+        <div class="notice c-info" id="cPreview" hidden>
+          <span class="notice-ico">🧮</span>
+          <div class="notice-body"><div class="notice-sub" id="cPreviewTxt">—</div></div>
+        </div>
+        <button class="btn btn-block btn-primary" id="cSave">🤝 Committee Add Karo</button>
+      </div>
+      <div id="cList"></div>
+    </div>
+
+    <!-- ── DUKAAN KA KHATA ──
+         OkCredit dukaandaar ke liye hai. Yahan aap customer ho —
+         panwale, doodhwale, kirane ka apna-apna khata. -->
+    <div class="panel" id="p-khata">
+      <div class="card tstrip c-red" id="khataTotal" style="display:none">
+        <span class="tstrip-lbl">🏪 Saari dukaanon ka baaki</span>
+        <span class="tstrip-val num" id="khataTotalVal">₹0</span>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">🏪 Meri Dukaanein<span class="help" role="button" tabindex="0" data-help="khata" aria-label="Ye kya hai?">?</span></div>
+        <button class="btn btn-soft c-mute" style="padding:var(--s2) var(--s3);font-size:var(--fs-xs)"
+                id="kFormToggle"><span id="kFormIco">➕</span> Add</button>
+      </div>
+      <div class="form-panel" id="kForm">
+        <div class="field-row">
+          <div class="field"><label for="kName">📝 Dukaan ka naam</label>
+            <input type="text" id="kName" class="input" maxlength="40" placeholder="jaise: Sharma Kirana"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="kType">🏪 Kis cheez ki</label>
+            <select id="kType" class="input"></select></div>
+          <div class="field"><label for="kPhone">📱 Phone (marzi se)</label>
+            <input type="tel" id="kPhone" class="input num" maxlength="10" inputmode="numeric" placeholder="10 digit"></div>
+        </div>
+        <button class="btn btn-block btn-primary" id="kSave">🏪 Dukaan Add Karo</button>
+      </div>
+      <div id="kList"></div>
+    </div>
+
     <!-- ── SETTINGS ── -->
     <div class="panel" id="p-set">
       <div class="eyebrow" style="margin-bottom:var(--s3)">📤 Share &amp; Export</div>
@@ -1654,6 +1843,87 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
 
       <div class="divider"></div>
       <div class="eyebrow" style="margin-bottom:var(--s3)">🎨 Preferences</div>
+
+      <!-- ── CLOUD BACKUP ──
+           Login ZAROORI NAHI. Ye upari cheez hai — na karo to app
+           bilkul waisa hi chalta hai.
+           Apni alag heading, kyunki ye "preference" nahi hai —
+           ye data ki suraksha hai. -->
+      <div class="divider"></div>
+      <div class="eyebrow" style="margin-bottom:var(--s3)">☁️ Cloud</div>
+
+      <div class="card set" id="cloudCard">
+        <div class="set-ico" id="cloudIco">☁️</div>
+        <div class="set-body">
+          <div class="set-title">Cloud Backup<span class="help" role="button" tabindex="0" data-help="cloud" aria-label="Ye kya hai?">?</span></div>
+          <div class="set-sub" id="cloudSub">—</div>
+        </div>
+        <span class="pill pill-br" id="cloudPill">—</span>
+      </div>
+
+      <!-- Logged out: email + password -->
+      <div class="form-panel open" id="cloudForm" style="margin-bottom:var(--s3)">
+        <div class="field-row">
+          <div class="field"><label for="cloudEmail">📧 Email</label>
+            <input type="email" id="cloudEmail" class="input" autocomplete="username"
+                   inputmode="email" placeholder="aapka@email.com"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="cloudPass">🔑 Password</label>
+            <input type="password" id="cloudPass" class="input" autocomplete="current-password"
+                   placeholder="kam se kam 6 akshar"></div>
+        </div>
+        <div class="field-row">
+          <button class="btn btn-primary" id="cloudLogin" style="flex:1">Login</button>
+          <button class="btn btn-soft c-info" id="cloudSignup" style="flex:1">Naya account</button>
+        </div>
+        <div class="tap-hint" style="margin-top:var(--s2)">
+          Login na karo to bhi app poora chalta hai — ye sirf backup ke liye hai
+        </div>
+      </div>
+
+      <!-- Logged in: kaun hai, sync, photos, logout -->
+      <div id="cloudIn" hidden>
+        <div class="card set c-mute">
+          <div class="set-ico">👤</div>
+          <div class="set-body">
+            <div class="set-title" id="cloudWho">—</div>
+            <div class="set-sub">Isi account mein aapka hisaab jaata hai</div>
+          </div>
+          <button class="btn btn-soft c-red" id="cloudOut">Logout</button>
+        </div>
+        <button class="card set c-info" id="cloudPhotoRow" style="width:100%;text-align:left">
+          <div class="set-ico">📷</div>
+          <div class="set-body">
+            <div class="set-title">Photos bhi bhejo</div>
+            <div class="set-sub" id="cloudPhotoSub">—</div>
+          </div>
+          <div class="switch" id="cloudPhotoSwitch"><i></i></div>
+        </button>
+        <button class="btn btn-block btn-soft c-gold" id="cloudSyncNow"
+                style="margin-bottom:var(--s3)">☁️ Abhi sync karo</button>
+      </div>
+
+      <div class="divider"></div>
+      <div class="eyebrow" style="margin-bottom:var(--s3)">🔒 Suraksha</div>
+
+      <!-- App lock — ghar mein phone sabke haath mein jaata hai -->
+      <button class="card set c-red" id="btnLock" style="width:100%;text-align:left">
+        <div class="set-ico">🔒</div>
+        <div class="set-body">
+          <div class="set-title">App Lock<span class="help" role="button" tabindex="0" data-help="lock" aria-label="Ye kya hai?">?</span></div>
+          <div class="set-sub" id="lockSubTxt">—</div>
+        </div>
+        <div class="switch" id="lockSwitch"><i></i></div>
+      </button>
+      <div class="card set c-mute" id="lockChangeRow" hidden>
+        <div class="set-ico">🔑</div>
+        <div class="set-body">
+          <div class="set-title">PIN badlo</div>
+          <div class="set-sub">Naya 4 digit ka PIN set karo</div>
+        </div>
+        <button class="btn btn-soft c-mute" id="btnLockChange">Badlo</button>
+      </div>
 
       <!-- Apni UPI ID — udhar yaad dilaane waale message mein pay link lagane ke liye -->
       <div class="card set c-info" style="align-items:flex-start">
@@ -1792,9 +2062,22 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
         <div class="field"><label for="edPay">💳 Payment</label>
           <select id="edPay" class="input"></select></div>
       </div>
-      <div class="field" style="margin-bottom:var(--s4)">
+      <div class="field" style="margin-bottom:var(--s3)">
         <label for="edNote">📝 Note</label>
         <input type="text" id="edNote" class="input" maxlength="80" autocomplete="off">
+      </div>
+      <div class="field" style="margin-bottom:var(--s4)">
+        <label>📷 Bill ki photo</label>
+        <button class="bill-box" id="edBillBox">
+          <img class="bill-thumb" id="edBillThumb" alt="" hidden>
+          <span class="bill-thumb" id="edBillIco"
+                style="display:flex;align-items:center;justify-content:center;font-size:22px">📷</span>
+          <span class="bill-txt">
+            <span class="bill-t" id="edBillT">Photo jodo</span>
+            <span class="bill-s" id="edBillS">Camera ya gallery se</span>
+          </span>
+        </button>
+        <input type="file" id="edBillFile" accept="image/*" hidden>
       </div>
       <button class="btn btn-lg btn-block btn-primary" id="edSave">✓ Save Karo</button>
       <button class="btn btn-block btn-soft c-red" id="edDelete" style="margin-top:var(--s2)">🗑 Delete Karo</button>
@@ -1812,6 +2095,24 @@ body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
       <div class="intro-btns">
         <button class="btn btn-soft c-mute" id="introSkip" style="flex:0 0 auto">Chhodo</button>
         <button class="btn btn-lg btn-primary" id="introNext" style="flex:1">Aage →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SHEET: bill ki photo poori dekho ══ -->
+<div class="sheet-wrap" id="billSheet">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head">
+      <div class="sheet-title" id="billTitle">📷 Bill</div>
+      <button class="btn-icon" id="billClose" aria-label="Band karo">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div id="billView"></div>
+      <div class="tap-hint" id="billMeta">—</div>
+      <div class="sheet-foot">
+        <button class="btn btn-block btn-soft c-red" id="billDelete">🗑 Photo hataao</button>
       </div>
     </div>
   </div>
@@ -1946,13 +2247,38 @@ var K = {
   schema:'pb_schema',
   merchants:'pb_merchants',     /* aapki sikhaayi hui merchant → category jodi */
   funcs:'pb_functions',         /* shaadi/mundan jaise function */
-  shagun:'pb_shagun'            /* un functions mein kisne kitna diya/liya */
+  shagun:'pb_shagun',           /* un functions mein kisne kitna diya/liya */
+  cmt:'pb_committees',          /* committee / BC / chit fund */
+  cmtPay:'pb_committee_pays',   /* har committee ki di hui kishtein */
+  shops:'pb_shops',             /* kirana, doodh, paan — jahan khata chalta hai */
+  khata:'pb_khata',             /* un dukaanon ki chhoti-chhoti entries */
+  bills:'pb_bills',             /* kharche ke saath lagi bill ki photo */
+  /* ── Ye do backup file mein KABHI nahi jaate ──
+     auth mein login ke token hote hain. Agar ye backup file mein
+     chale gaye, to wo file kisi ko mil jaaye to uske paas aapka
+     account khul jaayega. Isliye backupPayload() inko chhuta hi
+     nahi — aur ye jaan-boojh kar alag keys mein hain. */
+  auth:'pb_auth',               /* login ke token — sirf is phone mein */
+  cloud:'pb_cloud'              /* kab sync hua, server pe kya tha */
+};
+/* ── Cloud (Supabase) ──
+   Ye "publishable" key hai — isko public hona hi hota hai, isiliye
+   iska naam publishable hai. Ye akeli kuch nahi kar sakti: database
+   par RLS lagi hai, jo har sawaal par khud check karti hai ki
+   "ye banda sirf apni row chhue". Bina login ke ye key se kuch
+   padha ya likha nahi ja sakta — maine ye khud jaanch kar dekha hai.
+   Jo key KABHI yahan nahi aani chahiye wo "sb_secret_..." hai. */
+var CLOUD = {
+  url:  'https://sadeujawgjvforwzvpex.supabase.co',
+  key:  'sb_publishable_ktW9GYmjz_uXdYcTmu5khQ_2Mq7Ylk3',
+  table:'pb_backup'
 };
 /* Ye keys arrays rakhti hain */
-var LIST_KEYS  = [K.txn,K.udhar,K.budget,K.fest,K.emi,K.subs,K.rec,K.funcs,K.shagun];
+var LIST_KEYS  = [K.txn,K.udhar,K.budget,K.fest,K.emi,K.subs,K.rec,K.funcs,K.shagun,
+                  K.cmt,K.cmtPay,K.shops,K.khata,K.bills];
 /* Reset karte waqt ye SAB hatani hain (purane app mein streak reh jaata tha) */
 var ALL_KEYS   = LIST_KEYS.concat([K.settings,K.backup,K.tab,K.streak,K.streakDay,
-                                   K.milestone,K.schema,K.merchants]);
+                                   K.milestone,K.schema,K.merchants,K.auth,K.cloud]);
 
 var CATS = {
   income:[
@@ -2007,7 +2333,7 @@ var QUICK_AMOUNTS = [100,200,500,1000,2000,5000];
    Yahan likha hai ki simple mode mein kya CHHUPTA hai. */
 var SIMPLE_HIDES = {
   navTabs:   ['stats'],                  /* bottom nav se */
-  morePanels:['emi','bills','fest','shagun']   /* More ke andar se */
+  morePanels:['emi','bills','fest','shagun','cmt','khata']   /* More ke andar se */
 };
 
 /* ── HELP ──
@@ -2071,6 +2397,74 @@ var HELP = {
     'Saamne wale ko bas tap karna hai.<br><br>' +
     '<span class="t-mute">App aapka UPI ID sirf aapke phone mein rakhta hai. ' +
     'Paisa kabhi app ke through nahi jaata — aapka apna UPI app hi kholta hai.</span>' },
+
+  cloud:{ t:'☁️ Cloud Backup', b:
+    'Login karoge to aapka saara hisaab cloud mein bhi save hota rahega. ' +
+    'Naya phone liya? Wahi email-password se login karo — sab wapas aa jaayega.<br><br>' +
+    '<b>Login zaroori NAHI hai.</b> Na karo to app bilkul aise hi chalta hai jaise ' +
+    'abhi chalta hai — saara data aapke phone mein. Ye sirf upar se mili hui ' +
+    'suraksha hai.<br><br>' +
+    '<b>Kab jaata hai:</b> kuch badalne ke ~8 second baad apne aap. Net na ho to ' +
+    'ruk jaata hai aur net aate hi chala jaata hai.<br><br>' +
+    '<b>Kuch chup-chaap nahi mitega:</b> agar cloud wali copy aapke phone se alag ' +
+    'nikli, to app poochega ki kaunsi rakhni hai. Khud faisla nahi karega.<br><br>' +
+    '<b>Photos</b> default band hain — wo jagah bahut khaati hain. Chahiye to ' +
+    'upar wala switch chalu kar do.<br><br>' +
+    '<span class="t-mute">Ek baat: free cloud account hafte bhar bilkul use na ho ' +
+    'to so jaata hai. Roz app use karoge to kabhi nahi hoga.</span>' },
+
+  lock:{ t:'🔒 App Lock', b:
+    'App kholte hi 4 digit ka PIN poochega. Ghar mein phone bhai, ' +
+    'bachchon aur doston ke haath jaata hai — unse hisaab chhupa rehta hai.<br><br>' +
+    '<b>Saaf baat:</b> ye <b>ghar walon se</b> hai, hacker se nahi. ' +
+    'Aapka data isi phone ke browser mein hai. Jo aadmi computer ka jaankaar ' +
+    'hai wo nikaal sakta hai. Hum jhootha bharosa nahi denge.<br><br>' +
+    'PIN khud kabhi save nahi hota — usko ghuma kar ek pehchaan banti hai, ' +
+    'bas wahi rakhi jaati hai. Isliye <b>PIN bhool gaye to wapas nahi aa sakta</b>. ' +
+    'Lock chalu karne se pehle <b>ek backup zaroor le lo</b>.<br><br>' +
+    '<span class="t-mute">2 minute se zyada app band rahe to wapas aane par ' +
+    'dobara PIN poochega.</span>' },
+
+  bill:{ t:'📷 Bill ki photo', b:
+    'Kharche ke saath bill ki tasveer lagao. Teen jagah kaam aati hai:<br><br>' +
+    '• <b>Warranty</b> — 2 saal baad bill kaun dhoondega<br>' +
+    '• <b>Return</b> — dukaan bill maangti hai<br>' +
+    '• <b>"Ye ₹4,000 kahan gaye the?"</b> — photo dekh lo, yaad aa jaayega<br><br>' +
+    'Photo save hone se pehle app khud usko <b>chhota</b> kar deta hai — ' +
+    'bill saaf padhta rahega par jagah 4 MB ki jagah ~150 KB lagegi.<br><br>' +
+    'Kitni jagah lagi hai, ye <b>Settings › Storage</b> mein dikhta hai. ' +
+    'Backup mein photos bhi jaati hain — isliye backup file badi ho jaati hai.' },
+
+  committee:{ t:'🤝 Committee / BC / Chit', b:
+    'Maan lo <b>10 log</b> hain. Har mahine sab <b>₹5,000</b> daalte hain. ' +
+    'Har mahine ek aadmi ko poore <b>₹50,000</b> mil jaate hain. ' +
+    '10 mahine mein sabka number aa jaata hai.<br><br>' +
+    'Copy pe do cheezein likhna sab bhool jaate hain — <b>kitni kisht di</b> ' +
+    'aur <b>mera number kab aayega</b>. App dono khud rakhta hai.<br><br>' +
+    '<b>"✓ Is mahine ki kisht"</b> dabao → record bhi ban jaata hai aur ' +
+    '<b>Investment</b> ka kharcha bhi. Kyunki committee kharcha nahi, ' +
+    '<b>zabardasti ki bachat</b> hai.<br><br>' +
+    'Number aane par <b>"💰 Number aa gaya"</b> dabao → wo paisa income mein jud jaata hai.' },
+
+  cmtTurn:{ t:'🔢 Mera number', b:
+    'Committee mein har aadmi ka ek number hota hai — kaunse mahine usko ' +
+    'paisa milega.<br><br>' +
+    'Agar aapka <b>pehle</b> mahine mein hai to <b>1</b> likho, doosre mein ' +
+    'to <b>2</b>, aur aise hi.<br><br>' +
+    'Abhi pata na ho to <b>khaali chhod do</b> — baad mein add kar sakte ho. ' +
+    'Baaki sab hisaab phir bhi chalta rahega.' },
+
+  khata:{ t:'🏪 Dukaan ka khata', b:
+    'Kirane, doodhwale, panwale ke paas ek copy hoti hai jisme aapka udhar ' +
+    'likha rehta hai. <b>Wo copy unke paas hai, aapke paas nahi.</b> ' +
+    'Mahine ke end mein jo number wo bolte hain, wahi maanna padta hai.<br><br>' +
+    'Ab aapki apni copy: jo liya wo <b>🛒 Liya</b>, jo paisa diya wo ' +
+    '<b>💵 Paisa diya</b>. App khud baaki nikaal dega.<br><br>' +
+    '<b>Ek baat dhyan se:</b> saamaan lene par kharcha nahi ginaa jaata, ' +
+    '<b>paisa dene par</b> ginaa jaata hai. Ghar ka hisaab aise hi chalta hai — ' +
+    'warna ek hi cheez do baar gin jaati.<br><br>' +
+    'Dukaandaar se hisaab na mile to <b>"💬 Khata bhejo"</b> — poori list ' +
+    'WhatsApp pe chali jaayegi. Jhagda wahin khatam.' },
 
   sms:{ t:'📩 Bank SMS se add', b:
     'Bank ke SMS mein sab likha hota hai — amount, dukaan ka naam, date.<br><br>' +
@@ -2201,6 +2595,21 @@ var FUNCTION_TYPES = [
   { id:'Doosra',         ico:'🎉' }
 ];
 /* Rishta — taaki har baar type na karna pade */
+/* ── DUKAAN KE TYPE ──
+   Har type ke saath ek expense category juda hai. Jab khata chukta
+   hai tab wahi category ki entry banti hai — taaki mahine ka
+   hisaab sach dikhe, ek mota "dukaan" ka lump nahi. */
+var SHOP_TYPES = [
+  { id:'Kirana',  ico:'🏪', cat:'Khaana' },
+  { id:'Doodh',   ico:'🥛', cat:'Khaana' },
+  { id:'Sabzi',   ico:'🥬', cat:'Khaana' },
+  { id:'Chai',    ico:'☕', cat:'Khaana' },
+  { id:'Hotel',   ico:'🍽️', cat:'Khaana' },
+  { id:'Paan',    ico:'🍃', cat:'Personal' },
+  { id:'Medical', ico:'💊', cat:'Health' },
+  { id:'Doosra',  ico:'🛒', cat:'Shopping' }
+];
+
 var RELATIONS = [
   { id:'Rishtedaar', ico:'👨‍👩‍👧' }, { id:'Dost',   ico:'🤝' },
   { id:'Padosi',     ico:'🏘️' },     { id:'Office', ico:'💼' },
@@ -2241,7 +2650,20 @@ var LIMIT = {
   backupDays: 7,         /* itne din baad backup ki yaad dilao */
   storageCapMB: 5,
   undoMs: 6000,          /* undo kitni der dikhe */
-  updateCheckMs: 1800000 /* 30 minute — naya version aaya kya, ye check */
+  updateCheckMs: 1800000,/* 30 minute — naya version aaya kya, ye check */
+  /* Bill ki photo: phone ka camera 4 MB ki photo deta hai. Itni badi
+     rakhenge to 50 photo mein hi jagah bhar jaayegi. Isliye lambi
+     taraf 1200px tak chhoti karte hain — bill tab bhi saaf padhta hai. */
+  billMaxPx: 1200,
+  billQuality: 0.72,
+  billMaxBytes: 700000,  /* itne se bada hua to quality aur girao */
+  lockAfterMs: 120000,   /* app peeche gaye 2 minute se zyada → dobara PIN */
+  /* Cloud: kuch badalne ke itni der baad chup-chaap push. 8 second
+     isliye ki banda 5 entries ek saath kare to 5 push na hon. */
+  cloudPushMs: 8000,
+  cloudWarnBytes: 4000000,   /* itne se bada hua to warning */
+  cloudMaxBytes: 25000000,   /* itne se bada to push hi mat karo */
+  cloudTimeoutMs: 20000
 };
 var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -2312,6 +2734,13 @@ function fmtShort(k){ return toDate(k).toLocaleDateString('en-IN',{day:'2-digit'
    agar ek taraf "abhi ka waqt" lete, to subah 9 baje aaj ki entry
    "−1 din" dikhati (12 se peeche). Noon-to-noon se ye galti khatam. */
 function daysAgo(k){  return Math.round((toDate(todayKey()) - toDate(k)) / 86400000); }
+/* "0 din pehle" padhne mein ajeeb lagta hai — aadmi "Aaj" kehta hai */
+function agoLabel(k){
+  var d = daysAgo(k);
+  if(d <= 0) return 'Aaj';
+  if(d === 1) return 'Kal';
+  return d + ' din pehle';
+}
 function monthOf(k){  var p = dayKey(k).split('-'); return {y:+p[0], m:+p[1]-1, d:+p[2]}; }
 function daysInMonth(m,y){ return new Date(y, m+1, 0).getDate(); }
 function nowStamp(){ return new Date().toISOString(); }
@@ -2395,6 +2824,11 @@ function writeObj(key,val){ DB[key] = val; persist(key); return true; }
 /* Ek key ko disk pe likhna. 150ms rok kar likhte hain, taaki 10 baar
    badalne pe 10 baar disk-write na ho. */
 function persist(key){
+  /* Har data-badlav ke baad cloud push ka timer. auth/cloud keys
+     khud push ke dauraan likhti hain — unpe push karenge to
+     anant loop ban jaayega, isliye wo chhodi hui hain. */
+  if(key !== K.auth && key !== K.cloud && typeof scheduleCloudPush === 'function')
+    scheduleCloudPush();
   if(flushTimers[key]) clearTimeout(flushTimers[key]);
   flushTimers[key] = setTimeout(function(){
     flushTimers[key] = null;
@@ -2447,10 +2881,10 @@ function initStore(){
   return openIDB().then(function(conn){
     idb = conn;
     storeMode = conn ? 'idb' : 'ls';
-    var keys = LIST_KEYS.concat([K.settings, K.merchants]);
+    var keys = LIST_KEYS.concat([K.settings, K.merchants, K.auth, K.cloud]);
     return storeMode === 'idb' ? idbGetAll(keys) : Promise.resolve({});
   }).then(function(fromIdb){
-    var keys = LIST_KEYS.concat([K.settings, K.merchants]);
+    var keys = LIST_KEYS.concat([K.settings, K.merchants, K.auth, K.cloud]);
     var movedFromLS = false;
 
     keys.forEach(function(k){
@@ -2592,6 +3026,12 @@ var S = {
   fnOpen:null,         /* kaun sa function khula hai (id) */
   sgDir:'in',          /* nayi entry — aaya ya diya */
   sgFilter:'all',      /* detail list ka filter */
+  /* committee aur dukaan khata */
+  cmtOpenId:null,      /* kaun si committee khuli hai */
+  shopOpenId:null,     /* kaun si dukaan ka khata khula hai */
+  /* bill ki photo */
+  pendingBill:null,    /* Add screen pe chuni hui photo (save hone ka intezaar) */
+  billOpenId:null,     /* kis entry ki photo khuli hai */
   /* misc */
   qCat:'',             /* quick-add mein chuni hui category */
   hideAmounts:false,   /* share ki tasveer mein rupaye chhupane hain? */
@@ -2742,6 +3182,118 @@ function recStatus(rec){
   if(left <= 3)   return { label:left+' din mein',  cls:'c-red',    days:left, urgent:true,  paid:false };
   if(left <= 7)   return { label:left+' din mein',  cls:'c-orange', days:left, urgent:false, paid:false };
   return            { label:left+' din baaki',      cls:'c-green',  days:left, urgent:false, paid:false };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMMITTEE / BC / CHIT — ka hisaab
+   ───────────────────────────────────────────────────────────────
+   Committee kaise chalti hai: 10 log, har mahine ₹5,000 daalte
+   hain. Har mahine ek aadmi ko poore ₹50,000 mil jaate hain.
+   10 mahine mein sabka number aa jaata hai.
+
+   Do baatein jo copy pe likhne waale bhool jaate hain:
+     1. Ab tak kitni kisht di — aur kitni baaki
+     2. **Mera number kab aayega** — aur us din tak kitna aur dena hai
+
+   Yahan sirf hisaab hai. Screen ka koi kaam nahi.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Shuru ke mahine mein N mahine jodo → {m,y}. Saal ka carry khud. */
+function addMonths(m, y, n){
+  var t = m + n;
+  return { m: ((t % 12) + 12) % 12, y: y + Math.floor(t / 12) };
+}
+/* Do mahino ke beech kitne mahine ka fark */
+function monthDiff(fromM, fromY, toM, toY){ return (toY - fromY) * 12 + (toM - fromM); }
+
+/* Ek committee ki poori tasveer.
+   Deta hai: { paid, left, total, given, willGet, pct, turn, turnLabel,
+               monthsToTurn, gotIt, dueThisMonth } */
+function cmtStatus(c, pays){
+  pays = pays || read(K.cmtPay);
+  var mine = pays.filter(function(p){ return p.cmtId === c.id; });
+
+  var given  = mine.reduce(function(s,p){ return s + p.amount; }, 0);
+  var paid   = mine.length;                         /* kitni kisht di */
+  var total  = c.amount * c.members;                /* poori committee mein kitna dena hai */
+  var left   = Math.max(0, c.members - paid);
+  var pct    = c.members > 0 ? Math.round((paid / c.members) * 100) : 0;
+
+  /* Is mahine ki kisht di ya nahi */
+  var now = new Date();
+  var dueThisMonth = !mine.some(function(p){
+    return p.m === now.getMonth() && p.y === now.getFullYear();
+  });
+
+  /* Mera number kab — myTurn 1 matlab pehle hi mahine */
+  var turn = null, turnLabel = 'Number pata nahi', monthsToTurn = null, gotIt = false;
+  if(c.myTurn >= 1 && c.myTurn <= c.members){
+    turn = addMonths(c.startM, c.startY, c.myTurn - 1);
+    monthsToTurn = monthDiff(now.getMonth(), now.getFullYear(), turn.m, turn.y);
+    gotIt = monthsToTurn < 0;
+    turnLabel = MONTHS[turn.m] + ' ' + turn.y;
+  }
+  return {
+    paid:paid, left:left, total:total, given:given,
+    willGet: c.payout > 0 ? c.payout : total,       /* number aane par kitna milega */
+    pct:pct, turn:turn, turnLabel:turnLabel,
+    monthsToTurn:monthsToTurn, gotIt:gotIt, dueThisMonth:dueThisMonth,
+    done: paid >= c.members
+  };
+}
+/* Saari committee milaa kar is mahine kitni kisht baaki hai */
+function cmtDueCount(){
+  var pays = read(K.cmtPay);
+  return read(K.cmt).filter(function(c){
+    var s = cmtStatus(c, pays);
+    return !s.done && s.dueThisMonth;
+  }).length;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DUKAAN KA KHATA — ka hisaab
+   ───────────────────────────────────────────────────────────────
+   OkCredit dukaandaar ke liye hai. Aap CUSTOMER ho — aapko kya
+   pata ki panwale ka kitna baaki hai? Yahan har dukaan ka apna
+   khata: chhoti-chhoti entry jodte jao, mahine ke end mein ek
+   number — "Sharma Kirana — ₹2,340 dena hai".
+   ═══════════════════════════════════════════════════════════════ */
+
+function shopInfo(type){
+  for(var i = 0; i < SHOP_TYPES.length; i++)
+    if(SHOP_TYPES[i].id === type) return SHOP_TYPES[i];
+  return { id:type || 'Doosra', ico:'🛒', cat:'Shopping' };
+}
+/* Ek dukaan ka baaki hisaab.
+   udhar = jo saamaan liya · jama = jo paisa diya · baaki = fark */
+function shopBalance(shopId, list){
+  list = list || read(K.khata);
+  var udhar = 0, jama = 0, n = 0, last = '';
+  list.forEach(function(e){
+    if(e.shopId !== shopId) return;
+    n++;
+    if(e.kind === 'jama') jama += e.amount; else udhar += e.amount;
+    if(!last || dayKey(e.date) > last) last = dayKey(e.date);
+  });
+  return { udhar:udhar, jama:jama, baaki: udhar - jama, count:n, last:last };
+}
+/* Saari dukaanon ka total baaki + sabse purani baaki entry kitni purani */
+function khataTotals(){
+  var list = read(K.khata), baaki = 0, shops = 0, oldest = 0;
+  read(K.shops).forEach(function(s){
+    var b = shopBalance(s.id, list);
+    if(b.baaki > 0){
+      baaki += b.baaki; shops++;
+      /* us dukaan ki sabse purani entry — udhar kitne din se latka hai */
+      list.forEach(function(e){
+        if(e.shopId === s.id && e.kind !== 'jama'){
+          var d = daysAgo(e.date);
+          if(d > oldest) oldest = d;
+        }
+      });
+    }
+  });
+  return { baaki:baaki, shops:shops, oldestDays:oldest };
 }
 
 /* ── KAHAN NORMAL SE ZYADA KHARCH HUA ──
@@ -3136,13 +3688,34 @@ function closeSheet(id){
 }
 /* Confirm sheet — browser ke bhadde confirm() ki jagah */
 var confirmAction = null;
+var confirmNoAction = null;   /* do-raaste wale sawaal ka doosra raasta */
+var confirmDismiss  = null;   /* bahar tap kiya — saaf karne ka mauka */
+/* Do tarah ke sawaal hote hain:
+     (a) "pakka mitana hai?"  — Cancel + laal Haan
+     (b) "in do mein se kaunsa?" — dono asli faisle, koi laal nahi
+   Isliye `no`/`onNo` aur `tone` bhi lete hain. Sheet ke bahar tap
+   karne par DONO mein se kuch nahi chalta — ye zaroori hai, warna
+   galti se bahar daba kar kisi ka data badal jaata. */
 function askConfirm(opts){
   $('cfIco').textContent   = opts.icon  || '⚠️';
   $('cfTitle').textContent = opts.title || 'Pakka?';
   $('cfBody').innerHTML    = opts.body  || '';
   $('cfYes').textContent   = opts.yes   || 'Haan';
-  confirmAction = opts.onYes;
+  $('cfNo').textContent    = opts.no    || 'Cancel';
+  $('cfYes').className     = 'btn btn-lg ' + (opts.tone === 'soft' ? 'btn-primary' : 'btn-red');
+  confirmAction   = opts.onYes;
+  confirmNoAction = opts.onNo || null;
+  confirmDismiss  = opts.onDismiss || null;
   openSheet('confirmSheet');
+}
+
+/* Sawaal bina jawab ke band hua (bahar tap / Escape).
+   Kuch chalana nahi hai, par poochne wale ko bata do taaki wo
+   dobara pooch sake. */
+function clearConfirm(){
+  var d = confirmDismiss;
+  confirmAction = null; confirmNoAction = null; confirmDismiss = null;
+  if(d) d();
 }
 
 /* Reusable chip grid banane wala — add screen, edit sheet, sab yahin se */
@@ -3514,7 +4087,29 @@ function renderAlerts(){
       catIcon(r.category) + ' ' + r.category + ' · ' + money(r.amount),
       function(){ go('more'); setMoreTab('bills'); }));
   });
-  /* 3. Backup ki yaad */
+  /* 3. Committee ki kisht — mahine ka ek hi reminder, sab milaa kar */
+  var cDue = cmtDueCount();
+  if(cDue){
+    var cAmt = 0, cPays = read(K.cmtPay);
+    read(K.cmt).forEach(function(c){
+      var s = cmtStatus(c, cPays);
+      if(!s.done && s.dueThisMonth) cAmt += c.amount;
+    });
+    box.appendChild(notice('c-orange','🤝',
+      cDue + (cDue === 1 ? ' committee' : ' committee') + ' ki kisht baaki hai',
+      'Is mahine ' + money(cAmt) + ' dena hai',
+      function(){ go('more'); setMoreTab('cmt'); }));
+  }
+  /* 4. Dukaan ka khata — jab purana ho tabhi tang karo */
+  var kt = khataTotals();
+  if(kt.baaki > 0 && kt.oldestDays >= 20){
+    box.appendChild(notice('c-red','🏪',
+      kt.shops + (kt.shops === 1 ? ' dukaan' : ' dukaanon') + ' ka ' + money(kt.baaki) + ' baaki',
+      'Sabse purana udhar ' + kt.oldestDays + ' din se',
+      function(){ go('more'); setMoreTab('khata'); }));
+  }
+
+  /* 5. Backup ki yaad */
   var raw = localStorage.getItem(K.backup);
   if(read(K.txn).length > 0 && !sessionStorage.getItem('pb_bk_hide')){
     var since = (!raw || raw === 'null') ? Infinity : Math.floor((new Date() - new Date(raw))/86400000);
@@ -3583,6 +4178,7 @@ function renderTxnList(txns){
           '<span class="pill c-mute">' + esc(t.category) + '</span>' +
           '<span class="t-mute" style="font-size:var(--fs-xs)">' + fmtShort(t.date) + '</span>' +
           (t.payment ? '<span class="t-mute" style="font-size:var(--fs-xs)">' + esc(t.payment) + '</span>' : '') +
+          (hasBill(t.id) ? '<span class="row-clip" title="Bill ki photo lagi hai">📎</span>' : '') +
         '</div>' +
       '</div>' +
       '<div class="row-amt num ' + (isInc?'t-green':'t-red') + '">' + (isInc?'+':'−') + money(t.amount) + '</div>' +
@@ -3689,12 +4285,17 @@ function saveTxn(){
   var list = read(K.txn); list.push(txn);
   if(!write(K.txn, list)) return;
 
+  /* Photo chuni hui thi to ab jod do — entry ki id ab bani hai */
+  if(S.pendingBill) putBill(txn.id, S.pendingBill);
+
   bumpStreak();
-  toast((S.addType === 'income' ? '💰 ' : '💸 ') + money(amt) + ' ' + S.addCat + ' add hua', 'ok',
-    function(){ removeTxn(txn.id); toast('Wapas hataa diya','ok'); });
+  toast((S.addType === 'income' ? '💰 ' : '💸 ') + money(amt) + ' ' + S.addCat + ' add hua' +
+        (S.pendingBill ? ' 📷' : ''), 'ok',
+    function(){ removeTxn(txn.id); dropBill(txn.id); toast('Wapas hataa diya','ok'); });
 
   /* Form saaf karo, par type aur payment wahi rehne do — agli entry tez ho */
   $('amtIn').value = ''; $('noteIn').value = ''; $('dateIn').value = todayKey();
+  S.pendingBill = null; renderAddBill();
   S.addCat = ''; renderAddCats(); updateAmtHint();
   refreshAll();
 }
@@ -3882,6 +4483,7 @@ function openEdit(id){
   $('edAmt').value  = t.amount;
   $('edDate').value = dayKey(t.date);
   $('edNote').value = t.note || '';
+  renderEditBill();
   openSheet('editSheet');
 }
 function saveEdit(){
@@ -3907,9 +4509,12 @@ function deleteTxn(id){
   var list = read(K.txn);
   var t = list.filter(function(x){ return x.id === id; })[0];
   if(!t) return;
+  var bill = billFor(id);            /* photo bhi saath jaati hai — aur saath wapas aati hai */
   removeTxn(id);
+  if(bill) dropBill(id);
   toast('🗑 ' + money(t.amount) + ' ' + t.category + ' delete hua', 'ok', function(){
     var back = read(K.txn); back.push(t); write(K.txn, back);
+    if(bill){ var bl = read(K.bills); bl.push(bill); write(K.bills, bl); }
     toast('↩ Wapas aa gaya','ok'); refreshAll();
   });
   refreshAll();
@@ -4707,8 +5312,11 @@ function setMoreTab(tab){
   else if(tab === 'bills'){ renderRecurring(); renderSubs(); renderBillsTotal(); renderBillPresets(); }
   else if(tab === 'fest')  renderFestive();
   else if(tab === 'shagun')renderShagun();
+  else if(tab === 'cmt')   renderCommittees();
+  else if(tab === 'khata') renderShops();
   else if(tab === 'set')  { renderBackupStatus(); renderStorage(); renderTheme();
-                            renderVersionCard(); renderSimpleCard(); renderMyUpi(); }
+                            renderVersionCard(); renderSimpleCard(); renderMyUpi();
+                            renderLockCard(); renderCloudCard(); }
 }
 /* Ek form panel kholna/band karna + icon badalna */
 function toggleForm(panelId, icoId, onOpen, onClose){
@@ -5596,6 +6204,877 @@ function shareShagun(){
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   11e · BILL KI PHOTO
+   ───────────────────────────────────────────────────────────────
+   Kyun: warranty, return, aur "ye ₹4,000 kahan gaye the" — teeno
+   ka jawab ek photo mein hota hai.
+
+   Dhyan ki baat JAGAH hai. Phone ka camera 3–4 MB ki photo deta
+   hai; 50 photo = 200 MB. Isliye save karne se PEHLE canvas par
+   chhoti karte hain (lambi taraf 1200px, JPEG) — bill phir bhi
+   saaf padhta hai par size 100–200 KB reh jaata hai.
+
+   Photo transaction ke andar nahi, alag list mein rakhte hain.
+   Warna har baar jab bhi koi transaction padha jaata (din mein
+   sau baar) poori photo bhi memory mein aa jaati.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* File → chhoti ki hui JPEG dataURL. Promise deta hai. */
+function compressImage(file){
+  return new Promise(function(resolve, reject){
+    if(!file || !/^image\//.test(file.type)) return reject(new Error('image nahi hai'));
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function(){
+      try{
+        var w = img.naturalWidth, h = img.naturalHeight;
+        var scale = Math.min(1, LIMIT.billMaxPx / Math.max(w, h));
+        var cw = Math.max(1, Math.round(w * scale)), ch = Math.max(1, Math.round(h * scale));
+
+        var c = document.createElement('canvas');
+        c.width = cw; c.height = ch;
+        var x = c.getContext('2d');
+        x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, cw, ch);   /* PNG ka transparent kaala na ho */
+        x.drawImage(img, 0, 0, cw, ch);
+
+        var q = LIMIT.billQuality;
+        var data = c.toDataURL('image/jpeg', q);
+        /* Abhi bhi bada hai? Do baar aur quality girao — isse zyada
+           girane se bill padhna mushkil ho jaata hai. */
+        for(var i = 0; i < 2 && dataSize(data) > LIMIT.billMaxBytes; i++){
+          q = q - 0.18;
+          data = c.toDataURL('image/jpeg', Math.max(0.3, q));
+        }
+        URL.revokeObjectURL(url);
+        resolve({ data:data, w:cw, h:ch, size:dataSize(data) });
+      } catch(e){ URL.revokeObjectURL(url); reject(e); }
+    };
+    img.onerror = function(){ URL.revokeObjectURL(url); reject(new Error('photo khul nahi payi')); };
+    img.src = url;
+  });
+}
+/* dataURL ka asli byte size — base64 mein har 4 akshar = 3 byte */
+function dataSize(dataUrl){
+  var i = String(dataUrl).indexOf(',');
+  if(i < 0) return 0;
+  var b64 = dataUrl.slice(i + 1);
+  var pad = b64.endsWith('==') ? 2 : b64.endsWith('=') ? 1 : 0;
+  return Math.max(0, Math.floor(b64.length * 3 / 4) - pad);
+}
+function fmtBytes(n){
+  if(n >= 1048576) return (n/1048576).toFixed(1) + ' MB';
+  if(n >= 1024)    return Math.round(n/1024) + ' KB';
+  return n + ' B';
+}
+function billFor(txnId){
+  var l = read(K.bills);
+  for(var i = 0; i < l.length; i++) if(l[i].txnId === txnId) return l[i];
+  return null;
+}
+function hasBill(txnId){ return !!billFor(txnId); }
+/* Ek transaction ki photo set karo (purani ho to badal do) */
+function putBill(txnId, shot){
+  var l = read(K.bills).filter(function(b){ return b.txnId !== txnId; });
+  l.push({ id:uid(), txnId:txnId, data:shot.data, w:shot.w, h:shot.h,
+           size:shot.size, createdAt:nowStamp() });
+  return write(K.bills, l);
+}
+function dropBill(txnId){
+  write(K.bills, read(K.bills).filter(function(b){ return b.txnId !== txnId; }));
+}
+function billTotals(){
+  var l = read(K.bills), size = 0;
+  l.forEach(function(b){ size += b.size || dataSize(b.data); });
+  return { count:l.length, size:size };
+}
+
+/* ── Add screen ka photo box ──
+   Yahan photo pehle S.pendingBill mein rukti hai, kyunki entry ki
+   id save karne ke BAAD banti hai. */
+function pickAddBill(){
+  if(S.pendingBill){ clearAddBill(); return; }       /* dobara tap = hataao */
+  $('addBillFile').click();
+}
+function onAddBillFile(input){
+  var f = input.files && input.files[0];
+  input.value = '';                                   /* same file dobara chun sako */
+  if(!f) return;
+  toast('📷 Photo chhoti kar raha hoon…','ok');
+  compressImage(f).then(function(shot){
+    S.pendingBill = shot;
+    renderAddBill();
+    toast('📷 Photo lag gayi — ' + fmtBytes(shot.size),'ok');
+  }).catch(function(){ toast('Photo nahi khul payi','bad'); });
+}
+function clearAddBill(){ S.pendingBill = null; renderAddBill(); }
+function renderAddBill(){
+  var has = !!S.pendingBill;
+  $('addBillBox').classList.toggle('has', has);
+  $('addBillThumb').hidden = !has;
+  $('addBillIco').hidden   = has;
+  $('addBillX').hidden     = !has;
+  if(has){
+    $('addBillThumb').src   = S.pendingBill.data;
+    $('addBillT').textContent = 'Photo lag gayi';
+    $('addBillS').textContent = fmtBytes(S.pendingBill.size) + ' · hataane ke liye tap karo';
+  } else {
+    $('addBillT').textContent = 'Photo jodo (marzi se)';
+    $('addBillS').textContent = 'Camera se kheencho ya gallery se chuno';
+  }
+}
+
+/* ── Edit sheet ka photo box ── */
+function renderEditBill(){
+  var b = S.editId ? billFor(S.editId) : null;
+  $('edBillBox').classList.toggle('has', !!b);
+  $('edBillThumb').hidden = !b;
+  $('edBillIco').hidden   = !!b;
+  if(b){
+    $('edBillThumb').src   = b.data;
+    $('edBillT').textContent = 'Photo dekho';
+    $('edBillS').textContent = fmtBytes(b.size) + ' · ' + b.w + '×' + b.h;
+  } else {
+    $('edBillT').textContent = 'Photo jodo';
+    $('edBillS').textContent = 'Camera ya gallery se';
+  }
+}
+function onEditBillTap(){
+  if(billFor(S.editId)) openBill(S.editId);
+  else $('edBillFile').click();
+}
+function onEditBillFile(input){
+  var f = input.files && input.files[0];
+  input.value = '';
+  if(!f || !S.editId) return;
+  var id = S.editId;
+  toast('📷 Photo chhoti kar raha hoon…','ok');
+  compressImage(f).then(function(shot){
+    putBill(id, shot);
+    renderEditBill(); renderHome();
+    toast('📷 Photo lag gayi — ' + fmtBytes(shot.size),'ok');
+  }).catch(function(){ toast('Photo nahi khul payi','bad'); });
+}
+
+/* ── Poori photo dekhne wali sheet ── */
+function openBill(txnId){
+  var b = billFor(txnId); if(!b) return;
+  var t = read(K.txn).filter(function(x){ return x.id === txnId; })[0];
+  S.billOpenId = txnId;
+  $('billTitle').textContent = '📷 ' + (t ? (t.note || t.category) : 'Bill');
+  $('billView').innerHTML = '<img alt="Bill ki photo" src="' + b.data + '">';
+  $('billMeta').textContent = fmtBytes(b.size) + ' · ' + b.w + '×' + b.h +
+                              (t ? ' · ' + fmtDate(t.date) : '');
+  openSheet('billSheet');
+}
+function deleteOpenBill(){
+  var id = S.billOpenId; if(!id) return;
+  var b = billFor(id);
+  dropBill(id);
+  closeSheet('billSheet');
+  toast('Photo hataa di','ok', function(){
+    var l = read(K.bills); l.push(b); write(K.bills, l);
+    toast('↩ Wapas aa gayi','ok'); renderEditBill(); renderHome();
+  });
+  renderEditBill(); renderHome();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   11f · APP LOCK (PIN)
+   ───────────────────────────────────────────────────────────────
+   SAAF BAAT PEHLE: ye lock GHAR WALON se hai — bhai, bachche,
+   dost jo phone maang kar le jaate hain. Ye bank jaisi security
+   NAHI hai. Data isi phone ke browser mein hai; jo aadmi
+   developer tools kholna jaanta hai wo nikal sakta hai.
+   Help mein bhi yahi likha hai — jhootha bharosa dena bura hai.
+
+   PIN khud kabhi save nahi hota. Ek random "salt" ke saath usko
+   5000 baar ghuma kar ek chhoti si pehchaan (hash) banti hai,
+   bas wahi save hoti hai. Settings file dekhne se PIN nahi milta.
+   ═══════════════════════════════════════════════════════════════ */
+
+function pinHash(pin, salt){
+  var s = salt + '|' + String(pin) + '|paisabook';
+  var h1 = 0x811c9dc5, h2 = 0x01000193;
+  /* Ek baar ghumane se guess karna aasaan hota hai. 5000 baar
+     ghumane se har guess mein waqt lagta hai — par aadmi ko
+     sirf ek baar, isliye farak nahi padta. */
+  for(var r = 0; r < 5000; r++){
+    for(var i = 0; i < s.length; i++){
+      var ch = s.charCodeAt(i);
+      h1 = ((h1 ^ ch) * 16777619) >>> 0;
+      h2 = ((h2 << 5) - h2 + ch + h1) >>> 0;
+    }
+    s = h1.toString(36) + h2.toString(36) + salt;
+  }
+  return h1.toString(36) + '-' + h2.toString(36);
+}
+function lockCfg(){ return readObj(K.settings, {}).lock || null; }
+function lockOn(){ var l = lockCfg(); return !!(l && l.on && l.hash); }
+function saveLockCfg(cfg){
+  var s = readObj(K.settings, {});
+  if(cfg) s.lock = cfg; else delete s.lock;
+  writeObj(K.settings, s);
+}
+
+/* Lock screen ka chhota sa state machine.
+   mode: 'unlock' | 'new' | 'again' | 'verify' */
+var lockState = { mode:'unlock', buf:'', first:'', tries:0, after:null, busy:false };
+
+function showLock(mode, after){
+  lockState.mode = mode; lockState.buf = ''; lockState.first = '';
+  lockState.after = after || null;
+  if(mode === 'unlock') lockState.tries = 0;
+  /* Unlock ko "Chhodo" se nikala nahi ja sakta — par uski jagah
+     khaali rehni chahiye, warna keypad ke button khisak jaate hain */
+  $('lockCancel').classList.toggle('blank', mode === 'unlock');
+  $('lockForgot').hidden = (mode !== 'unlock');
+  $('lock').classList.add('show');
+  paintLock();
+}
+function hideLock(){
+  $('lock').classList.remove('show');
+  lockState.buf = ''; lockState.first = '';
+}
+function paintLock(){
+  var m = lockState.mode;
+  var t = m === 'new'    ? 'Naya PIN banao'
+        : m === 'again'  ? 'Dobara daalo'
+        : m === 'verify' ? 'Apna PIN daalo'
+        : 'PIN daalo';
+  var sub = m === 'new'    ? '4 digit — jo yaad rahe'
+          : m === 'again'  ? 'Pakka karne ke liye wahi PIN'
+          : m === 'verify' ? 'Pehle purana PIN confirm karo'
+          : 'Apna 4 digit ka PIN';
+  $('lockIco').textContent   = m === 'unlock' ? '🔒' : '🔑';
+  $('lockTitle').textContent = t;
+  setLockSub(sub, false);
+  paintDots();
+}
+function setLockSub(txt, bad){
+  $('lockSub').textContent = txt;
+  $('lockSub').classList.toggle('bad', !!bad);
+}
+function paintDots(){
+  $$('#lockDots .lock-dot').forEach(function(d, i){
+    d.classList.toggle('on', i < lockState.buf.length);
+  });
+}
+function lockKey(k){
+  if(lockState.busy) return;
+  if(k === 'del'){ lockState.buf = lockState.buf.slice(0, -1); paintDots(); return; }
+  if(lockState.buf.length >= 4) return;
+  lockState.buf += k;
+  paintDots();
+  if(lockState.buf.length === 4) setTimeout(submitPin, 140);   /* dot dikhne do */
+}
+function shakeDots(msg){
+  setLockSub(msg, true);
+  $('lockDots').classList.add('shake');
+  setTimeout(function(){ $('lockDots').classList.remove('shake'); }, 420);
+  lockState.buf = ''; paintDots();
+}
+function submitPin(){
+  var pin = lockState.buf, m = lockState.mode;
+
+  if(m === 'new'){
+    lockState.first = pin; lockState.buf = '';
+    lockState.mode = 'again'; paintLock(); return;
+  }
+  if(m === 'again'){
+    if(pin !== lockState.first){
+      lockState.mode = 'new'; lockState.first = '';
+      /* Heading bhi wapas "Naya PIN banao" par laani zaroori hai —
+         warna upar "Dobara daalo" likha rehta hai aur neeche
+         "dono alag the". Banda samajh hi nahi paata ki ab kya kare. */
+      paintLock();
+      shakeDots('Dono PIN alag the — phir se'); return;
+    }
+    var salt = uid() + uid();
+    saveLockCfg({ on:true, salt:salt, hash:pinHash(pin, salt) });
+    hideLock(); renderLockCard();
+    toast('🔒 App lock chalu — ab khulte hi PIN poochega','ok');
+    return;
+  }
+  /* unlock aur verify — dono mein PIN match karna hai */
+  var cfg = lockCfg();
+  if(!cfg){ hideLock(); return; }
+  lockState.busy = true;
+  var okPin = pinHash(pin, cfg.salt) === cfg.hash;
+  lockState.busy = false;
+
+  if(!okPin){
+    lockState.tries++;
+    shakeDots(lockState.tries >= 3
+      ? 'Galat PIN · ' + lockState.tries + ' baar — "bhool gaye?" dabao'
+      : 'Galat PIN — phir se');
+    return;
+  }
+  var after = lockState.after;
+  hideLock();
+  if(m === 'verify' && after) after();
+  else if(m === 'unlock') setTimeout(runPendingShortcut, 250);   /* shortcut ab chalega */
+}
+
+/* App khulte hi — ya background se wapas aate hi */
+function lockIfNeeded(){
+  if(!lockOn()) return false;
+  showLock('unlock');
+  return true;
+}
+function toggleLock(){
+  if(lockOn()){
+    showLock('verify', function(){
+      saveLockCfg(null); renderLockCard();
+      toast('🔓 App lock band — ab PIN nahi poochega','ok');
+    });
+  } else {
+    showLock('new');
+  }
+}
+function changePin(){
+  if(!lockOn()) return;
+  showLock('verify', function(){ showLock('new'); });
+}
+/* PIN bhool gaye — seedhi baat, koi jhootha rasta nahi */
+function forgotPin(){
+  askConfirm({
+    icon:'🤔', title:'PIN bhool gaye?',
+    body:'PIN sirf aapke phone mein hai — hum use wapas nahi la sakte, ' +
+         'kyunki hum usko kabhi save hi nahi karte.<br><br>' +
+         '<b>Agar aapke paas backup file hai:</b> use browser mein kholo, ' +
+         'saara hisaab wahan dikh jaayega.<br><br>' +
+         '<span class="t-red">Aage badhne ka sirf ek rasta hai — app ka saara ' +
+         'data mitaa kar naya shuru karna.</span>',
+    yes:'Sab mitaa do',
+    onYes:function(){
+      askConfirm({
+        icon:'⚠️', title:'Pakka?',
+        body:'Saare transactions, udhar, committee, khata — <b>sab chala jaayega</b> ' +
+             'aur wapas nahi aayega.<br><br>Agar backup file hai to ye theek hai. ' +
+             'Nahi hai, to yahin ruk jao.',
+        yes:'Haan, sab mitaa do',
+        onYes:function(){
+          ALL_KEYS.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+          clearStore();
+          location.reload();
+        }
+      });
+    }
+  });
+}
+function renderLockCard(){
+  var on = lockOn();
+  $('lockSwitch').classList.toggle('on', on);
+  $('lockSubTxt').textContent = on
+    ? 'Chalu — app kholte hi PIN poochega'
+    : 'Band — koi bhi app khol sakta hai';
+  $('btnLock').className = 'card set ' + (on ? 'c-green' : 'c-red');
+  $('lockChangeRow').hidden = !on;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   11c · COMMITTEE / BC / CHIT
+   ───────────────────────────────────────────────────────────────
+   Hisaab LOGIC section mein hai (cmtStatus). Yahan sirf screen.
+
+   Ek committee kisht "kharcha" nahi hai — wo zabardasti ki BACHAT
+   hai. Isliye kisht Investment category mein jaati hai, aur number
+   aane par jo paisa milta hai wo income banta hai. Isse mahine ka
+   hisaab sach dikhta hai.
+   ═══════════════════════════════════════════════════════════════ */
+
+function saveCommittee(){
+  var name    = $('cName').value.trim();
+  var amt     = parseFloat($('cAmt').value);
+  var members = parseInt($('cMembers').value, 10);
+  var start   = $('cStart').value;                    /* "2026-02" */
+  var turn    = parseInt($('cTurn').value, 10) || 0;
+
+  if(!name)                      { $('cName').classList.add('bad');    toast('Naam daalo','bad'); return; }
+  if(!amt || amt <= 0)           { $('cAmt').classList.add('bad');     toast('Kisht ka amount daalo','bad'); return; }
+  if(!members || members < 2)    { $('cMembers').classList.add('bad'); toast('Kam se kam 2 log','bad'); return; }
+  if(!start)                     { $('cStart').classList.add('bad');   toast('Shuru ka mahina chuno','bad'); return; }
+  if(turn > members){ $('cTurn').classList.add('bad');
+    toast('Number ' + members + ' se zyada nahi ho sakta','bad'); return; }
+  ['cName','cAmt','cMembers','cStart','cTurn'].forEach(function(id){ $(id).classList.remove('bad'); });
+
+  var p = start.split('-');
+  var list = read(K.cmt);
+  list.push({ id:uid(), name:name, amount:amt, members:members,
+              startM:(+p[1]) - 1, startY:+p[0], myTurn:turn,
+              payout:0, gotOn:'', createdAt:nowStamp() });
+  if(!write(K.cmt, list)) return;
+
+  toast('🤝 ' + name + ' add ho gayi','ok');
+  toggleForm('cForm','cFormIco');
+  clearFields(['cName','cAmt','cMembers','cTurn']); $('cStart').value = '';
+  $('cPreview').hidden = true;
+  renderCommittees();
+}
+/* Form bharte waqt hi dikha do ki kitna dena hai aur kab milega —
+   banda save se PEHLE samajh jaaye ki wo kis cheez mein ghus raha hai */
+function updateCmtPreview(){
+  var amt     = parseFloat($('cAmt').value);
+  var members = parseInt($('cMembers').value, 10);
+  var start   = $('cStart').value;
+  var turn    = parseInt($('cTurn').value, 10) || 0;
+  if(!amt || !members || members < 2){ $('cPreview').hidden = true; return; }
+
+  var txt = 'Poori committee mein <b class="num">' + money(amt * members) + '</b> dena hai — ' +
+            members + ' mahine mein. Number aane par utna hi wapas milega.';
+  if(start && turn >= 1 && turn <= members){
+    var p = start.split('-');
+    var t = addMonths((+p[1]) - 1, +p[0], turn - 1);
+    txt += '<br>Aapka number: <b>' + MONTHS[t.m] + ' ' + t.y + '</b>';
+  }
+  $('cPreviewTxt').innerHTML = txt;
+  $('cPreview').hidden = false;
+}
+function deleteCommittee(id){
+  var c = read(K.cmt).filter(function(x){ return x.id === id; })[0];
+  var n = read(K.cmtPay).filter(function(p){ return p.cmtId === id; }).length;
+  askConfirm({
+    icon:'🗑️', title:'Committee delete?',
+    body:'<b>' + esc(c.name) + '</b> aur iski <b class="num">' + n +
+         '</b> kisht ka record delete ho jaayega.<br><br>' +
+         '<span class="t-mute">Jo expense entries ban chuki hain wo rahengi.</span>',
+    yes:'Haan, delete karo',
+    onYes:function(){
+      write(K.cmt,    read(K.cmt).filter(function(x){ return x.id !== id; }));
+      write(K.cmtPay, read(K.cmtPay).filter(function(p){ return p.cmtId !== id; }));
+      toast('Committee delete hui','ok');
+      S.cmtOpenId = null; renderCommittees(); renderHome();
+    }
+  });
+}
+/* "Is mahine ki kisht di" — ek tap mein record + expense entry */
+function payKisht(id){
+  var c = read(K.cmt).filter(function(x){ return x.id === id; })[0];
+  if(!c) return;
+  var st = cmtStatus(c);
+  if(st.done){ toast('Saari kisht ho chuki hain','ok'); return; }
+  if(!st.dueThisMonth){ toast('Is mahine ki kisht pehle hi di hui hai','bad'); return; }
+
+  var now = new Date();
+  var pay = { id:uid(), cmtId:id, m:now.getMonth(), y:now.getFullYear(),
+              amount:c.amount, date:todayKey(), createdAt:nowStamp() };
+  var pays = read(K.cmtPay); pays.push(pay); write(K.cmtPay, pays);
+
+  /* Committee bachat hai, kharcha nahi — isliye Investment */
+  var txn = { id:uid(), type:'expense', amount:c.amount, category:'Investment',
+              payment:'UPI', note:c.name + ' — committee kisht', date:todayKey(),
+              createdAt:nowStamp(), updatedAt:nowStamp() };
+  var txns = read(K.txn); txns.push(txn); write(K.txn, txns);
+  bumpStreak();
+
+  toast('✅ Kisht ' + money(c.amount) + ' — Investment mein bhi jud gayi','ok', function(){
+    write(K.cmtPay, read(K.cmtPay).filter(function(p){ return p.id !== pay.id; }));
+    removeTxn(txn.id);
+    toast('↩ Wapas hataa diya','ok'); renderCommittees(); refreshAll();
+  });
+  renderCommittees(); renderHome();
+}
+function undoKisht(payId){
+  var pays = read(K.cmtPay);
+  var p = pays.filter(function(x){ return x.id === payId; })[0];
+  write(K.cmtPay, pays.filter(function(x){ return x.id !== payId; }));
+  toast('Kisht ka record hataa diya','ok', function(){
+    var back = read(K.cmtPay); back.push(p); write(K.cmtPay, back);
+    toast('↩ Wapas aa gayi','ok'); renderCommittees();
+  });
+  renderCommittees();
+}
+/* "Mera number aa gaya" — poora paisa mila, income entry ban jaati hai */
+function cmtGotPayout(id){
+  var list = read(K.cmt);
+  var i = list.findIndex(function(x){ return x.id === id; });
+  if(i === -1) return;
+  var c = list[i], st = cmtStatus(c);
+  askConfirm({
+    icon:'💰', title:'Number aa gaya?',
+    body:'<b>' + esc(c.name) + '</b> se <b class="num">' + money(st.willGet) +
+         '</b> mila?<br><br>Ye income mein jud jaayega. Kisht phir bhi chalti rahegi.',
+    yes:'Haan, mil gaya',
+    onYes:function(){
+      var txn = { id:uid(), type:'income', amount:st.willGet, category:'Other Income',
+                  payment:'UPI', note:c.name + ' — committee ka number', date:todayKey(),
+                  createdAt:nowStamp(), updatedAt:nowStamp() };
+      var txns = read(K.txn); txns.push(txn); write(K.txn, txns);
+      var l = read(K.cmt);
+      var j = l.findIndex(function(x){ return x.id === id; });
+      l[j].gotOn = todayKey(); write(K.cmt, l);
+      toast('💰 ' + money(st.willGet) + ' income mein jud gaya','ok');
+      renderCommittees(); refreshAll();
+    }
+  });
+}
+
+function renderCommittees(){
+  var list = read(K.cmt), pays = read(K.cmtPay);
+
+  /* Upar ki patti — ek nazar mein poori tasveer */
+  var monthly = 0, given = 0, dueN = 0;
+  list.forEach(function(c){
+    var s = cmtStatus(c, pays);
+    given += s.given;
+    if(!s.done){ monthly += c.amount; if(s.dueThisMonth) dueN++; }
+  });
+  var st;
+  if(!list.length)  st = { ico:'🤝', cls:'c-mute', title:'Koi committee nahi',
+                           sub:'Committee ya BC chalti ho to yahan rakho', pill:'–' };
+  else if(dueN > 0) st = { ico:'🔔', cls:'c-orange', title: dueN + ' kisht baaki hai',
+                           sub:'Is mahine ka ' + money(monthly) + ' dena hai', pill:'Due' };
+  else              st = { ico:'✅', cls:'c-green', title:'Is mahine sab clear',
+                           sub:'Ab tak kul ' + money(given) + ' jama kiya', pill:'Clear' };
+
+  $('cmtStrip').className      = 'card hstrip card-top ' + st.cls;
+  $('cmtStripIco').textContent = st.ico;
+  $('cmtStripTitle').textContent = st.title;
+  $('cmtStripSub').textContent = st.sub;
+  $('cmtStripPill').className  = 'pill pill-br ' + st.cls;
+  $('cmtStripPill').textContent = st.pill;
+
+  var box = $('cList'); box.innerHTML = '';
+  if(!list.length){
+    box.innerHTML = emptyHTML('🤝','Koi committee nahi',
+      '➕ Add se apni committee ya BC daalo');
+    return;
+  }
+  list.forEach(function(c, i){ box.appendChild(cmtCard(c, i, pays)); });
+}
+
+function cmtCard(c, i, pays){
+  var s    = cmtStatus(c, pays);
+  var open = S.cmtOpenId === c.id;
+  var cls  = s.done ? 'c-green' : s.dueThisMonth ? 'c-orange' : 'c-gold';
+
+  var card = document.createElement('div');
+  card.className = 'u-card ' + cls + (open ? ' open' : '');
+  card.style.animationDelay = Math.min(i,8) * 0.04 + 's';
+
+  /* Mera number — sabse kaam ki line, isliye alag se */
+  var turnLine;
+  if(s.turn === null)
+    turnLine = '<span class="pill c-mute">❓ Number pata nahi</span>';
+  else if(c.gotOn)
+    turnLine = '<span class="pill c-green">✅ Mil gaya — ' + fmtDate(c.gotOn) + '</span>';
+  else if(s.monthsToTurn === 0)
+    turnLine = '<span class="pill c-green">🎉 Is mahine aapka number!</span>';
+  else if(s.monthsToTurn > 0)
+    turnLine = '<span class="pill c-gold">📅 ' + s.turnLabel + ' · ' +
+               s.monthsToTurn + ' mahine baad</span>';
+  else
+    turnLine = '<span class="pill c-info">📅 Number aa chuka — ' + s.turnLabel + '</span>';
+
+  var mine = pays.filter(function(p){ return p.cmtId === c.id; })
+                 .sort(function(a,b){ return dayKey(a.date) < dayKey(b.date) ? 1 : -1; });
+  var history = mine.length
+    ? mine.slice(0,12).map(function(p){
+        return '<div class="ph-item"><span class="ph-date">' + MONTHS[p.m] + ' ' + p.y + '</span>' +
+               '<span class="ph-amt num">' + money(p.amount) + '</span>' +
+               '<button class="btn-icon" data-kundo="' + p.id + '" aria-label="Hataao">✕</button></div>';
+      }).join('')
+    : '<div class="empty-hint" style="font-style:italic">Abhi koi kisht nahi</div>';
+
+  card.innerHTML =
+    '<button class="u-head">' +
+      '<div class="u-av">🤝</div>' +
+      '<div class="row-main">' +
+        '<div class="u-name">' + esc(c.name) + '</div>' +
+        '<div class="row-meta">' +
+          '<span class="pill ' + cls + ' num">' + money(c.amount) + '/mahina</span>' +
+          '<span class="pill c-mute num">' + c.members + ' log</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="u-right">' +
+        '<div class="u-amt num">' + money(s.given) + '</div>' +
+        '<div class="u-total num">' + s.paid + '/' + c.members + ' kisht di</div>' +
+        '<div class="u-chev">⌄</div>' +
+      '</div>' +
+    '</button>' +
+    '<div class="u-body">' +
+      barHTML(s.pct, 'linear-gradient(90deg,var(--brand),var(--brand-2))') +
+      '<div class="row-meta" style="margin:var(--s3) 0">' + turnLine +
+        (s.done ? '<span class="pill c-green">🎉 Poori ho gayi</span>'
+                : '<span class="pill c-mute num">' + s.left + ' kisht baaki · ' +
+                  money(s.left * c.amount) + '</span>') +
+      '</div>' +
+      '<div class="ph"><div class="eyebrow">Kisht ka record</div>' + history + '</div>' +
+      '<div class="u-actions">' +
+        (s.done ? '' :
+          s.dueThisMonth
+            ? '<button class="btn btn-soft c-green" data-kisht="' + c.id + '">✓ Is mahine ki kisht</button>'
+            : '<button class="btn btn-soft c-mute" disabled>✅ Is mahine di hui</button>') +
+        ((s.turn !== null && s.monthsToTurn <= 0 && !c.gotOn)
+          ? '<button class="btn btn-soft c-gold" data-kgot="' + c.id + '">💰 Number aa gaya</button>' : '') +
+        '<button class="btn btn-soft c-red narrow" data-kdel="' + c.id + '">🗑</button>' +
+      '</div>' +
+    '</div>';
+
+  card.querySelector('.u-head').addEventListener('click', function(){
+    S.cmtOpenId = open ? null : c.id; renderCommittees();
+  });
+  card.addEventListener('click', function(e){
+    var t = e.target;
+    if(t.getAttribute('data-kisht')){ e.stopPropagation(); payKisht(c.id); }
+    else if(t.getAttribute('data-kgot')){ e.stopPropagation(); cmtGotPayout(c.id); }
+    else if(t.getAttribute('data-kdel')){ e.stopPropagation(); deleteCommittee(c.id); }
+    else if(t.getAttribute('data-kundo')){ e.stopPropagation(); undoKisht(t.getAttribute('data-kundo')); }
+  });
+  return card;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   11d · DUKAAN KA KHATA
+   ───────────────────────────────────────────────────────────────
+   Do tarah ki entry hoti hai:
+     udhar — saamaan liya, paisa nahi diya (baaki badhta hai)
+     jama  — paisa diya (baaki ghatta hai)
+
+   AHEM FAISLA: saamaan lene par expense entry NAHI banti. Paisa
+   dene par banti hai. Kyunki ghar ka hisaab cash par chalta hai —
+   "jab paisa gaya tab kharcha". Warna mahine ka kharch do baar
+   gina jaata: ek baar saamaan lete waqt, ek baar paisa dete waqt.
+   ═══════════════════════════════════════════════════════════════ */
+
+function saveShop(){
+  var name  = $('kName').value.trim();
+  var type  = $('kType').value || 'Kirana';
+  var phone = $('kPhone').value.trim();
+  if(!name){ $('kName').classList.add('bad'); toast('Dukaan ka naam daalo','bad'); return; }
+  $('kName').classList.remove('bad');
+
+  var list = read(K.shops);
+  list.push({ id:uid(), name:name, type:type,
+              phone: isValidPhone(phone) ? phone : '', createdAt:nowStamp() });
+  if(!write(K.shops, list)) return;
+
+  toast(shopInfo(type).ico + ' ' + name + ' add ho gayi','ok');
+  toggleForm('kForm','kFormIco');
+  clearFields(['kName','kPhone']);
+  renderShops();
+}
+function deleteShop(id){
+  var s = read(K.shops).filter(function(x){ return x.id === id; })[0];
+  var n = read(K.khata).filter(function(e){ return e.shopId === id; }).length;
+  askConfirm({
+    icon:'🗑️', title:'Dukaan delete?',
+    body:'<b>' + esc(s.name) + '</b> aur iski <b class="num">' + n +
+         '</b> entries delete ho jaayengi.<br><br><span class="t-red">Ye undo nahi ho sakta.</span>',
+    yes:'Haan, delete karo',
+    onYes:function(){
+      write(K.shops, read(K.shops).filter(function(x){ return x.id !== id; }));
+      write(K.khata, read(K.khata).filter(function(e){ return e.shopId !== id; }));
+      toast('Dukaan delete hui','ok');
+      S.shopOpenId = null; renderShops(); renderHome();
+    }
+  });
+}
+/* Ek entry jodo — kind 'udhar' (liya) ya 'jama' (diya) */
+function addKhataEntry(shopId, kind){
+  var inp = $('kIn-' + shopId), nIn = $('kNote-' + shopId);
+  if(!inp) return;
+  var amt = parseFloat(inp.value);
+  if(!amt || amt <= 0){ toast('Valid amount daalo','bad'); inp.focus(); return; }
+  if(amt > LIMIT.amount) amt = LIMIT.amount;
+
+  var entry = { id:uid(), shopId:shopId, amount:amt, kind:kind,
+                note: nIn ? nIn.value.trim() : '', date:todayKey(), createdAt:nowStamp() };
+  var list = read(K.khata); list.push(entry);
+  if(!write(K.khata, list)) return;
+  bumpStreak();
+
+  var shop = read(K.shops).filter(function(s){ return s.id === shopId; })[0];
+  var txnId = null;
+  /* Paisa diya = asli kharcha. Saamaan liya = abhi nahi. */
+  if(kind === 'jama' && shop){
+    var txn = { id:uid(), type:'expense', amount:amt, category:shopInfo(shop.type).cat,
+                payment:'Cash', note:shop.name + (entry.note ? ' — ' + entry.note : ''),
+                date:todayKey(), createdAt:nowStamp(), updatedAt:nowStamp() };
+    var txns = read(K.txn); txns.push(txn); write(K.txn, txns);
+    txnId = txn.id;
+  }
+  toast((kind === 'jama' ? '💵 ' + money(amt) + ' diya' : '🛒 ' + money(amt) + ' ka liya') +
+        (txnId ? ' — kharch mein bhi jud gaya' : ''), 'ok', function(){
+    write(K.khata, read(K.khata).filter(function(e){ return e.id !== entry.id; }));
+    if(txnId) removeTxn(txnId);
+    toast('↩ Wapas hataa diya','ok'); renderShops(); refreshAll();
+  });
+  if(nIn) nIn.value = '';
+  inp.value = '';
+  renderShops(); renderHome();
+  setTimeout(function(){ var el = $('kIn-' + shopId); if(el) el.focus(); }, 60);
+}
+function deleteKhataEntry(id){
+  var list = read(K.khata);
+  var e = list.filter(function(x){ return x.id === id; })[0];
+  write(K.khata, list.filter(function(x){ return x.id !== id; }));
+  toast('Entry hataa di','ok', function(){
+    var back = read(K.khata); back.push(e); write(K.khata, back);
+    toast('↩ Wapas aa gayi','ok'); renderShops();
+  });
+  renderShops(); renderHome();
+}
+/* "Poora chukaya" — ek jama entry baaki ke barabar */
+function settleShop(id){
+  var shop = read(K.shops).filter(function(s){ return s.id === id; })[0];
+  var b = shopBalance(id);
+  if(b.baaki <= 0){ toast('Kuch baaki nahi hai','ok'); return; }
+  askConfirm({
+    icon:'✅', title:'Poora chukaya?',
+    body:'<b>' + esc(shop.name) + '</b> ka <b class="num">' + money(b.baaki) +
+         '</b> chuka diya?<br><br>Khata zero ho jaayega aur itna kharcha ' +
+         '<b>' + shopInfo(shop.type).cat + '</b> mein jud jaayega.',
+    yes:'Haan, chuka diya',
+    onYes:function(){
+      var entry = { id:uid(), shopId:id, amount:b.baaki, kind:'jama',
+                    note:'Poora hisaab saaf', date:todayKey(), createdAt:nowStamp() };
+      var list = read(K.khata); list.push(entry); write(K.khata, list);
+
+      var txn = { id:uid(), type:'expense', amount:b.baaki, category:shopInfo(shop.type).cat,
+                  payment:'Cash', note:shop.name + ' — khata settle', date:todayKey(),
+                  createdAt:nowStamp(), updatedAt:nowStamp() };
+      var txns = read(K.txn); txns.push(txn); write(K.txn, txns);
+      bumpStreak();
+
+      toast('✅ ' + shop.name + ' ka khata saaf — ' + money(b.baaki),'ok', function(){
+        write(K.khata, read(K.khata).filter(function(e){ return e.id !== entry.id; }));
+        removeTxn(txn.id);
+        toast('↩ Wapas hataa diya','ok'); renderShops(); refreshAll();
+      });
+      renderShops(); refreshAll();
+    }
+  });
+}
+/* Dukaandaar ko khata WhatsApp pe bhejo — jhagda yahin khatam */
+function shareKhata(id){
+  var shop = read(K.shops).filter(function(s){ return s.id === id; })[0];
+  if(!shop) return;
+  var b = shopBalance(id);
+  var rows = read(K.khata).filter(function(e){ return e.shopId === id; })
+             .sort(function(a,b2){ return dayKey(a.date) < dayKey(b2.date) ? 1 : -1; });
+
+  var L = [ shopInfo(shop.type).ico + ' *' + shop.name + '* — khata', '' ];
+  rows.slice(0,25).forEach(function(e){
+    L.push((e.kind === 'jama' ? '✅ diya  ' : '🛒 liya  ') + money(e.amount) +
+           '  · ' + fmtDate(e.date) + (e.note ? ' · ' + e.note : ''));
+  });
+  L.push('', '🛒 Kul liya: *' + money(b.udhar) + '*');
+  L.push('✅ Kul diya: *' + money(b.jama) + '*');
+  L.push(b.baaki > 0 ? '🔴 *Baaki: ' + money(b.baaki) + '*' : '✅ *Khata saaf hai*');
+  L.push('', '_PaisaBook — Apna Paisa, Apna Hisaab_');
+
+  var text = L.join('\n');
+  if(isValidPhone(shop.phone))
+    window.open('https://wa.me/91' + shop.phone + '?text=' + encodeURIComponent(text), '_blank');
+  else if(navigator.share) navigator.share({ title:shop.name, text:text }).catch(function(){});
+  else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+function renderShops(){
+  var shops = read(K.shops), all = read(K.khata);
+  var t = khataTotals();
+
+  $('khataTotal').style.display = t.baaki > 0 ? 'flex' : 'none';
+  $('khataTotalVal').textContent = money(t.baaki);
+
+  var box = $('kList'); box.innerHTML = '';
+  if(!shops.length){
+    box.innerHTML = emptyHTML('🏪','Koi dukaan nahi',
+      '➕ Add se kirana, doodh ya paan wale ka khata banao');
+    return;
+  }
+  /* Jiska zyada baaki hai wo pehle */
+  shops.slice().sort(function(a,b){
+    return shopBalance(b.id, all).baaki - shopBalance(a.id, all).baaki;
+  }).forEach(function(s, i){ box.appendChild(shopCard(s, i, all)); });
+}
+
+function shopCard(s, i, all){
+  var b    = shopBalance(s.id, all);
+  var open = S.shopOpenId === s.id;
+  var info = shopInfo(s.type);
+  var cls  = b.baaki > 0 ? 'c-red' : 'c-green';
+
+  var card = document.createElement('div');
+  card.className = 'u-card ' + cls + (open ? ' open' : '');
+  card.style.animationDelay = Math.min(i,8) * 0.04 + 's';
+
+  var rows = all.filter(function(e){ return e.shopId === s.id; })
+                .sort(function(a,b2){ return dayKey(a.date) < dayKey(b2.date) ? 1 : -1; });
+  var history = rows.length
+    ? rows.slice(0,15).map(function(e){
+        var isJ = e.kind === 'jama';
+        return '<div class="ph-item">' +
+          '<span class="ph-date">' + (isJ ? '✅ ' : '🛒 ') + fmtDate(e.date) +
+            (e.note ? ' · ' + esc(e.note) : '') + '</span>' +
+          '<span class="ph-amt num" style="color:var(--' + (isJ ? 'green' : 'red') + ')">' +
+            (isJ ? '−' : '+') + money(e.amount) + '</span>' +
+          '<button class="btn-icon" data-edel2="' + e.id + '" aria-label="Hataao">✕</button></div>';
+      }).join('')
+    : '<div class="empty-hint" style="font-style:italic">Abhi koi entry nahi</div>';
+
+  card.innerHTML =
+    '<button class="u-head">' +
+      '<div class="u-av">' + info.ico + '</div>' +
+      '<div class="row-main">' +
+        '<div class="u-name">' + esc(s.name) + '</div>' +
+        '<div class="row-meta">' +
+          '<span class="pill c-mute">' + esc(s.type) + '</span>' +
+          (b.last ? '<span class="pill c-mute">' + agoLabel(b.last) + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="u-right">' +
+        '<div class="u-amt num">' + money(b.baaki) + '</div>' +
+        '<div class="u-total">' + (b.baaki > 0 ? 'dena hai' : 'saaf hai') + '</div>' +
+        '<div class="u-chev">⌄</div>' +
+      '</div>' +
+    '</button>' +
+    '<div class="u-body">' +
+      /* Amount aur note alag-alag line mein — 320px ke phone pe
+         saath rakhne se note ka placeholder kat jaata tha */
+      '<div class="pay-inline open red">' +
+        '<input class="input num" id="kIn-' + s.id + '" type="number" min="1" step="any" ' +
+               'inputmode="decimal" placeholder="Kitne ka?">' +
+        '<input class="input" id="kNote-' + s.id + '" type="text" maxlength="40" ' +
+               'placeholder="Kya liya? (marzi se)">' +
+        '<div class="field-row">' +
+          '<button class="btn btn-red" data-kliya="' + s.id + '" style="flex:1">🛒 Liya</button>' +
+          '<button class="btn btn-green" data-kdiya="' + s.id + '" style="flex:1">💵 Diya</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ph"><div class="eyebrow">Khata</div>' + history + '</div>' +
+      '<div class="u-actions">' +
+        (b.baaki > 0
+          ? '<button class="btn btn-soft c-green" data-ksettle="' + s.id + '">✅ Chukaya</button>'
+          : '') +
+        '<button class="btn btn-soft c-wa" data-kshare="' + s.id + '">💬 Bhejo</button>' +
+        '<button class="btn btn-soft c-red narrow" data-sdel2="' + s.id + '">🗑</button>' +
+      '</div>' +
+    '</div>';
+
+  card.querySelector('.u-head').addEventListener('click', function(){
+    S.shopOpenId = open ? null : s.id; renderShops();
+    if(!open) setTimeout(function(){ var el = $('kIn-' + s.id); if(el) el.focus(); }, 80);
+  });
+  card.addEventListener('click', function(e){
+    var t = e.target;
+    if(t.getAttribute('data-kliya')){  e.stopPropagation(); addKhataEntry(s.id, 'udhar'); }
+    else if(t.getAttribute('data-kdiya')){   e.stopPropagation(); addKhataEntry(s.id, 'jama'); }
+    else if(t.getAttribute('data-ksettle')){ e.stopPropagation(); settleShop(s.id); }
+    else if(t.getAttribute('data-kshare')){  e.stopPropagation(); shareKhata(s.id); }
+    else if(t.getAttribute('data-sdel2')){   e.stopPropagation(); deleteShop(s.id); }
+    else if(t.getAttribute('data-edel2')){   e.stopPropagation(); deleteKhataEntry(t.getAttribute('data-edel2')); }
+  });
+  /* Enter se bhi "liya" — sabse aam kaam */
+  var amtIn = card.querySelector('#kIn-' + s.id);
+  if(amtIn) amtIn.addEventListener('keydown', function(ev){
+    if(ev.key === 'Enter') addKhataEntry(s.id, 'udhar');
+  });
+  return card;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    12 · SETTINGS · BACKUP · EXPORT · REPORT
    ═══════════════════════════════════════════════════════════════ */
 
@@ -5711,6 +7190,9 @@ function backupPayload(){
       subscriptions:read(K.subs), recurring: read(K.rec),
       festivals:    read(K.fest), settings: readObj(K.settings,{}),
       functions:    read(K.funcs), shagun: read(K.shagun),  /* shaadi wali copy bhi */
+      committees:   read(K.cmt),   committeePays: read(K.cmtPay),
+      shops:        read(K.shops), khata: read(K.khata),
+      bills:        read(K.bills),            /* bill ki photos bhi — warna restore pe chup-chaap gayab */
       merchants:    readObj(K.merchants,{})   /* aapki sikhaayi hui categories bhi backup mein */
     }
   };
@@ -5886,7 +7368,9 @@ function applyRestore(p){
   var d = p.data;
   var map = [[K.txn,'transactions'],[K.udhar,'udhar'],[K.budget,'budgets'],
              [K.emi,'emis'],[K.subs,'subscriptions'],[K.rec,'recurring'],[K.fest,'festivals'],
-             [K.funcs,'functions'],[K.shagun,'shagun']];
+             [K.funcs,'functions'],[K.shagun,'shagun'],
+             [K.cmt,'committees'],[K.cmtPay,'committeePays'],
+             [K.shops,'shops'],[K.khata,'khata'],[K.bills,'bills']];
   map.forEach(function(pair){ if(d[pair[1]]) write(pair[0], d[pair[1]]); });
   if(d.settings)  writeObj(K.settings,  d.settings);
   if(d.merchants) writeObj(K.merchants, d.merchants);
@@ -5897,6 +7381,473 @@ function applyRestore(p){
 
   toast('✅ Restore ho gaya — ' + (d.transactions||[]).length + ' transactions wapas aaye','ok');
   refreshAll();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   12e · CLOUD BACKUP (Supabase)
+   ───────────────────────────────────────────────────────────────
+   TEEN NIYAM jo poore design ko chalate hain:
+
+   1. LOGIN ZAROORI NAHI. Login na karo to app bilkul waisa hi
+      chalta hai jaisa pehle — saara data phone mein. Login ek
+      UPARI cheez hai, neend ki tarah oodhi hui. Isse agar kal
+      Supabase band bhi ho jaaye, app marta nahi.
+
+   2. PHONE KA DATA ASLI HAI, cloud uski NAKAL hai. Hum cloud se
+      chupchaap kuch overwrite nahi karte.
+
+   3. CHUP-CHAAP KUCH NA MITE. Agar cloud wali copy aapke phone se
+      nayi nikli, to hum poochte hain ki kaunsi rakhni hai —
+      apne aap faisla nahi karte. Hisaab ka data wapas nahi aata.
+
+   KYUN supabase-js library nahi use ki: wo 100KB+ ki hai aur CDN
+   se aati hai. Chart.js ka CDN ek baar block ho chuka hai aur
+   poora app baith gaya tha. Login ke liye wahi khatra mol lena
+   bewakoofi hoti — isliye seedha fetch() se REST API bulate hain.
+   App ek hi file rehti hai, aur ek failure point kam.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── SIRF ye function network ko chhuta hai ──
+   Do fayde: (1) net ki har galti ek hi jagah sambhalti hai,
+   (2) test mein isko nakli bana kar poora sync bina internet ke
+   jaancha ja sakta hai — aur wahi maine kiya bhi hai. */
+function cloudFetch(path, opts){
+  opts = opts || {};
+  var headers = { 'apikey': CLOUD.key, 'Content-Type':'application/json' };
+  if(opts.token) headers['Authorization'] = 'Bearer ' + opts.token;
+  if(opts.headers) for(var h in opts.headers) headers[h] = opts.headers[h];
+
+  /* Net latak jaye to hamesha ke liye mat ruko */
+  var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  var timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, LIMIT.cloudTimeoutMs) : null;
+
+  return fetch(CLOUD.url + path, {
+    method: opts.method || 'GET',
+    headers: headers,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+    signal: ctrl ? ctrl.signal : undefined
+  }).then(function(r){
+    if(timer) clearTimeout(timer);
+    return r.text().then(function(txt){
+      var data = null;
+      try{ data = txt ? JSON.parse(txt) : null; } catch(e){ data = txt; }
+      return { ok:r.ok, status:r.status, data:data };
+    });
+  }).catch(function(e){
+    if(timer) clearTimeout(timer);
+    var why = (e && e.name === 'AbortError') ? 'timeout' : 'network';
+    return { ok:false, status:0, data:{ message:why } };
+  });
+}
+
+/* Server ki angrezi galti ko seedhi Hinglish mein badlo.
+   "Invalid login credentials" se aam aadmi ko kuch pata nahi chalta. */
+function cloudErr(r){
+  var d = r && r.data || {};
+  var code = d.error_code || d.code || '';
+  var msg  = String(d.msg || d.message || d.error_description || d.error || '');
+
+  if(r && r.status === 0)
+    return msg === 'timeout' ? 'Net bahut dheema hai — baad mein try karo'
+                             : 'Net nahi mil raha — baad mein apne aap ho jaayega';
+  if(code === 'invalid_credentials' || /invalid login/i.test(msg))
+    return 'Email ya password galat hai';
+  if(code === 'user_already_exists' || /already registered/i.test(msg))
+    return 'Is email ka account pehle se hai — Login dabao';
+  if(code === 'weak_password' || /at least 6/i.test(msg))
+    return 'Password kam se kam 6 akshar ka rakho';
+  if(code === 'validation_failed' || /valid email/i.test(msg))
+    return 'Email theek se likho';
+  if(code === 'email_not_confirmed')
+    return 'Email confirm nahi hui — Supabase mein wo setting band karo';
+  if(code === 'over_email_send_rate_limit' || /rate limit/i.test(msg))
+    return 'Thodi der ruk kar try karo (ek ghante mein ginti hai)';
+  if(r && r.status === 401) return 'Login purana ho gaya — dobara login karo';
+  if(r && r.status === 403) return 'Is data tak pahunch nahi hai';
+  if(r && (r.status === 502 || r.status === 503 || r.status === 504))
+    return 'Cloud abhi so raha hai — 1-2 minute mein dobara try karo';
+  return msg || 'Kuch gadbad hui — baad mein try karo';
+}
+
+/* ── Login ka haal ── */
+function authState(){ return readObj(K.auth, {}); }
+function saveAuth(a){ writeObj(K.auth, a || {}); }
+function loggedIn(){ var a = authState(); return !!(a.access && a.uid); }
+function cloudMeta(){ return readObj(K.cloud, {}); }
+function setCloudMeta(patch){
+  var m = cloudMeta();
+  for(var k in patch) m[k] = patch[k];
+  writeObj(K.cloud, m);
+}
+function storeSession(d){
+  var old = authState();
+  saveAuth({
+    access:  d.access_token,
+    refresh: d.refresh_token,
+    /* 60 second pehle hi purana maan lo — taaki beech raaste mein na mare */
+    expires: Date.now() + ((d.expires_in || 3600) * 1000),
+    email:  (d.user && d.user.email) || old.email || '',
+    uid:    (d.user && d.user.id)    || old.uid   || ''
+  });
+}
+/* Token zinda hai? Nahi to refresh karke lao. Dono haal mein Promise. */
+function cloudToken(){
+  var a = authState();
+  if(!a.access) return Promise.resolve(null);
+  if(a.expires && Date.now() < a.expires - 60000) return Promise.resolve(a.access);
+  if(!a.refresh) return Promise.resolve(null);
+  return cloudFetch('/auth/v1/token?grant_type=refresh_token', {
+    method:'POST', body:{ refresh_token:a.refresh }
+  }).then(function(r){
+    if(r.ok && r.data && r.data.access_token){ storeSession(r.data); return r.data.access_token; }
+    /* Refresh bhi nakaam — login khatam maan lo, par DATA MAT CHHUO */
+    saveAuth({});
+    return null;
+  });
+}
+
+function cloudSignup(email, pass){
+  return cloudFetch('/auth/v1/signup', { method:'POST', body:{ email:email, password:pass } })
+    .then(function(r){
+      if(!r.ok) return { ok:false, msg:cloudErr(r) };
+      /* Confirm-email band hai to session turant milta hai */
+      if(r.data && r.data.access_token){ storeSession(r.data); return { ok:true }; }
+      return { ok:false, msg:'Account to ban gaya, par login nahi hua — ab Login dabao' };
+    });
+}
+function cloudLogin(email, pass){
+  return cloudFetch('/auth/v1/token?grant_type=password',
+                    { method:'POST', body:{ email:email, password:pass } })
+    .then(function(r){
+      if(!r.ok) return { ok:false, msg:cloudErr(r) };
+      storeSession(r.data);
+      return { ok:true };
+    });
+}
+/* Logout sirf is phone se token hataata hai. DATA WAISA KA WAISA
+   rehta hai — logout karne par kisi ka hisaab nahi mitna chahiye. */
+function cloudLogout(){
+  var a = authState();
+  if(a.access) cloudFetch('/auth/v1/logout', { method:'POST', token:a.access });
+  saveAuth({});
+  setCloudMeta({ lastPush:null, serverAt:null });
+  renderCloudCard();
+  toast('Logout ho gaya — data is phone mein waisa hi hai','ok');
+}
+
+/* ── Kya bhejna hai ──
+   Wahi dhaancha jo backup file use karti hai, taaki ek hi raasta
+   rahe (aur applyRestore dono jagah chale). Photos default band —
+   wo jagah khaati hain aur free plan mein 500 MB hai. */
+function cloudPayload(){
+  var p = backupPayload();
+  if(!readObj(K.settings, {}).cloudPhotos) delete p.data.bills;
+  return p;
+}
+function cloudCount(data){
+  if(!data) return 0;
+  return (data.transactions||[]).length + (data.udhar||[]).length +
+         (data.khata||[]).length + (data.shagun||[]).length;
+}
+function deviceName(){
+  var ua = navigator.userAgent || '';
+  if(/Android/i.test(ua))        return 'Android phone';
+  if(/iPhone|iPad|iPod/i.test(ua)) return 'iPhone';
+  if(/Windows/i.test(ua))        return 'Windows';
+  if(/Mac/i.test(ua))            return 'Mac';
+  return 'Doosra device';
+}
+
+/* ── Sync ka haal (UI ke liye) ── */
+var cloudState = { s:'idle', msg:'' };
+function setCloudState(s, msg){
+  cloudState = { s:s, msg:msg || '' };
+  renderCloudCard();
+}
+
+/* ── Push se PEHLE ka pahra ──
+   KYUN ZAROORI HAI: maan lo laptop par kuch likha aur wo cloud mein
+   chala gaya. Phone background mein khula pada tha. Ab phone par ek
+   chhoti si entry ki — phone ka auto-push cloud ko overwrite kar
+   dega, aur laptop wala kaam BINA POOCHE mit jaayega.
+
+   Isliye push se pehle ek sawaal: "server pe wahi hai jo humne
+   aakhri baar bheja tha?" Alag nikla to overwrite nahi karte —
+   wahi "kaunsa rakhna hai" wali sheet dikha dete hain.
+
+   Ek extra request lagti hai, par ye hisaab ka data hai. Ek
+   request se kisi ka mahina bachta ho to wo sasta sauda hai. */
+var cloudAsking = false;      /* sheet ek hi baar khule */
+function cloudGuard(tok){
+  var m = cloudMeta();
+  /* Pehli baar bhej rahe hain — kuch overwrite ho hi nahi raha */
+  if(!m.serverAt) return Promise.resolve(true);
+  return cloudFetch('/rest/v1/' + CLOUD.table + '?select=*&user_id=eq.' +
+                    encodeURIComponent(authState().uid), { token:tok })
+    .then(function(r){
+      /* Check hi na ho paaya (net gadbad) to rok mat lagao —
+         warna net kharab hone par kabhi backup hi nahi hoga */
+      if(!r.ok) return true;
+      var row = Array.isArray(r.data) ? r.data[0] : null;
+      if(!row) return true;                        /* server pe kuch hai hi nahi */
+      if(row.updated_at === m.serverAt) return true;  /* wahi hai jo humne bheja tha */
+
+      /* Kisi aur ne bheja hai — poochna padega */
+      if(!cloudAsking){
+        cloudAsking = true;
+        askCloudChoice(row, cloudCount(backupPayload().data),
+                            cloudCount(row.data && row.data.data));
+      }
+      setCloudState('idle');
+      return false;
+    });
+}
+
+/* ── PUSH: phone ka data cloud mein ──
+   force=true sirf tab jab banda khud keh chuka ho ki "phone wala rakho" */
+function cloudPush(manual, force){
+  if(!loggedIn()) return Promise.resolve({ ok:false, why:'login' });
+  if(navigator.onLine === false){
+    setCloudState('offline');
+    if(manual) toast('Net nahi hai — net aate hi apne aap chala jaayega','bad');
+    return Promise.resolve({ ok:false, why:'offline' });
+  }
+  setCloudState('syncing');
+  return cloudToken().then(function(tok){
+    if(!tok){ setCloudState('error','Login purana ho gaya — dobara login karo');
+              renderCloudCard(); return { ok:false, why:'auth' }; }
+
+    var payload = cloudPayload();
+    var size = JSON.stringify(payload).length;
+    if(size > LIMIT.cloudMaxBytes){
+      setCloudState('error','Data bahut bada hai — Settings mein photos ka switch band karo');
+      return { ok:false, why:'too-big', size:size };
+    }
+    return (force ? Promise.resolve(true) : cloudGuard(tok)).then(function(safe){
+    if(!safe) return { ok:false, why:'conflict' };
+    return cloudFetch('/rest/v1/' + CLOUD.table + '?on_conflict=user_id', {
+      method:'POST', token:tok,
+      headers:{ 'Prefer':'resolution=merge-duplicates,return=representation' },
+      body:{ user_id:authState().uid, data:payload,
+             version:APP.version, device:deviceName() }
+    }).then(function(r){
+      if(!r.ok){ setCloudState('error', cloudErr(r)); return { ok:false, why:'server', r:r }; }
+      var row = Array.isArray(r.data) ? r.data[0] : r.data;
+      setCloudMeta({ lastPush:nowStamp(), serverAt:(row && row.updated_at) || null, size:size });
+      setCloudState('ok');
+      if(manual) toast('☁️ Cloud mein save ho gaya','ok');
+      if(size > LIMIT.cloudWarnBytes)
+        toast('Data bada ho raha hai (' + fmtBytes(size) + ') — photos ka switch dekh lo','bad');
+      return { ok:true, row:row, size:size };
+    });
+    });
+  });
+}
+
+/* ── PULL: cloud se row laao (lagao nahi, sirf laao) ── */
+function cloudPull(){
+  if(!loggedIn()) return Promise.resolve({ ok:false, why:'login' });
+  return cloudToken().then(function(tok){
+    if(!tok) return { ok:false, why:'auth' };
+    return cloudFetch('/rest/v1/' + CLOUD.table + '?select=*&user_id=eq.' +
+                      encodeURIComponent(authState().uid), { token:tok })
+      .then(function(r){
+        if(!r.ok) return { ok:false, why:'server', msg:cloudErr(r) };
+        var row = Array.isArray(r.data) ? r.data[0] : null;
+        return { ok:true, row:row || null };
+      });
+  });
+}
+/* Cloud ki copy phone pe lagao */
+function applyCloudRow(row){
+  if(!row || !row.data) return false;
+  applyRestore(row.data);                     /* wahi raasta jo backup file ka hai */
+  setCloudMeta({ lastPull:nowStamp(), serverAt:row.updated_at });
+  setCloudState('ok');
+  return true;
+}
+
+/* ── Login ke turant baad ka faisla ──
+   Yahi sabse nazuk jagah hai. Chaar haalat ho sakti hain: */
+function cloudAfterLogin(){
+  setCloudState('syncing');
+  return cloudPull().then(function(res){
+    if(!res.ok){ setCloudState('error', res.msg || 'Cloud se baat nahi hui'); return; }
+    var mine  = cloudCount(backupPayload().data);
+    var their = res.row ? cloudCount(res.row.data && res.row.data.data) : 0;
+
+    /* 1. Cloud khaali → phone ka data upar bhej do */
+    if(!res.row) return cloudPush(true).then(function(){
+      toast('☁️ Aapka hisaab cloud mein chala gaya','ok');
+    });
+    /* 2. Phone khaali → cloud ka utaar lo */
+    if(mine === 0){
+      applyCloudRow(res.row);
+      refreshAll();
+      toast('☁️ Cloud se ' + their + ' entries wapas aa gayi','ok');
+      return;
+    }
+    /* 3. Dono mein wahi data (ginti barabar aur hum hi ne aakhri baar
+          bheja tha) → kuch mat poocho, bas push kar do */
+    if(cloudMeta().serverAt && res.row.updated_at === cloudMeta().serverAt)
+      return cloudPush(false);
+    /* 4. Dono mein alag data → POOCHO. Chup-chaap kuch nahi mitega. */
+    askCloudChoice(res.row, mine, their);
+  });
+}
+
+/* ── "Kaunsa rakhna hai?" wali sheet ──
+   Ye sheet hi is poore feature ki sabse zaroori cheez hai. Iske
+   bina kabhi na kabhi kisi ka mahine bhar ka hisaab chup-chaap
+   mit jaata. */
+function askCloudChoice(row, mine, their){
+  var when = row.updated_at ? new Date(row.updated_at) : null;
+  var dev  = row.device ? esc(row.device) : 'doosre device';
+  askConfirm({
+    icon:'☁️', title:'Cloud mein doosra hisaab hai',
+    body:'Dono jagah data hai, aur dono alag hain. Ek hi rakha ja sakta hai.<br><br>' +
+         '<b>📱 Is phone mein:</b> <b class="num">' + mine + '</b> entries<br>' +
+         '<b>☁️ Cloud mein:</b> <b class="num">' + their + '</b> entries' +
+         (when ? '<br><span class="t-mute">Cloud wala ' + dev + ' se, ' +
+                 when.toLocaleString('en-IN',{day:'2-digit',month:'short',
+                   year:'numeric',hour:'2-digit',minute:'2-digit'}) + '</span>' : '') +
+         '<br><br><span class="t-mute">Jo nahi chunoge wo chala jaayega. ' +
+         'Pakka na ho to pehle <b>Backup</b> le lo — wo button isi screen par hai.</span>',
+    yes:'☁️ Cloud wala rakho (' + their + ')',
+    no:'📱 Phone wala rakho (' + mine + ')',
+    tone:'soft',                 /* dono asli faisle hain — koi laal nahi */
+    onYes:function(){
+      cloudAsking = false;
+      applyCloudRow(row); refreshAll();
+      toast('☁️ Cloud wala hisaab lag gaya','ok');
+    },
+    onNo:function(){
+      cloudAsking = false;
+      /* force=true — banda khud keh chuka hai, ab dobara mat poocho */
+      cloudPush(true, true).then(function(){
+        toast('📱 Phone wala hisaab cloud mein chala gaya','ok');
+      });
+    },
+    onDismiss:function(){ cloudAsking = false; }   /* bahar tap kiya — phir pooch sakte hain */
+  });
+}
+
+/* ── Apne aap push ──
+   write() ke baad 8 second ka intezaar, phir chup-chaap bhej do.
+   8 second isliye ki banda 5 entries ek saath kare to 5 push na hon. */
+var cloudTimer = null;
+function scheduleCloudPush(){
+  if(!loggedIn()) return;
+  if(cloudTimer) clearTimeout(cloudTimer);
+  cloudTimer = setTimeout(function(){ cloudTimer = null; cloudPush(false); }, LIMIT.cloudPushMs);
+}
+function flushCloudPush(){
+  if(!cloudTimer) return;
+  clearTimeout(cloudTimer); cloudTimer = null;
+  cloudPush(false);
+}
+
+/* ── Settings ka card ── */
+function renderCloudCard(){
+  if(!$('cloudCard')) return;
+  var on = loggedIn(), a = authState(), m = cloudMeta();
+
+  $('cloudForm').hidden = on;
+  $('cloudIn').hidden   = !on;
+
+  var st, pill, cls;
+  if(!on){                          st='Login karo to hisaab cloud mein safe rahega'; pill='Band'; cls='c-mute'; }
+  else if(cloudState.s==='syncing'){st='Bhej raha hoon…';            pill='Sync';     cls='c-info'; }
+  else if(cloudState.s==='offline'){st='Net nahi — net aate hi chala jaayega'; pill='Offline'; cls='c-orange'; }
+  else if(cloudState.s==='error'){  st=cloudState.msg;               pill='Rukawat';  cls='c-red'; }
+  else if(m.lastPush){              st='Aakhri baar ' + agoLabel(m.lastPush).toLowerCase() +
+                                       ' · ' + fmtTime(m.lastPush);  pill='Safe';     cls='c-green'; }
+  else {                            st='Login hai — abhi tak kuch bheja nahi'; pill='Taiyaar'; cls='c-gold'; }
+
+  $('cloudCard').className   = 'card set ' + cls;
+  $('cloudIco').textContent  = on ? (cloudState.s==='error' ? '⚠️' : '☁️') : '☁️';
+  $('cloudSub').textContent  = st;
+  $('cloudPill').className   = 'pill pill-br ' + cls;
+  $('cloudPill').textContent = pill;
+  if(on) $('cloudWho').textContent = a.email || '—';
+
+  var ph = !!readObj(K.settings,{}).cloudPhotos;
+  if($('cloudPhotoSwitch')){
+    $('cloudPhotoSwitch').classList.toggle('on', ph);
+    $('cloudPhotoSub').textContent = ph
+      ? 'Photos bhi ja rahi hain — jagah zyada lagegi'
+      : 'Photos sirf is phone mein rahengi (default)';
+  }
+}
+function fmtTime(iso){
+  try{ return new Date(iso).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
+  catch(e){ return ''; }
+}
+function toggleCloudPhotos(){
+  var s = readObj(K.settings,{});
+  s.cloudPhotos = !s.cloudPhotos;
+  writeObj(K.settings, s);
+  renderCloudCard();
+  toast(s.cloudPhotos ? '📷 Photos bhi cloud mein jaayengi'
+                      : '📷 Photos sirf is phone mein rahengi','ok');
+  if(loggedIn()) scheduleCloudPush();
+}
+
+/* ── Button ke kaam ── */
+function doCloudAuth(mode){
+  var email = $('cloudEmail').value.trim();
+  var pass  = $('cloudPass').value;
+  if(!email || email.indexOf('@') < 0){
+    $('cloudEmail').classList.add('bad'); toast('Email theek se likho','bad'); return; }
+  if(!pass || pass.length < 6){
+    $('cloudPass').classList.add('bad'); toast('Password kam se kam 6 akshar','bad'); return; }
+  $('cloudEmail').classList.remove('bad'); $('cloudPass').classList.remove('bad');
+
+  var btns = [$('cloudLogin'), $('cloudSignup')];
+  btns.forEach(function(b){ b.disabled = true; });
+  setCloudState('syncing');
+
+  var work = mode === 'signup' ? cloudSignup(email, pass) : cloudLogin(email, pass);
+  work.then(function(res){
+    btns.forEach(function(b){ b.disabled = false; });
+    if(!res.ok){ setCloudState('error', res.msg); toast(res.msg,'bad'); return; }
+    $('cloudPass').value = '';
+    toast(mode === 'signup' ? '✅ Account ban gaya' : '✅ Login ho gaya','ok');
+    renderCloudCard();
+    cloudAfterLogin();
+  });
+}
+/* ── App khulte waqt ka check ──
+   Doosre phone se kuch bheja gaya ho to wo yahan pakda jaata hai.
+   Dhyan do: hum khud se kuch nahi lagate — sirf tab poochte hain
+   jab server ka waqt humare aakhri push se alag ho. */
+function cloudOpenCheck(){
+  if(!loggedIn() || navigator.onLine === false) return;
+  cloudPull().then(function(res){
+    if(!res.ok || !res.row) return;
+    var m = cloudMeta();
+    /* Humne hi aakhri baar bheja tha → kuch naya nahi hua */
+    if(m.serverAt && res.row.updated_at === m.serverAt) return;
+
+    var mine  = cloudCount(backupPayload().data);
+    var their = cloudCount(res.row.data && res.row.data.data);
+    if(mine === 0){                       /* phone khaali — bina pooche le lo */
+      applyCloudRow(res.row); refreshAll();
+      toast('☁️ Cloud se ' + their + ' entries aa gayi','ok');
+      return;
+    }
+    askCloudChoice(res.row, mine, their);
+  });
+}
+
+function askCloudLogout(){
+  askConfirm({
+    icon:'🚪', title:'Logout karein?',
+    body:'Is phone ka hisaab <b>waisa ka waisa rahega</b> — kuch nahi mitega.<br><br>' +
+         'Bas cloud se judaav toot jaayega. Dobara login karoge to sab wapas jud jaayega.',
+    yes:'Haan, logout',
+    onYes:cloudLogout
+  });
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -5989,7 +7940,13 @@ function renderStorage(){
   var used = 0;
   try{ used = new Blob([JSON.stringify(DB)]).size; }catch(e){}
   var mode = storeMode === 'idb' ? 'IndexedDB' : 'localStorage (fallback)';
-  var line = '<b class="t-green num">' + (used/1048576).toFixed(2) + ' MB</b> · ' + mode;
+  /* Photos sabse zyada jagah khaate hain — isliye alag se dikhao,
+     taaki banda samajh sake ki jagah kahan ja rahi hai */
+  var bt = billTotals();
+  var photoLine = bt.count
+    ? ' · 📷 ' + bt.count + (bt.count === 1 ? ' photo ' : ' photos ') + fmtBytes(bt.size)
+    : '';
+  var line = '<b class="t-green num">' + (used/1048576).toFixed(2) + ' MB</b> · ' + mode + photoLine;
 
   $('storeTxt').innerHTML = line + ' · gin raha hoon…';
 
@@ -6001,7 +7958,7 @@ function renderStorage(){
       $('storeTxt').innerHTML =
         '<b class="' + cls + ' num">' + (used/1048576).toFixed(2) + ' MB</b>' +
         (quota ? ' / ' + (quota/1073741824).toFixed(1) + ' GB available' : '') +
-        ' · ' + mode +
+        ' · ' + mode + photoLine +
         (storeMode === 'idb' ? ' ✅' : ' ⚠️ (purana browser)');
     }).catch(function(){ $('storeTxt').innerHTML = line; });
   } else {
@@ -6592,7 +8549,13 @@ function go(name){
   $('main').scrollTop = 0;
   try{ localStorage.setItem(K.tab, name); }catch(e){}
 
-  if(name === 'udhar')      renderUdhar();
+  /* Har screen apne aane par dobara render hoti hai. Home pehle
+     chhooti thi — wo chalta tha kyunki refreshAll() hamesha
+     renderHome() bulata hai. Par jab kisi aur raaste se data
+     badla (committee ki kisht, dukaan ka khata) aur phir seedha
+     go('home') hua, to Home purana hi dikhta tha. Ab sab barabar. */
+  if(name === 'home')       renderHome();
+  else if(name === 'udhar') renderUdhar();
   else if(name === 'stats') setStatsTab(S.statTab);
   else if(name === 'more')  setMoreTab(S.moreTab);
   else if(name === 'add')   setTimeout(function(){ $('amtIn').focus(); }, 250);
@@ -6705,6 +8668,47 @@ function wireEvents(){
   });
   $('smsSaveAll').addEventListener('click', saveSmsRows);
 
+  /* Bill ki photo */
+  $('addBillBox').addEventListener('click', function(e){
+    if(e.target.closest('[data-help]')) return;
+    pickAddBill();
+  });
+  $('addBillFile').addEventListener('change', function(){ onAddBillFile(this); });
+  $('edBillBox').addEventListener('click', onEditBillTap);
+  $('edBillFile').addEventListener('change', function(){ onEditBillFile(this); });
+  $('billClose').addEventListener('click', function(){ closeSheet('billSheet'); });
+  $('billDelete').addEventListener('click', deleteOpenBill);
+
+  /* App lock — keypad ke saare button ek hi listener se */
+  $('keypad').addEventListener('click', function(e){
+    var k = e.target.getAttribute('data-k');
+    if(k) lockKey(k);
+  });
+  $('lockCancel').addEventListener('click', function(){ hideLock(); renderLockCard(); });
+  $('lockForgot').addEventListener('click', forgotPin);
+  /* Laptop pe keyboard se bhi — testing aur aaram dono ke liye */
+  document.addEventListener('keydown', function(e){
+    if(!$('lock').classList.contains('show')) return;
+    if(/^[0-9]$/.test(e.key)){ e.preventDefault(); lockKey(e.key); }
+    else if(e.key === 'Backspace'){ e.preventDefault(); lockKey('del'); }
+  });
+  $('btnLock').addEventListener('click', function(e){
+    if(e.target.closest('[data-help]')) return;
+    toggleLock();
+  });
+  $('btnLockChange').addEventListener('click', changePin);
+
+  /* Cloud backup */
+  $('cloudLogin').addEventListener('click',  function(){ doCloudAuth('login'); });
+  $('cloudSignup').addEventListener('click', function(){ doCloudAuth('signup'); });
+  $('cloudPass').addEventListener('keydown', function(e){ if(e.key === 'Enter') doCloudAuth('login'); });
+  $('cloudOut').addEventListener('click', askCloudLogout);
+  $('cloudSyncNow').addEventListener('click', function(){ cloudPush(true); });
+  $('cloudPhotoRow').addEventListener('click', toggleCloudPhotos);
+  /* Net wapas aate hi jo ruka tha wo bhej do */
+  window.addEventListener('online',  function(){ if(loggedIn()){ setCloudState('idle'); cloudPush(false); } });
+  window.addEventListener('offline', function(){ if(loggedIn()) setCloudState('offline'); });
+
   /* Edit sheet */
   $('editClose').addEventListener('click', function(){ closeSheet('editSheet'); });
   $('edSave').addEventListener('click', saveEdit);
@@ -6790,6 +8794,28 @@ function wireEvents(){
   });
   $('sgShare').addEventListener('click', shareShagun);
 
+  /* ── Committee ── */
+  $('cFormToggle').addEventListener('click', function(){
+    toggleForm('cForm','cFormIco',
+      function(){                                   /* khulte waqt: aaj ka mahina */
+        if(!$('cStart').value){
+          var n = new Date();
+          $('cStart').value = n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0');
+        }
+        updateCmtPreview();
+      },
+      function(){ $('cPreview').hidden = true; });
+  });
+  ['cAmt','cMembers','cStart','cTurn'].forEach(function(id){
+    $(id).addEventListener('input', updateCmtPreview);
+  });
+  $('cSave').addEventListener('click', saveCommittee);
+
+  /* ── Dukaan ka khata ── */
+  $('kFormToggle').addEventListener('click', function(){ toggleForm('kForm','kFormIco'); });
+  $('kSave').addEventListener('click', saveShop);
+  $('kName').addEventListener('keydown', function(e){ if(e.key === 'Enter') saveShop(); });
+
   /* Help (?) — ek hi listener saare (?) buttons sambhalta hai.
      Delegation: click poore document pe sunte hain, phir dekhte
      hain ki kis element pe hua. Isse naye (?) add karne par koi
@@ -6842,21 +8868,36 @@ function wireEvents(){
   $('rptClose').addEventListener('click', function(){ closeSheet('reportSheet'); });
 
   /* Confirm sheet */
-  $('cfNo').addEventListener('click', function(){ closeSheet('confirmSheet'); confirmAction = null; });
+  $('cfNo').addEventListener('click', function(){
+    var fn = confirmNoAction;
+    confirmAction = null; confirmNoAction = null; confirmDismiss = null;
+    closeSheet('confirmSheet');
+    if(fn) fn();                      /* sirf tab jab asli doosra raasta ho */
+  });
   $('cfYes').addEventListener('click', function(){
-    var fn = confirmAction; confirmAction = null;
+    var fn = confirmAction;
+    confirmAction = null; confirmNoAction = null; confirmDismiss = null;
     closeSheet('confirmSheet');
     if(fn) fn();
   });
 
   /* Sheet ke bahar tap → band. Aur Escape se bhi band. */
-  var SHEETS = ['editSheet','reportSheet','confirmSheet','smsSheet','helpSheet'];
+  var SHEETS = ['editSheet','reportSheet','confirmSheet','smsSheet','helpSheet','billSheet'];
   SHEETS.forEach(function(id){
-    $(id).addEventListener('click', function(e){ if(e.target === this) closeSheet(id); });
+    $(id).addEventListener('click', function(e){
+      if(e.target !== this) return;
+      /* Bahar tap kiya = koi faisla nahi liya. Dono raaste saaf. */
+      if(id === 'confirmSheet') clearConfirm();
+      closeSheet(id);
+    });
   });
   document.addEventListener('keydown', function(e){
     if(e.key !== 'Escape') return;
-    SHEETS.forEach(function(id){ if($(id).classList.contains('show')) closeSheet(id); });
+    SHEETS.forEach(function(id){
+      if(!$(id).classList.contains('show')) return;
+      if(id === 'confirmSheet') clearConfirm();
+      closeSheet(id);
+    });
   });
 }
 
@@ -6870,6 +8911,7 @@ function fillAllSelects(){
   /* Shagun: function ke type dropdown mein icon bhi dikhe */
   fillSelect($('fnType'), FUNCTION_TYPES, 'Shaadi');
   fillSelect($('sgRel'),  RELATIONS,      'Rishtedaar');
+  fillSelect($('kType'),  SHOP_TYPES,     'Kirana');
 }
 
 /* ── PWA manifest ──
@@ -6882,19 +8924,39 @@ function fillAllSelects(){
    single-file app se possible nahi (usko apni alag .js file
    chahiye same origin par) — isliye wo hataa diya, jhootha dawa
    karne se behtar hai. */
+function svgIcon(ch){
+  return 'data:image/svg+xml,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">' +
+    '<rect width="512" height="512" rx="104" fill="#0A0A0F"/>' +
+    '<text x="256" y="368" text-anchor="middle" font-size="320" ' +
+    'font-family="Arial,sans-serif" fill="#F0C040">' + ch + '</text></svg>');
+}
 function injectManifest(){
   try{
-    var icon = 'data:image/svg+xml,' + encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">' +
-      '<rect width="512" height="512" rx="104" fill="#0A0A0F"/>' +
-      '<text x="256" y="368" text-anchor="middle" font-size="320" ' +
-      'font-family="Arial,sans-serif" fill="#F0C040">₹</text></svg>');
+    var icon = svgIcon('₹');
     var manifest = {
       name:'PaisaBook', short_name:'PaisaBook',
       description:'Apna Paisa, Apna Hisaab — budget, udhar aur bill tracker',
       start_url:'.', display:'standalone', orientation:'portrait',
       background_color:'#0A0A0F', theme_color:'#0A0A0F',
-      icons:[{ src:icon, sizes:'512x512', type:'image/svg+xml', purpose:'any' }]
+      icons:[{ src:icon, sizes:'512x512', type:'image/svg+xml', purpose:'any' }],
+      /* ── Home screen ke shortcut ──
+         Phone pe app ka icon DABAYE RAKHO → ye menu khulta hai.
+         Seedha us kaam pe pahunch jaate ho, app khulne ka intezaar
+         nahi. Roz ka kaam ek tap chhota ho jaata hai.
+         (Android/Chrome par chalta hai; iPhone abhi support nahi
+         karta — wahan kuch tootega nahi, bas menu nahi aayega.) */
+      shortcuts:[
+        { name:'Kharcha likho', short_name:'Kharcha', url:'./?go=add',
+          description:'Seedha naya kharcha add karo',
+          icons:[{ src:svgIcon('+'), sizes:'512x512', type:'image/svg+xml' }] },
+        { name:'Udhar dekho', short_name:'Udhar', url:'./?go=udhar',
+          description:'Lena-dena ka hisaab',
+          icons:[{ src:svgIcon('U'), sizes:'512x512', type:'image/svg+xml' }] },
+        { name:'Mahine ka report', short_name:'Report', url:'./?go=report',
+          description:'Is mahine ka poora hisaab',
+          icons:[{ src:svgIcon('R'), sizes:'512x512', type:'image/svg+xml' }] }
+      ]
     };
     var link = document.createElement('link');
     link.rel  = 'manifest';
@@ -6902,6 +8964,37 @@ function injectManifest(){
     document.head.appendChild(link);
   } catch(e){}
 }
+
+/* ── Home-screen shortcut se aaye ho? ──
+   Shortcut URL mein ?go=add / udhar / report hota hai. Use padh
+   kar seedha wahan le jaate hain, phir URL saaf kar dete hain
+   (warna reload karne par baar-baar wahi khulta rahega). */
+function startShortcut(){
+  var m = /[?&]go=([a-z]+)/i.exec(location.search || '');
+  if(!m) return null;
+  var go2 = m[1].toLowerCase();
+  try{ history.replaceState(null, '', location.pathname); }catch(e){}
+
+  if(go2 === 'report'){
+    go('home');
+    pendingShortcut = 'report';     /* lock ke peeche ho to unlock ke baad khulega */
+    setTimeout(runPendingShortcut, 1800);
+    return 'report';
+  }
+  if($('s-' + go2)){ go(go2); return go2; }
+  return null;
+}
+var pendingShortcut = null;
+/* Shortcut ka aakhri kaam — par lock khula ho to ruk jao, warna
+   report PIN screen ke peeche chup-chaap khul jaayegi aur banda
+   unlock karte hi bina maange report dekhega. */
+function runPendingShortcut(){
+  if(!pendingShortcut) return;
+  if($('lock').classList.contains('show')) return;    /* baad mein */
+  var what = pendingShortcut; pendingShortcut = null;
+  if(what === 'report') showReport();
+}
+var hiddenSince = 0;    /* app kab peeche gaya — auto-lock ke liye */
 
 /* ═══════════════════════════════════════════════════════════════
    INIT — app khulne par yahi chalta hai, isi order mein
@@ -6940,28 +9033,51 @@ function bootUI(){
   setMoreTab(S.moreTab);
   applySimpleMode();                             /* 6b. kaunse features dikhenge */
 
-  /* 7. pichhli baar jis tab pe the, wahi kholo */
-  var last = localStorage.getItem(K.tab);
-  if(last && last !== 'home' && last !== 'add' && $('s-' + last)){
-    go(last);
-  } else {
-    $('nav').style.setProperty('--tab-i', 0);
+  /* 7. Kahan kholna hai?
+        Pehli priority: home-screen shortcut (?go=add) — banda ne
+        soch kar wahi daba kar aaya hai. Warna pichhla tab. */
+  var jump = startShortcut();
+  if(!jump){
+    var last = localStorage.getItem(K.tab);
+    if(last && last !== 'home' && last !== 'add' && $('s-' + last)){
+      go(last);
+    } else {
+      $('nav').style.setProperty('--tab-i', 0);
+    }
   }
+
+  /* 7b. Lock chalu ho to splash ke peeche se hi PIN screen lagaa do */
+  lockIfNeeded();
 
   /* 8. Splash hataa do (CSS animation 1.6s mein khatam ho jaati hai) */
   setTimeout(function(){ var s = $('splash'); if(s) s.remove(); }, 1700);
 
-  /* 8b. Pehli baar aaye ho? Intro dikhao — splash ke turant baad. */
-  if(!settings.onboarded){
+  /* 8b. Pehli baar aaye ho? Intro dikhao — splash ke turant baad.
+         Lock khula ho to intro ka koi matlab nahi, pehle PIN. */
+  if(!settings.onboarded && !lockOn()){
     setTimeout(startIntro, 1900);
   }
+
+  /* 8c. Cloud: login hai to dekho kahin doosre phone se naya data to
+          nahi aaya. Splash ke baad, taaki app pehle khul jaaye. */
+  if(loggedIn()) setTimeout(cloudOpenCheck, 2600);
 
   /* 9. Naya version aaya kya — 5 second baad ek baar, phir har 30 minute.
         Aur jab user app par wapas aaye (tab switch karke), tab bhi. */
   setTimeout(function(){ checkForUpdate(false); }, 5000);
   setInterval(function(){ checkForUpdate(false); }, LIMIT.updateCheckMs);
   document.addEventListener('visibilitychange', function(){
-    if(!document.hidden && !S.newVersion) checkForUpdate(false);
+    if(document.hidden){
+      hiddenSince = Date.now();
+      flushCloudPush();          /* band karne se pehle jo ruka tha wo bhej do */
+      return;
+    }
+    /* Thodi der ke liye tab badla — dobara PIN poochna tang karna hai.
+       Lambe time baad wapas aaye to phone kisi aur ke haath bhi
+       ho sakta hai — tab PIN poochna sahi hai. */
+    if(lockOn() && hiddenSince && Date.now() - hiddenSince > LIMIT.lockAfterMs) lockIfNeeded();
+    hiddenSince = 0;
+    if(!S.newVersion) checkForUpdate(false);
   });
 
   console.log('[' + APP.name + '] v' + APP.version + ' ready · schema ' + APP.schema);
