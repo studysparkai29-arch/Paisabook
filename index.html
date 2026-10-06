@@ -45,7 +45,7 @@
      = user ko "Update karo" ka banner dikhta hai.
      BADALNA ZAROORI HAI: har baar GitHub pe naya file daalo, to ye
      number bhi badhao (aur JS mein APP.version bhi — dono same rakho). -->
-<meta name="pb-version" content="2.3">
+<meta name="pb-version" content="2.4">
 <meta name="theme-color" content="#0A0A0F">
 <meta name="description" content="PaisaBook — offline budget, udhar aur bill tracker. Aapka data sirf aapke phone mein.">
 <meta name="mobile-web-app-capable" content="yes">
@@ -190,6 +190,15 @@ input[type=date]::-webkit-calendar-picker-indicator{
   filter:invert(.55) sepia(1) saturate(3) hue-rotate(5deg);cursor:pointer}
 body.light input[type=date]::-webkit-calendar-picker-indicator{filter:none;opacity:.6}
 ::selection{background:var(--gold-bg)}
+
+/* ── [hidden] HAMESHA chhupe ──
+   Browser ka apna rule `[hidden]{display:none}` kamzor hota hai —
+   humari koi bhi class jo `display` set karti hai (jaise
+   .btn{display:inline-flex} ya .mtab{display:flex}) usko haraa deti
+   hai. Nateeja: el.hidden = true karne par bhi cheez dikhti rehti
+   thi (Simple Mode mein EMI/Bills tabs chhup hi nahi rahe the).
+   Ye ek line poore app mein wo problem khatam kar deti hai. */
+[hidden]{display:none!important}
 
 /* Keyboard se navigate karne walon ke liye — focus dikhna chahiye */
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:var(--r-sm)}
@@ -508,6 +517,19 @@ select.input{background-image:none}
 }
 .sheet-title{font-family:var(--font-head);font-size:var(--fs-lg);font-weight:800;letter-spacing:-.3px}
 .sheet-body{padding:var(--s4)}
+/* ── Sheet ka chipka hua footer ──
+   PROBLEM: 360px ke phone par 3 SMS parse hone ke baad "Save" button
+   screen se neeche chala jaata tha (734px par, jabki screen 640px ki).
+   Banda scroll nahi karta — usse lagta hai button hai hi nahi.
+   HAL: button sheet ke neeche chipka rehta hai, hamesha dikhta hai. */
+.sheet-foot{
+  position:sticky;bottom:0;z-index:3;
+  margin:var(--s4) calc(var(--s4) * -1) 0;
+  padding:var(--s3) var(--s4) calc(var(--s3) + env(safe-area-inset-bottom,0px));
+  background:var(--surface);border-top:1px solid var(--border);
+  box-shadow:0 -8px 20px -8px rgba(0,0,0,.35);
+}
+body.light .sheet-foot{box-shadow:0 -8px 20px -8px rgba(20,20,50,.12)}
 
 /* ── Collapsible form panel ── */
 .form-panel{
@@ -618,6 +640,51 @@ select.input{background-image:none}
 .streak.show{display:inline-flex;animation:noticeIn var(--t-slow) var(--ease) both}
 .streak-n{font-family:var(--font-head);font-size:var(--fs-base);font-weight:800;color:var(--orange)}
 .streak-l{font-size:var(--fs-2xs);font-weight:700;color:var(--orange);opacity:.85}
+
+/* ───────── QUICK ADD (Home ke sabse upar) ─────────
+   Maksad: app kholo aur wahin se kharcha likh do — Add tab par
+   jaane ki zaroorat hi na pade. Amount likho, category tap karo,
+   + dabao. Category pehle se chuni hui aati hai (jo aap sabse
+   zyada use karte ho), isliye aksar sirf DO tap lagte hain. */
+.qadd{padding:var(--s3);margin-bottom:var(--s3);--top:var(--brand)}
+.qadd-head{display:flex;align-items:center;justify-content:space-between;
+           margin-bottom:var(--s2)}
+.qadd-row{display:flex;align-items:center;gap:var(--s2)}
+.qadd-rs{font-family:var(--font-head);font-size:var(--fs-lg);font-weight:800;
+         color:var(--gold);opacity:.6;flex-shrink:0}
+.qadd-in{
+  flex:1;min-width:0;background:var(--card-2);
+  border:1.5px solid var(--border);border-radius:var(--r-md);
+  color:var(--text);font-family:var(--font-head);font-size:var(--fs-lg);
+  font-weight:800;letter-spacing:-.5px;padding:var(--s2) var(--s3);
+  outline:none;-webkit-appearance:none;appearance:none;
+  transition:border-color var(--t),box-shadow var(--t);
+}
+.qadd-in:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-bg)}
+.qadd-in::placeholder{color:var(--text-3);font-weight:700}
+.qadd-btn{
+  width:46px;height:46px;flex-shrink:0;border-radius:var(--r-md);
+  background:linear-gradient(135deg,var(--brand),var(--brand-2));
+  color:var(--on-brand);font-size:22px;font-weight:800;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--glow);transition:transform var(--t-fast),opacity var(--t);
+}
+.qadd-btn:active{transform:scale(.9)}
+.qadd-btn:disabled{opacity:.4;box-shadow:none;cursor:not-allowed}
+/* Category chips — ek line mein, side mein scroll hoti hain */
+.qadd-cats{margin-top:var(--s3)}
+.qchip{
+  display:flex;align-items:center;gap:var(--s1);flex-shrink:0;
+  padding:var(--s2) var(--s3);border-radius:var(--r-full);
+  border:1.5px solid var(--border);background:var(--card-2);
+  color:var(--text-2);font-size:var(--fs-sm);font-weight:600;
+  white-space:nowrap;transition:all var(--t-fast);
+}
+.qchip:active{transform:scale(.93)}
+.qchip.on{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+.qchip-ico{font-size:15px;line-height:1}
+.qadd-hint{font-size:var(--fs-xs);color:var(--text-3);margin-top:var(--s2);
+           text-align:center;min-height:15px}
 
 /* Aaj ka snapshot */
 #snapshot{margin-bottom:var(--s3);padding:var(--s3)}
@@ -961,6 +1028,24 @@ select.input{background-image:none}
         <span class="streak-n num" id="streakN">1</span>
         <span class="streak-l">din</span><span class="help" role="button" tabindex="0" data-help="streak" aria-label="Ye kya hai?">?</span>
       </div>
+    </div>
+
+    <!-- ⚡ QUICK ADD — app kholte hi seedha yahan se kharcha likh do.
+         Add tab par jaane ki zaroorat nahi. -->
+    <div class="card card-top qadd" id="qadd">
+      <div class="qadd-head">
+        <div class="chart-title">⚡ Jaldi se likho</div>
+        <button class="btn btn-soft c-mute" id="qMore"
+                style="padding:2px var(--s2);font-size:var(--fs-2xs)">Poora form →</button>
+      </div>
+      <div class="qadd-row">
+        <span class="qadd-rs">₹</span>
+        <input type="number" id="qAmt" class="qadd-in num" inputmode="decimal"
+               placeholder="0" min="0" step="any" autocomplete="off" aria-label="Kitne paise">
+        <button class="qadd-btn" id="qSave" aria-label="Add karo" disabled>+</button>
+      </div>
+      <div class="row-scroll qadd-cats" id="qCats"></div>
+      <div class="qadd-hint" id="qHint">Amount likho, category tap karo, + dabao</div>
     </div>
 
     <!-- Yahan saare alert banners aate hain (udhar, bills, backup) -->
@@ -1514,7 +1599,7 @@ select.input{background-image:none}
       <div class="footer">
         <div class="footer-logo">Paisa<b>Book</b></div>
         Apna Paisa, Apna Hisaab<br>
-        <span style="opacity:.6" id="verTxt">v2.3</span>
+        <span style="opacity:.6" id="verTxt">v2.4</span>
       </div>
     </div>
   </section>
@@ -1642,8 +1727,9 @@ select.input{background-image:none}
           </div>
         </div>
         <div class="list" id="smsList"></div>
-        <button class="btn btn-lg btn-block btn-primary" id="smsSaveAll"
-                style="margin-top:var(--s4)">✓ Save Karo</button>
+        <div class="sheet-foot">
+          <button class="btn btn-lg btn-block btn-primary" id="smsSaveAll">✓ Save Karo</button>
+        </div>
       </div>
     </div>
   </div>
@@ -2247,6 +2333,7 @@ var S = {
   /* home */
   search:'', showAllTxns:false,
   /* misc */
+  qCat:'',             /* quick-add mein chuni hui category */
   editId:null, theme:'dark', healthFolded:false,
   undo:null,           /* { label, revert() } */
   newVersion:null,     /* server pe naya version mila to uska number */
@@ -2759,12 +2846,105 @@ function emptyHTML(icon, text, hint){
    ═══════════════════════════════════════════════════════════════ */
 function renderHome(){
   renderGreeting();
+  renderQuickAdd();
   renderSummary();
   renderSnapshot();
   renderHealth();
   renderAlerts();
   renderStreak();
   renderTxnSection();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   7b · QUICK ADD — Home ke upar wala chhota box
+   ───────────────────────────────────────────────────────────────
+   Maksad: Add tab par jaane ki zaroorat hi na pade.
+   Category chips aapke apne istemaal se aati hain — jo aap sabse
+   zyada use karte ho wo pehle. Isliye aksar sirf do tap lagte hain:
+   amount likho → + dabao.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Pichhle 60 din mein sabse zyada istemaal ki gayi categories.
+   Naya user ho (koi data nahi) to common wali dikha dete hain. */
+function topCategories(n){
+  var cut = new Date(); cut.setDate(cut.getDate() - 60);
+  var cutKey = cut.getFullYear() + '-' + String(cut.getMonth()+1).padStart(2,'0') +
+               '-' + String(cut.getDate()).padStart(2,'0');
+  var count = {};
+  read(K.txn).forEach(function(t){
+    if(t.type !== 'expense') return;
+    if(dayKey(t.date) < cutKey) return;
+    count[t.category] = (count[t.category] || 0) + 1;
+  });
+  var used = Object.keys(count).sort(function(a,b){ return count[b] - count[a]; });
+
+  /* Jo bache hain unko default order se bhar do */
+  var defaults = ['Khaana','Transport','Ghar','Bills','Shopping','Health'];
+  defaults.concat(CATS.expense.map(function(c){ return c.id; })).forEach(function(c){
+    if(used.indexOf(c) === -1) used.push(c);
+  });
+  /* Sirf wahi jo asli list mein maujood hain */
+  return used.filter(function(c){
+    return CATS.expense.some(function(x){ return x.id === c; });
+  }).slice(0, n || 6);
+}
+
+function renderQuickAdd(){
+  var cats = topCategories(6);
+  /* Pehli baar: sabse upar wali category pehle se chuni hui */
+  if(!S.qCat || cats.indexOf(S.qCat) === -1) S.qCat = cats[0];
+
+  var box = $('qCats'); box.innerHTML = '';
+  cats.forEach(function(c){
+    var b = document.createElement('button');
+    b.className = 'qchip' + (c === S.qCat ? ' on' : '');
+    b.innerHTML = '<span class="qchip-ico">' + catIcon(c) + '</span>' + esc(c);
+    b.addEventListener('click', function(){
+      S.qCat = c;
+      renderQuickAdd();
+      $('qAmt').focus();
+    });
+    box.appendChild(b);
+  });
+  /* Chuni hui chip agar side mein kat rahi ho to usko view mein laao
+     — warna banda ko pata hi nahi chalta kaunsi category chuni hai. */
+  var on = box.querySelector('.qchip.on');
+  if(on && on.scrollIntoView){
+    on.scrollIntoView({ block:'nearest', inline:'nearest' });
+  }
+  updateQuickState();
+}
+
+/* + button tabhi chalu ho jab amount theek ho */
+function updateQuickState(){
+  var v = parseFloat($('qAmt').value);
+  var ok = !!v && v > 0;
+  $('qSave').disabled = !ok;
+  $('qHint').innerHTML = ok
+    ? money(v) + ' · ' + catIcon(S.qCat) + ' ' + esc(S.qCat) + ' — <b class="t-gold">+ dabao</b>'
+    : 'Amount likho, category tap karo, + dabao';
+}
+
+function saveQuickAdd(){
+  var amt = parseFloat($('qAmt').value);
+  if(!amt || amt <= 0){ $('qAmt').focus(); return; }
+  amt = Math.min(amt, LIMIT.amount);
+
+  var txn = {
+    id:uid(), type:'expense', amount:amt, category:S.qCat,
+    payment:S.addPay || 'UPI', note:S.qCat, date:todayKey(),
+    source:'quick', createdAt:nowStamp(), updatedAt:nowStamp()
+  };
+  var list = read(K.txn); list.push(txn);
+  if(!write(K.txn, list)) return;
+
+  bumpStreak();
+  toast('💸 ' + money(amt) + ' ' + S.qCat + ' add hua', 'ok', function(){
+    removeTxn(txn.id); toast('↩ Wapas hataa diya','ok'); refreshAll();
+  });
+  $('qAmt').value = '';
+  refreshAll();
+  $('qAmt').focus();          /* agla kharcha turant likh sako */
 }
 
 function renderGreeting(){
@@ -3223,14 +3403,19 @@ function renderSmsRows(){
     /* Category dropdown bharo — usi type ki categories */
     var sel = card.querySelector('[data-cat]');
     fillSelect(sel, CATS[r.type], r.category);
+    /* Category badalne par POORI list dobara nahi banate — sirf is
+       card ka icon badal dete hain. Poora re-render mobile par jhatka
+       deta tha: dropdown band hota, list kaudti, aur lagta ki change
+       hua hi nahi. */
     sel.addEventListener('change', function(){
       smsRows[i].category = this.value;
       smsRows[i].userPicked = true;      /* aapne khud chuna — isliye seekhne laayak */
-      renderSmsRows();
+      var ico = card.querySelector('.row-ico');
+      if(ico) ico.textContent = catIcon(this.value);
     });
     card.querySelector('[data-x]').addEventListener('click', function(){
       smsRows.splice(i, 1);
-      renderSmsRows();
+      renderSmsRows();                   /* yahan re-render zaroori hai (index shift) */
     });
     box.appendChild(card);
   });
@@ -5273,6 +5458,23 @@ function wireEvents(){
     S.search = this.value; S.showAllTxns = false; renderTxnSection();
   });
   $('btnReport').addEventListener('click', showReport);
+
+  /* Quick add (Home ke upar) */
+  $('qAmt').addEventListener('input', function(){
+    if(parseFloat(this.value) > LIMIT.amount) this.value = LIMIT.amount;
+    updateQuickState();
+  });
+  $('qAmt').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') saveQuickAdd();     /* Enter se bhi save */
+  });
+  $('qSave').addEventListener('click', saveQuickAdd);
+  $('qMore').addEventListener('click', function(){
+    /* Poora form chahiye? Amount le kar Add screen par le jao */
+    var v = $('qAmt').value;
+    go('add');
+    if(v){ $('amtIn').value = v; updateAmtHint(); }
+    if(S.qCat){ setAddType('expense'); S.addCat = S.qCat; renderAddCats(); }
+  });
 
   /* Add */
   $('tgInc').addEventListener('click', function(){ setAddType('income'); });
